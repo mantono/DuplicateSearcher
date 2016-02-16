@@ -1,0 +1,61 @@
+<project name="DuplicateSearcher" default="compile" basedir=".">
+
+<description>
+	Ant build file for project Duplicate Searcher
+</description>
+
+<property name="src" location="src"/>
+<property name="test" location="test"/>
+<property name="build" location="bin"/>
+<property name="dist"  location="dist"/>
+<property name="libs" location="lib"/>
+
+<path id="project.class.path">
+	<pathelement path="${build}" />
+	<fileset dir="${libs}" includes="**/*.jar"/>
+</path>
+
+<target name="init" description="Initialize Ant script">
+	<tstamp/>
+	<mkdir dir="${build}"/>
+	<mkdir dir="${dist}"/>
+	<mkdir dir="${libs}"/>
+</target>
+
+<target name="clean" description="Delete previous jar and class files">
+	<delete dir="${build}"/>
+	<delete dir="${dist}"/>
+</target>
+
+<target name="libs" description="Compile dependency libraries">
+
+</target>
+
+<target name="test" description="Run JUnit tests" depends="compile">
+	<junit showoutput="true" printsummary="yes" haltonfailure="yes">
+		<formatter type="brief" usefile="false"/>
+		<classpath refid="project.class.path" />
+
+		<batchtest>
+			<fileset dir="${test}" includes="**/*Test.java"/>
+		</batchtest>
+	</junit>
+</target>
+
+<target name="compile" description="Compile code" depends="clean,init">
+	<javac includeantruntime="true" srcdir="${src}:${test}" destdir="${build}">
+		<classpath refid="project.class.path" />
+	</javac>
+</target>
+
+<target name="doc" description="Compiles JavaDocs">
+</target>
+
+<target name="package" description="Package files to JAR" depends="test,doc">
+	<jar jarfile="${dist}/${ant.project.name}-${DSTAMP}.jar" basedir="${dist}" />
+</target>
+
+<target name="deploy" description="Deploy code to server">
+</target>
+
+</project>
