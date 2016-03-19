@@ -35,8 +35,37 @@ public class IssueRetriever implements IssueFetcher
 	@Override
 	public Collection<Issue> getOpenIssues(int amount) throws IOException
 	{
-		filter.put("state", IssueService.STATE_OPEN);
-		List<Issue> issues = new ArrayList<Issue>(amount);
+		return getIssues(IssueService.STATE_OPEN, amount);
+	}
+
+	@Override
+	public Collection<Issue> getOpenIssues() throws IOException
+	{
+		return getOpenIssues(Integer.MAX_VALUE);
+	}
+
+	@Override
+	public Collection<Issue> getClosedIssues(int amount)
+	{
+		return getIssues(IssueService.STATE_CLOSED, amount);
+	}
+
+	@Override
+	public Collection<Issue> getClosedIssues()
+	{
+		return getClosedIssues(Integer.MAX_VALUE);
+	}
+	
+	private Collection<Issue> getIssues(final String state, final int amount)
+	{
+		filter.put("state", state);
+		
+		List<Issue> issues;
+		if(amount > 20_000)
+			issues = new ArrayList<Issue>(1000);
+		else
+			issues = new ArrayList<Issue>(amount);
+		
 		final PageIterator<Issue> issuePages = service.pageIssues(repoOwner, repoName, filter);
 		while(issues.size() < amount && issuePages.hasNext())
 		{
@@ -48,27 +77,6 @@ public class IssueRetriever implements IssueFetcher
 			issues.remove(issues.size()-1);
 		
 		return issues;
-	}
-
-	@Override
-	public Set<Issue> getOpenIssues()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Set<Issue> getClosedIssues(int amount)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Set<Issue> getClosedIssues()
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 	private void checkQuota()
