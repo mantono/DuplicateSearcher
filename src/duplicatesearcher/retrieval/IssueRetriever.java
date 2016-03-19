@@ -1,52 +1,74 @@
 package duplicatesearcher.retrieval;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.eclipse.egit.github.core.Issue;
-import org.eclipse.egit.github.core.Label;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.client.PageIterator;
 import org.eclipse.egit.github.core.service.IssueService;
 
-public class IssueRetriever
+public class IssueRetriever implements IssueFetcher
 {
-	private final Set<Issue> openIssues = new HashSet<Issue>(40);
-	private final Set<Issue> closedIssues = new HashSet<Issue>(30);
-	private final Map<String, String> filter = new HashMap<String, String>();
-	private final GitHubClient client = new GitHubClient();
+	private final GitHubClient client;
 	private final IssueService service;
+	private final Map<String, String> filter = new HashMap<String, String>();
+	private final String repoOwner;
+	private final String repoName;
 	
-	public IssueRetriever(final String token) throws IOException
+	public IssueRetriever(final GitHubClient client, final String repoOwner, final String repoName)
 	{
-		client.setOAuth2Token(token);
-		service = new IssueService(client);
-		service.getIssues();
+		this.client = client;
+		this.service = new IssueService(client);
+		this.repoOwner = repoOwner;
+		this.repoName = repoName;
 	}
-	
-	public IssueRetriever(final String username, final String password)
+
+	@Override
+	public Collection<Issue> getOpenIssues(int amount) throws IOException
 	{
-		client.setCredentials(username, password);
-		service = new IssueService(client);
-		client.getRequestLimit();
-	}
-	
-	public List<Issue> getOpenIssues(final String repoOwner, final String repo) throws IOException
-	{
-		checkQuota();
 		filter.put("state", IssueService.STATE_OPEN);
-		return service.getIssues(repoOwner, repo, filter);
+		List<Issue> issues = new ArrayList<Issue>(amount);
+		final PageIterator<Issue> issuePages = service.pageIssues(repoOwner, repoName, filter);
+		while(issues.size() < amount && issuePages.hasNext())
+		{
+			checkQuota();
+			issues.addAll(issuePages.next());
+		}
+		
+		while(issues.size() > amount)
+			issues.remove(issues.size()-1);
+		
+		return issues;
 	}
-	
-	public List<Issue> getClosedIssues(final String repoOwner, final String repo) throws IOException
+
+	@Override
+	public Set<Issue> getOpenIssues()
 	{
-		checkQuota();
-		filter.put("state", IssueService.STATE_CLOSED);
-		return service.getIssues(repoOwner, repo, filter);
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<Issue> getClosedIssues(int amount)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<Issue> getClosedIssues()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	private void checkQuota()
@@ -56,34 +78,4 @@ public class IssueRetriever
 			throw new IllegalStateException("Request quota has been reached, cannot make a request to the API at the moment.");
 	}
 
-	public static void main(String[] args) throws IOException
-	{
-		if(args.length == 0)
-		{
-			System.err.println("Missing argument for authentication token");
-			System.exit(1);
-		}
-		
-		final IssueRetriever ret = new IssueRetriever(args[0]);
-
-		List<Issue> issues = ret.getOpenIssues("mantono", "BachelorThesis");
-		System.out.println("\nOpen issues");
-		ret.printIssues(issues);
-
-		issues = ret.getClosedIssues("mantono", "BachelorThesis");
-		System.out.println("\nClosed issues");
-		ret.printIssues(issues);
-	}
-	
-	private void printIssues(final Collection<Issue> issues)
-	{
-		for(Issue i : issues)
-		{	
-			System.out.println("\t" + i.getTitle());
-			System.out.print("\t\tLabels: ");
-			for(Label label : i.getLabels())
-				System.out.print(label.getName() + " ");
-			System.out.println("\n");
-		}
-	}
 }
