@@ -14,8 +14,6 @@ import java.util.Set;
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 
-import com.sun.xml.internal.ws.api.pipe.NextAction;
-
 /**
  * Create a set on which our experiments can be conducted.
  */
@@ -72,15 +70,6 @@ public class ExperimentSetGenerator
 		}
 		return duplicates;
 	}
-
-	// private Set<Integer> findIssuesWithComments()
-	// {
-	// final Set<Integer> hasComments = new
-	// HashSet<Integer>(closedIssues.size());
-	// for(Issue i : closedIssues)
-	// if(i.getComments() > 0)
-	// hasComments.add(i.getNumber());
-	// }
 
 	private boolean isTaggedAsDuplicate(List<Comment> issueComments)
 	{
