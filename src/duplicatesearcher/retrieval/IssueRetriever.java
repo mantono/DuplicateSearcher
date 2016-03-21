@@ -1,16 +1,10 @@
 package duplicatesearcher.retrieval;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.PageIterator;
@@ -33,13 +27,13 @@ public class IssueRetriever implements IssueFetcher
 	}
 
 	@Override
-	public Collection<Issue> getOpenIssues(int amount) throws IOException
+	public Collection<Issue> getOpenIssues(int amount)
 	{
 		return getIssues(IssueService.STATE_OPEN, amount);
 	}
 
 	@Override
-	public Collection<Issue> getOpenIssues() throws IOException
+	public Collection<Issue> getOpenIssues()
 	{
 		return getOpenIssues(Integer.MAX_VALUE);
 	}
