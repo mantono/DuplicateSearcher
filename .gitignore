@@ -18,3 +18,9 @@ hs_err_pid*
 
 # Contains GitHub API access token
 .token
+
+# JavaDocs
+doc
+
+# External libs and dependencies
+lib
