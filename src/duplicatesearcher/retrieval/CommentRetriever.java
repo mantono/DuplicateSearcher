@@ -57,27 +57,6 @@ public class CommentRetriever extends GitHubTask
 		
 		return i;
 	}
-	
-	private void autoThrottle()
-	{
-		final int remainingRequests = checkQuota();
-		if(remainingRequests > 4000)
-		{
-			System.out.println("No sleep needed.");
-			return;
-		}
-		final double requestsConsumedRate = remainingRequests / 5000.0;
-		final int oneHour = 3600;
-		final long sleepTime = (long) ((1-requestsConsumedRate)*oneHour)*1000;
-		try
-		{
-			System.out.print("Thread will sleep for " + sleepTime/1000 + " seconds.");
-			Thread.sleep(sleepTime);
-		} catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-	}
 
 	public Map<Issue, List<Comment>> getIssuesAndComments()
 	{
