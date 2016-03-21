@@ -24,9 +24,9 @@ public class CommentRetrieverTest
 	public static void setup()
 	{
 		IssueRetriever ret = new IssueRetriever(CLIENT, "golang", "go");
-		issues = new HashSet<Issue>(2000);
-		issues.addAll(ret.getOpenIssues(200));
-		issues.addAll(ret.getClosedIssues(1800));
+		issues = new HashSet<Issue>(200);
+		issues.addAll(ret.getOpenIssues(20));
+		issues.addAll(ret.getClosedIssues(180));
 	}
 
 	@Test
