@@ -27,3 +27,6 @@ lib
 
 # VIM swap files
 *.swp
+
+# Ant
+.ant_targets
