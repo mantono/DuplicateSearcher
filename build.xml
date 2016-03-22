@@ -9,6 +9,9 @@
 <property name="build" location="bin"/>
 <property name="dist"  location="dist"/>
 <property name="libs" location="lib"/>
+<property name="doc" location="doc"/>
+<property name="extdoc" location="${doc}/ext"/>
+<property name="libsdownload" location="${libs}/doc"/>
 
 <path id="project.class.path">
 	<pathelement path="${build}" />
@@ -20,15 +23,42 @@
 	<mkdir dir="${build}"/>
 	<mkdir dir="${dist}"/>
 	<mkdir dir="${libs}"/>
+	<mkdir dir="${doc}"/>
+	<mkdir dir="${extdoc}"/>
+	<mkdir dir="${libsdownload}"/>
 </target>
 
 <target name="clean" description="Delete previous jar and class files">
 	<delete dir="${build}"/>
 	<delete dir="${dist}"/>
+	<delete dir="${extdoc}"/>
+	<delete dir="${doc}"/>
+	<delete dir="${libsdownload}"/>
 </target>
 
-<target name="libs" description="Compile dependency libraries">
+<target name="libs" description="Download and/or compile dependency libraries">
+	<!-- See https://github.com/mantono/DuplicateSearcher/wiki/Frameworks for links to projects and APIs -->
+	<get dest="${libs}" verbose="true" usetimestamp="true">
+		<!-- GSON -->
+		<url url="http://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2.jar" />
+		<url url="http://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2.jar.md5" />
+		<!-- Snowball -->
+		<url url="http://snowball.tartarus.org/dist/libstemmer_java.tgz" />
+		<!-- Egit/GitHub API client -->
+		<url url="http://repo1.maven.org/maven2/org/eclipse/mylyn/github/org.eclipse.egit.github.core/2.1.5/org.eclipse.egit.github.core-2.1.5.jar" />
+		<url url="http://repo1.maven.org/maven2/org/eclipse/mylyn/github/org.eclipse.egit.github.core/2.1.5/org.eclipse.egit.github.core-2.1.5-sources.jar" />
+		<!-- Apache Commons (sandbox) - Levenshtein Distance -->
+		<url url="https://github.com/apache/commons-text/blob/master/src/main/java/org/apache/commons/text/similarity/LevenshteinDistance.java" />
+	</get>
+</target>
 
+<target name="downloaddoc" description="Download JavaDocs for dependency libraries">
+	<get dest="${libsdownload}" verbose="true" usetimestamp="true">
+		<!-- GSON -->
+		<url url="http://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2-javadoc.jar" />
+		<!-- Egit/GitHub API client -->
+		<url url="http://repo1.maven.org/maven2/org/eclipse/mylyn/github/org.eclipse.egit.github.core/2.1.5/org.eclipse.egit.github.core-2.1.5-javadoc.jar" />
+	</get>
 </target>
 
 <target name="test" description="Run JUnit tests" depends="compile">
@@ -48,10 +78,17 @@
 	</javac>
 </target>
 
-<target name="doc" description="Compiles JavaDocs">
+<target name="javadoc" description="Compiles JavaDocs for this project" depends="init">
+	<javadoc packagenames="duplicatesearcher.*,research.*" access="package" additionalparam="-link http://docs.oracle.com/javase/8/docs/api/ " author="false" sourcepath="src" destdir="${doc}" source="1.8">
+	</javadoc>
 </target>
 
-<target name="package" description="Package files to JAR" depends="test,doc">
+<target name="extdoc" description="Download and generate JavaDocs for external frameworks" depends="downloaddoc">
+	<javadoc packagenames="*" access="package" additionalparam="-link http://docs.oracle.com/javase/8/docs/api/ " author="true" sourcepath="${libsdownload}" destdir="${extdoc}">
+	</javadoc>
+</target>
+
+<target name="package" description="Package files to JAR" depends="test,javadoc">
 	<jar jarfile="${dist}/${ant.project.name}-${DSTAMP}.jar" basedir="${dist}" />
 </target>
 
