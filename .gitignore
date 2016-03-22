@@ -24,3 +24,6 @@ doc
 
 # External libs and dependencies
 lib
+
+# VIM swap files
+*.swp
