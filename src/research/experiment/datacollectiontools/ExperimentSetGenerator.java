@@ -4,11 +4,11 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
@@ -21,12 +21,21 @@ public class ExperimentSetGenerator
 {
 	private final SecureRandom random = new SecureRandom();
 	private final Map<Integer, List<Comment>> comments;
-	private Set<Issue> closedIssues, openIssues, allIssues, nonDuplicates, duplicates, generatedCorpus;
+	private final Map<Integer, Issue> allIssues;
+	private Set<Issue> closedIssues, openIssues, nonDuplicates, duplicates, generatedCorpus;
 
 	public ExperimentSetGenerator(final Set<Issue> issues, final Map<Integer, List<Comment>> issuesWithcomments)
 	{
-		this.allIssues = issues;
+		this.allIssues = createMap(issues);
 		this.comments = issuesWithcomments;
+	}
+
+	private Map<Integer, Issue> createMap(Set<Issue> issues)
+	{
+		Map<Integer, Issue> issueMap = new HashMap<Integer, Issue>(issues.size());
+		for(Issue issue : issues)
+			issueMap.put(issue.getNumber(), issue);
+		return issueMap;
 	}
 
 	public void generateSet(final int size, final float duplicateRatio)
@@ -59,10 +68,18 @@ public class ExperimentSetGenerator
 		for(Issue issue : duplicates)
 		{
 			List<Comment> commentsForIssue = comments.get(issue.getNumber());
-			// TODO some regexp magic here!
+			final int master = findMaster(commentsForIssue);
+			if(master != -1)
+				masterIssues.add(allIssues.get(master));
 		}
 		
 		return masterIssues;
+	}
+
+	private int findMaster(List<Comment> commentsForIssue)
+	{
+		// TODO some regexp magic here!
+		return -1;
 	}
 
 	private static Collection<? extends Issue> getRandomElements(Set<Issue> set, int amount)
@@ -74,7 +91,7 @@ public class ExperimentSetGenerator
 
 	private Set<Issue> findNonDuplicates()
 	{
-		Set<Issue> filteredNonDuplicates = new HashSet<Issue>(allIssues);
+		Set<Issue> filteredNonDuplicates = new HashSet<Issue>(allIssues.values());
 		filteredNonDuplicates.removeAll(duplicates);
 		return filteredNonDuplicates;
 	}
@@ -82,7 +99,7 @@ public class ExperimentSetGenerator
 	private Set<Issue> findKnownDuplicates()
 	{
 		duplicates = new HashSet<Issue>(comments.size() / 2);
-		Iterator<Issue> iter = allIssues.iterator();
+		Iterator<Issue> iter = allIssues.values().iterator();
 		while (iter.hasNext())
 		{
 			final Issue issue = iter.next();
