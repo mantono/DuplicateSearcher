@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class RegexFinderTest
 {
-	private IRepositoryIdProvider repo = new RepositoryId("mantono", "DuplicateSearcher");
+	private RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
 	private RegexFinder finder = new RegexFinder(repo);
 	private Comment noDupeNoRef, dupe1NoRef, dupe2NoRef, noDupeRef1, noDupeRef2, noDupeBadRefDupeInName, dupeBadRef, duplicate1, duplicate2;
 
@@ -44,10 +44,10 @@ public class RegexFinderTest
 	public void setupDupes() throws Exception
 	{
 		duplicate1 = new Comment();
-		duplicate1.setBody("This is a dupe https://github.com/mantono/DuplicateSearcher/1");
+		duplicate1.setBody("This is a dupe https://github.com/mantono/DuplicateSearcher/issues/1");
 
 		duplicate2 = new Comment();
-		duplicate2.setBody("This is a duplicate of https://github.com/mantono/DuplicateSearcher/3");
+		duplicate2.setBody("This is a duplicate of https://github.com/mantono/DuplicateSearcher/issues/3");
 	}
 
 	@Test
