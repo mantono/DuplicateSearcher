@@ -1,6 +1,8 @@
 package research.experiment.datacollectiontools;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
@@ -72,11 +74,12 @@ public class RegexFinder
 	 */
 	public boolean commentContainsDupe(Comment comment)
 	{
-		// TODO Fix BUG in this code. If the link to another reference contains one
-		// of the keywords, this method will return true, event tough only typed
-		// occurrences should count as hits.
 		final String content = comment.getBody().toLowerCase();
-		return content.contains("dupe") || content.contains("duplicate");
+		final String regex = "(\\b|^)[Dd]up(e|licate)\\b";
+		
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(content);
+		return matcher.find();
 	}
 
 	/**
