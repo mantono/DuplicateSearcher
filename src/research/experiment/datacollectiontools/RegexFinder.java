@@ -70,12 +70,12 @@ public class RegexFinder
 	 * <em>dupe</dupe> or <em>duplicate</em>.
 	 * 
 	 * @param comment to be checked.
-	 * @return true if either key words are found, else false.
+	 * @return true if either keywords are found, else false.
 	 */
 	public boolean commentContainsDupe(Comment comment)
 	{
 		final String content = comment.getBody().toLowerCase();
-		final String regex = "(\\b|^)[Dd]up(e|licate)\\b";
+		final String regex = "(\\b)[Dd]up(e|licate)\\b(?!/)";
 		
 		final Pattern pattern = Pattern.compile(regex);
 		final Matcher matcher = pattern.matcher(content);
