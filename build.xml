@@ -49,6 +49,8 @@
 		<url url="http://repo1.maven.org/maven2/org/eclipse/mylyn/github/org.eclipse.egit.github.core/2.1.5/org.eclipse.egit.github.core-2.1.5-sources.jar" />
 		<!-- Apache Commons (sandbox) - Levenshtein Distance -->
 		<url url="https://github.com/apache/commons-text/blob/master/src/main/java/org/apache/commons/text/similarity/LevenshteinDistance.java" />
+		<url url="https://github.com/apache/commons-text/blob/master/NOTICE.txt" />
+		<url url="https://github.com/apache/commons-text/blob/master/LICENSE.txt" />
 	</get>
 </target>
 
