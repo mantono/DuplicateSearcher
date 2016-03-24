@@ -7,12 +7,13 @@ import java.util.regex.Pattern;
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.Issue;
+import org.eclipse.egit.github.core.RepositoryId;
 
 public class RegexFinder
 {
-	private final IRepositoryIdProvider repository;
+	private final RepositoryId repository;
 
-	public RegexFinder(final IRepositoryIdProvider repo)
+	public RegexFinder(final RepositoryId repo)
 	{
 		this.repository = repo;
 	}
@@ -59,10 +60,10 @@ public class RegexFinder
 	 */
 	public boolean hasReferenceToOtherIssue(Comment comment)
 	{
-		// TODO improve with regex!
-		// https://github.com/$USER/$REPO/issues/INTEGER
-		final String body = comment.getBody();
-		return body.contains("https://github.com/") && body.contains("/issues/");
+		final String regex = "https?://github\\.com/" + repository.getOwner() + "/" + repository.getName() + "/issues/\\d+";
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(comment.getBody());
+		return matcher.find();
 	}
 
 	/**
