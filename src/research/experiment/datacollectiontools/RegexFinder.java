@@ -1,11 +1,11 @@
 package research.experiment.datacollectiontools;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.egit.github.core.Comment;
-import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
 
@@ -60,10 +60,15 @@ public class RegexFinder
 	 */
 	public boolean hasReferenceToOtherIssue(Comment comment)
 	{
+		final Matcher matcher = parseCommentForReferences(comment);
+		return matcher.find();
+	}
+	
+	private Matcher parseCommentForReferences(Comment comment)
+	{
 		final String regex = "https?://github\\.com/" + repository.getOwner() + "/" + repository.getName() + "/issues/\\d+";
 		final Pattern pattern = Pattern.compile(regex);
-		final Matcher matcher = pattern.matcher(comment.getBody());
-		return matcher.find();
+		return pattern.matcher(comment.getBody());
 	}
 
 	/**
@@ -91,9 +96,21 @@ public class RegexFinder
 	 * @return the identification number, or <code>-1</code> if no valid
 	 * reference was found.
 	 */
-	public int getIssueNumber(Comment comment)
+	public List<Integer> getIssueNumber(Comment comment)
 	{
-		// TODO Auto-generated method stub
-		return -1;
+		final String input = comment.getBody();
+		final Matcher matcher = parseCommentForReferences(comment);
+		final List<Integer> ids = new ArrayList<Integer>();
+		
+		while(matcher.find())
+		{
+			final String occurence = input.substring(matcher.start(), matcher.end());
+			final String[] divided = occurence.split("/");
+			final String number = divided[divided.length-1];
+			final int id = Integer.parseInt(number);
+			ids.add(id);
+		}
+		
+		return ids;
 	}
 }
