@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
-import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.Issue;
+import org.eclipse.egit.github.core.RepositoryId;
 
 /**
  * Create a set on which our experiments can be conducted.
@@ -26,7 +26,7 @@ public class ExperimentSetGenerator
 	private final Map<Integer, Issue> allIssues;
 	private Set<Issue> closedIssues, openIssues, nonDuplicates, duplicates, generatedCorpus;
 
-	public ExperimentSetGenerator(final IRepositoryIdProvider repo, final Set<Issue> issues, final Map<Integer, List<Comment>> issuesWithcomments)
+	public ExperimentSetGenerator(final RepositoryId repo, final Set<Issue> issues, final Map<Integer, List<Comment>> issuesWithcomments)
 	{
 		this.duplicateParser = new RegexFinder(repo);
 		this.allIssues = createMap(issues);
@@ -85,12 +85,19 @@ public class ExperimentSetGenerator
 		{
 			if(duplicateParser.commentContainsDupe(comment))
 			{
-				final int issueNumber = duplicateParser.getIssueNumber(comment);
-				if(issueNumber != -1)
-					return issueNumber;
+				final List<Integer> issueNumbers = duplicateParser.getIssueNumber(comment);
+				if(issueNumbers.size() == 1)
+					return issueNumbers.get(0);
+				if(issueNumbers.size() > 1)
+					return findOldestIssue(issueNumbers);
 			}
 		}
 		return -1;
+	}
+
+	private int findOldestIssue(List<Integer> issueNumbers)
+	{
+		return Collections.min(issueNumbers);
 	}
 
 	private static Collection<? extends Issue> getRandomElements(Set<Issue> set, int amount)
