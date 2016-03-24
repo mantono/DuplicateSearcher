@@ -13,7 +13,7 @@ public class RegexFinderTest
 {
 	private IRepositoryIdProvider repo = new RepositoryId("mantono", "DuplicateSearcher");
 	private RegexFinder finder = new RegexFinder(repo);
-	private Comment noDupeNoRef, dupe1NoRef, dupe2NoRef, noDupeRef1, noDupeRef2, dupeBadRef, duplicate1, duplicate2;
+	private Comment noDupeNoRef, dupe1NoRef, dupe2NoRef, noDupeRef1, noDupeRef2, noDupeBadRefDupeInName, dupeBadRef, duplicate1, duplicate2;
 
 	@Before
 	public void setUpNoDupes() throws Exception
@@ -32,6 +32,9 @@ public class RegexFinderTest
 		
 		noDupeRef2 = new Comment();
 		noDupeRef2.setBody("This comment has link to another issue https://github.com/mantono/duplicateSearcher/issues/5");
+		
+		noDupeBadRefDupeInName = new Comment();
+		noDupeBadRefDupeInName.setBody("This comment has link to another issue https://github.com/duplicate/duplicateSearcher/issues/5");
 
 		dupeBadRef = new Comment();
 		dupeBadRef.setBody("This comment has the word duplicate in it and links to another issue https://github.com/mantono/Dimensions/issues/1 but it is in another repository.");
@@ -79,6 +82,7 @@ public class RegexFinderTest
 		assertFalse(finder.commentContainsDupe(noDupeNoRef));
 		assertFalse(finder.commentContainsDupe(noDupeRef1));
 		assertFalse(finder.commentContainsDupe(noDupeRef2));
+		assertFalse(finder.commentContainsDupe(noDupeBadRefDupeInName));
 
 		assertTrue(finder.commentContainsDupe(dupe1NoRef));
 		assertTrue(finder.commentContainsDupe(dupe2NoRef));
