@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
+import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.Issue;
 
 /**
@@ -20,12 +21,14 @@ import org.eclipse.egit.github.core.Issue;
 public class ExperimentSetGenerator
 {
 	private final SecureRandom random = new SecureRandom();
+	private final RegexFinder duplicateParser;
 	private final Map<Integer, List<Comment>> comments;
 	private final Map<Integer, Issue> allIssues;
 	private Set<Issue> closedIssues, openIssues, nonDuplicates, duplicates, generatedCorpus;
 
-	public ExperimentSetGenerator(final Set<Issue> issues, final Map<Integer, List<Comment>> issuesWithcomments)
+	public ExperimentSetGenerator(final IRepositoryIdProvider repo, final Set<Issue> issues, final Map<Integer, List<Comment>> issuesWithcomments)
 	{
+		this.duplicateParser = new RegexFinder(repo);
 		this.allIssues = createMap(issues);
 		this.comments = issuesWithcomments;
 	}
@@ -78,7 +81,15 @@ public class ExperimentSetGenerator
 
 	private int findMaster(List<Comment> commentsForIssue)
 	{
-		// TODO some regexp magic here!
+		for(Comment comment : commentsForIssue)
+		{
+			if(duplicateParser.commentContainsDupe(comment))
+			{
+				final int issueNumber = duplicateParser.getIssueNumber(comment);
+				if(issueNumber != -1)
+					return issueNumber;
+			}
+		}
 		return -1;
 	}
 
@@ -104,23 +115,15 @@ public class ExperimentSetGenerator
 		{
 			final Issue issue = iter.next();
 			List<Comment> issueComments = comments.get(issue.getNumber());
-			if (isTaggedAsDuplicate(issueComments))
+			if (duplicateParser.isTaggedAsDuplicate(issueComments) || isLabeledAsDuplicates(issue))
 				duplicates.add(issue);
 		}
 		return duplicates;
 	}
 
-	private boolean isTaggedAsDuplicate(List<Comment> issueComments)
+	private boolean isLabeledAsDuplicates(Issue issue)
 	{
-		for (Comment c : issueComments)
-		{
-			if (c.getBody().contains("dupe") || c.getBody().contains("duplicate"))
-				if (c.getBodyHtml().contains("https://github.com/"))
-					return true;
-			// TODO improve!
-			// https://github.com/$USER/$REPO/issues/INTEGER
-		}
-
+		// TODO fix me
 		return false;
 	}
 
