@@ -86,8 +86,8 @@
 </target>
 
 <target name="extdoc" description="Download and generate JavaDocs for external frameworks" depends="downloaddoc">
-	<javadoc packagenames="*" access="package" additionalparam="-link http://docs.oracle.com/javase/8/docs/api/ " author="true" sourcepath="${libsdownload}" destdir="${extdoc}">
-	</javadoc>
+	<unzip src="${libsdownload}/org.eclipse.egit.github.core-2.1.5-javadoc.jar" dest="${extdoc}/egit.github.core-2.1.5-javadoc" />
+	<unzip src="${libsdownload}/gson-2.6.2-javadoc.jar" dest="${extdoc}/gson-2.6.2-javadoc" />
 </target>
 
 <target name="package" description="Package files to JAR" depends="test,javadoc">
