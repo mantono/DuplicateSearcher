@@ -2,6 +2,7 @@ package research.experiment.datacollectiontools;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,16 +22,21 @@ public class DatasetFileManager
 	{
 		this.repoInfo = repoInfo;
 	}
-	
+
 	public DatasetFileManager(RepositoryId repoInfo, final Collection<Issue> data)
 	{
 		this(repoInfo);
 		this.issueData = data;
 	}
-	
-	public void load() throws IOException, ClassNotFoundException
+
+	public void load() throws ClassNotFoundException, IOException
 	{
-		final String fileName = getFileName();
+		load("");
+	}
+
+	public void load(final String suffix) throws IOException, ClassNotFoundException
+	{
+		final String fileName = getFileName() + suffix;
 		final FileInputStream fileStream = new FileInputStream(fileName);
 		final ObjectInputStream objectStream = new ObjectInputStream(fileStream);
 		Object object = objectStream.readObject();
@@ -38,10 +44,15 @@ public class DatasetFileManager
 		issueData = (Collection<Issue>) object;
 		System.out.println("Object loaded from  disk <-- " + fileName);
 	}
-	
+
 	public void save() throws IOException
 	{
-		final String fileName = getFileName();
+		save("");
+	}
+
+	public void save(final String suffix) throws IOException
+	{
+		final String fileName = getFileName() + suffix;
 		createPath();
 		final FileOutputStream fileStream = new FileOutputStream(fileName);
 		final ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
@@ -49,7 +60,7 @@ public class DatasetFileManager
 		fileStream.close();
 		System.out.println("Object saved to disk --> " + fileName);
 	}
-	
+
 	private void createPath()
 	{
 		final String path = PATH + "/" + repoInfo.getOwner();
