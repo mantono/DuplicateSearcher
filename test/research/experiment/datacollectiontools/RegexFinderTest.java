@@ -13,7 +13,8 @@ public class RegexFinderTest
 {
 	private RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
 	private RegexFinder finder = new RegexFinder(repo);
-	private Comment noDupeNoRef, dupe1NoRef, dupe2NoRef, noDupeRef1, noDupeRef2, noDupeBadRefDupeInName, dupeBadRef, duplicate1, duplicate2;
+	private Comment noDupeNoRef, dupe1NoRef, dupe2NoRef, noDupeRef1, noDupeRef2, noDupeBadRefDupeInName, dupeBadRef,
+			duplicate1, duplicate2, duplicate3;
 
 	@Before
 	public void setUpNoDupes() throws Exception
@@ -29,10 +30,10 @@ public class RegexFinderTest
 
 		noDupeRef1 = new Comment();
 		noDupeRef1.setBody("This comment has link to another issue https://github.com/mantono/DuplicateSearcher/issues/5");
-		
+
 		noDupeRef2 = new Comment();
 		noDupeRef2.setBody("This comment has link to another issue https://github.com/mantono/duplicateSearcher/issues/5");
-		
+
 		noDupeBadRefDupeInName = new Comment();
 		noDupeBadRefDupeInName.setBody("This comment has link to another issue https://github.com/duplicate/duplicateSearcher/issues/5");
 
@@ -48,6 +49,9 @@ public class RegexFinderTest
 
 		duplicate2 = new Comment();
 		duplicate2.setBody("This is a duplicate of https://github.com/mantono/DuplicateSearcher/issues/3");
+
+		duplicate3 = new Comment();
+		duplicate3.setBody("This is a duplicate with a reference to two issues, this https://github.com/mantono/DuplicateSearcher/issues/3 and this http://github.com/mantono/DuplicateSearcher/issues/11");
 	}
 
 	@Test
@@ -94,14 +98,20 @@ public class RegexFinderTest
 	@Test
 	public void testGetIssueNumber()
 	{
-		assertEquals(-1, finder.getIssueNumber(noDupeNoRef));
-		assertEquals(-1, finder.getIssueNumber(dupe1NoRef));
-		assertEquals(-1, finder.getIssueNumber(dupe2NoRef));
-		assertEquals(-1, finder.getIssueNumber(dupeBadRef));
+		assertEquals(0, finder.getIssueNumber(noDupeNoRef).size());
+		assertEquals(0, finder.getIssueNumber(dupe1NoRef).size());
+		assertEquals(0, finder.getIssueNumber(dupe2NoRef).size());
+		assertEquals(0, finder.getIssueNumber(dupeBadRef).size());
 
-		assertEquals(5, finder.getIssueNumber(noDupeRef1));
-		assertEquals(1, finder.getIssueNumber(duplicate1));
-		assertEquals(3, finder.getIssueNumber(duplicate2));
+		assertEquals(1, finder.getIssueNumber(noDupeRef1).size());
+		assertEquals(1, finder.getIssueNumber(duplicate1).size());
+		assertEquals(1, finder.getIssueNumber(duplicate2).size());
+		assertEquals(2, finder.getIssueNumber(duplicate3).size());
+		
+		final int firstHit = finder.getIssueNumber(duplicate3).get(0);
+		assertEquals(3, firstHit);
+		final int secondHit = finder.getIssueNumber(duplicate3).get(1);
+		assertEquals(11, secondHit);
 	}
 
 }
