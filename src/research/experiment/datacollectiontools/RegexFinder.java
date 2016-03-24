@@ -63,10 +63,11 @@ public class RegexFinder
 		final Matcher matcher = parseCommentForReferences(comment);
 		return matcher.find();
 	}
-	
+
 	private Matcher parseCommentForReferences(Comment comment)
 	{
-		final String regex = "https?://github\\.com/" + repository.getOwner() + "/" + repository.getName() + "/issues/\\d+";
+		final String regex = "https?://github\\.com/" + repository.getOwner() + "/" + repository.getName()
+				+ "/issues/\\d+";
 		final Pattern pattern = Pattern.compile(regex);
 		return pattern.matcher(comment.getBody());
 	}
@@ -82,7 +83,7 @@ public class RegexFinder
 	{
 		final String content = comment.getBody().toLowerCase();
 		final String regex = "(\\b)[Dd]up(e|licate)\\b(?!/)";
-		
+
 		final Pattern pattern = Pattern.compile(regex);
 		final Matcher matcher = pattern.matcher(content);
 		return matcher.find();
@@ -93,24 +94,25 @@ public class RegexFinder
 	 * reference to another issue in a {@link Comment}.
 	 * 
 	 * @param comment that will be parsed.
-	 * @return the identification number, or <code>-1</code> if no valid
-	 * reference was found.
+	 * @return a {@link List} of all the found identification numbers for issues
+	 * being references to. An empty list is returned if the parsed comment does
+	 * not contain any references to other issues.
 	 */
 	public List<Integer> getIssueNumber(Comment comment)
 	{
 		final String input = comment.getBody();
 		final Matcher matcher = parseCommentForReferences(comment);
 		final List<Integer> ids = new ArrayList<Integer>();
-		
+
 		while(matcher.find())
 		{
 			final String occurence = input.substring(matcher.start(), matcher.end());
 			final String[] divided = occurence.split("/");
-			final String number = divided[divided.length-1];
+			final String number = divided[divided.length - 1];
 			final int id = Integer.parseInt(number);
 			ids.add(id);
 		}
-		
+
 		return ids;
 	}
 }
