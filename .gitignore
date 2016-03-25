@@ -30,3 +30,6 @@ lib
 
 # Ant
 .ant_targets
+
+# Downloaded data from GitHub
+datasets
