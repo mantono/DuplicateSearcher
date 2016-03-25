@@ -10,17 +10,18 @@ import java.util.Set;
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.Issue;
+import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.IssueService;
 
 public class CommentRetriever extends GitHubTask
 {
 	private final IssueService issueService;
-	private final IRepositoryIdProvider repo;
+	private final RepositoryId repo;
 	private final Map<Issue, List<Comment>> comments;
 	private final Set<Issue> issuesThatHasComments, allIssues;
 	
-	public CommentRetriever(final GitHubClient client, final IRepositoryIdProvider repo, final Set<Issue> issues)
+	public CommentRetriever(final GitHubClient client, final RepositoryId repo, final Set<Issue> issues)
 	{
 		super(client);
 		this.repo = repo;
@@ -49,10 +50,10 @@ public class CommentRetriever extends GitHubTask
 			final List<Comment> commentsFromIssue = issueService.getComments(repo, issue.getNumber());
 			comments.put(issue, commentsFromIssue);
 			i += commentsFromIssue.size();
-			iterations++;
 			printProgress("downloading comments", iterations, end);
-			if(iterations % 50 == 0)
+			if(iterations++ % 50 == 0)
 				autoThrottle();
+			threadSleep();
 		}
 		
 		return i;

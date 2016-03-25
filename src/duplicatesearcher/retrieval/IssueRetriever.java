@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.egit.github.core.Issue;
+import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.PageIterator;
 import org.eclipse.egit.github.core.service.IssueService;
@@ -14,15 +15,13 @@ public class IssueRetriever extends GitHubTask implements IssueFetcher
 {
 	private final IssueService service;
 	private final Map<String, String> filter = new HashMap<String, String>();
-	private final String repoOwner;
-	private final String repoName;
+	private final RepositoryId repo;
 	
-	public IssueRetriever(final GitHubClient client, final String repoOwner, final String repoName)
+	public IssueRetriever(final GitHubClient client, final RepositoryId repo)
 	{
 		super(client);
 		this.service = new IssueService(client);
-		this.repoOwner = repoOwner;
-		this.repoName = repoName;
+		this.repo = repo;
 	}
 
 	@Override
@@ -55,16 +54,19 @@ public class IssueRetriever extends GitHubTask implements IssueFetcher
 		
 		List<Issue> issues;
 		if(amount > 20_000)
-			issues = new ArrayList<Issue>(1000);
+			issues = new ArrayList<Issue>(10_000);
 		else
 			issues = new ArrayList<Issue>(amount);
 		
-		final PageIterator<Issue> issuePages = service.pageIssues(repoOwner, repoName, filter);
+		int iterations = 0;
+		final PageIterator<Issue> issuePages = service.pageIssues(repo.getOwner(), repo.getName(), filter);
 		while(issues.size() < amount && issuePages.hasNext())
 		{
-			checkQuota();
 			printProgress("downloading issues", issues.size(), amount);
 			issues.addAll(issuePages.next());
+			if(iterations++ % 50 == 0)
+				autoThrottle();
+			threadSleep();
 		}
 		
 		while(issues.size() > amount)

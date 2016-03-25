@@ -10,7 +10,7 @@ public class GitHubTestClient extends GitHubClient
 {
 	private final String token = readTokenFromFile();
 
-	protected GitHubTestClient()
+	public GitHubTestClient()
 	{
 		super.setOAuth2Token(token);
 	}
