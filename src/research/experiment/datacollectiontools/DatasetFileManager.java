@@ -8,14 +8,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
+import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
 
 public class DatasetFileManager
 {
 	private final static String PATH = "./datasets";
-	private Collection<Issue> issueData;
+	private Map<Issue, List<Comment>> issueData;
 	private final RepositoryId repoInfo;
 
 	public DatasetFileManager(final RepositoryId repoInfo)
@@ -23,7 +26,7 @@ public class DatasetFileManager
 		this.repoInfo = repoInfo;
 	}
 
-	public DatasetFileManager(RepositoryId repoInfo, final Collection<Issue> data)
+	public DatasetFileManager(RepositoryId repoInfo, final Map<Issue, List<Comment>> data)
 	{
 		this(repoInfo);
 		this.issueData = data;
@@ -41,7 +44,7 @@ public class DatasetFileManager
 		final ObjectInputStream objectStream = new ObjectInputStream(fileStream);
 		Object object = objectStream.readObject();
 		objectStream.close();
-		issueData = (Collection<Issue>) object;
+		issueData = (Map<Issue, List<Comment>>) object;
 		System.out.println("Object loaded from  disk <-- " + fileName);
 	}
 
@@ -72,7 +75,7 @@ public class DatasetFileManager
 		return PATH + "/" + repoInfo.getOwner() + "/" + repoInfo.getName();
 	}
 
-	public Collection<Issue> getDataset()
+	public Map<Issue, List<Comment>> getDataset()
 	{
 		return issueData;
 	}
