@@ -1,11 +1,20 @@
 package duplicatesearcher.retrieval;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.egit.github.core.client.GitHubClient;
 
 public abstract class GitHubTask
 {
+	private final static int TICK_RATE = 720;
 	private final GitHubClient client;
-	
+	private int sleepTime = 720;
+	private LocalDateTime lastThrottleUpdate = LocalDateTime.now();
+	private int consumedRequests = -1;
+
 	public GitHubTask(final GitHubClient client)
 	{
 		this.client = client;
@@ -15,39 +24,87 @@ public abstract class GitHubTask
 	{
 		return client;
 	}
-	
+
 	protected void printProgress(final String task, int current, int total)
 	{
-		final double progress = current / (double) total;
+		final float progress = current / (float) total;
 		System.out.println("Progress " + task + ": " + progress);
+	}
+
+	protected int getConsumedRequests()
+	{
+		return client.getRequestLimit() - client.getRemainingRequests();
 	}
 
 	protected int checkQuota()
 	{
-		final int remainingRequests = client.getRemainingRequests(); 
-		if(remainingRequests < 1 && remainingRequests != -1)
-			throw new IllegalStateException("Request quota has been reached, cannot make a request to the API at the moment.");
+		final int remainingRequests = client.getRemainingRequests();
+		if(remainingRequests < 100 && remainingRequests != -1 || remainingRequests < consumedRequests * 2)
+		{
+			System.err.println("Request quota has almost been reached, cannot make a request to the API at the moment.");
+			try
+			{
+				final long tenMinutes = 600 * 1000;
+				Thread.sleep(tenMinutes);
+			}
+			catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
 		return remainingRequests;
 	}
-	
-	protected void autoThrottle()
+
+	protected double getConsumedRequestsPercentrage()
 	{
-		final int remainingRequests = checkQuota();
-		if(remainingRequests > 4000)
-		{
-			System.out.println("No sleep needed.");
-			return;
-		}
-		final double requestsConsumedRate = remainingRequests / 5000.0;
-		final int oneHour = 3600;
-		final long sleepTime = (long) ((1-requestsConsumedRate)*oneHour)*1000;
+		final double requestsUsed = getConsumedRequests();
+		return requestsUsed / client.getRequestLimit();
+	}
+
+	protected void threadSleep()
+	{
 		try
 		{
-			System.out.print("Thread will sleep for " + sleepTime/1000 + " seconds.");
 			Thread.sleep(sleepTime);
-		} catch (InterruptedException e)
+		}
+		catch(InterruptedException e)
 		{
 			e.printStackTrace();
 		}
+	}
+
+	protected void autoThrottle()
+	{
+		checkQuota();
+		final double consumedRequestRate = getConsumedRequestsPercentrage();
+		final double delta = getDelta() + 0.5;
+		sleepTime = (int) (10 + TICK_RATE * consumedRequestRate * delta);
+		System.out.println("Delta: " + delta);
+		System.out.println("Used " + consumedRequestRate * 100 + "% of hourly request quota.");
+		System.out.println("Thread will sleep for " + sleepTime + " milliseconds between each request.");
+
+	}
+
+	private double getDelta()
+	{
+		final float consumedRequestsSinceLastThrottle = getConsumedRequests() - consumedRequests;
+		final long elapsedTimeSinceLastThrottle = lastThrottleUpdate.until(LocalDateTime.now(), ChronoUnit.MILLIS);
+		double timeBetweenEachRequest = elapsedTimeSinceLastThrottle / consumedRequestsSinceLastThrottle;
+		if(consumedRequests == -1)
+			timeBetweenEachRequest = 720;
+
+		System.out.println(consumedRequestsSinceLastThrottle + " requests done in "
+				+ elapsedTimeSinceLastThrottle / 1000.0 + " seconds.");
+		System.out.println("Averaging " + timeBetweenEachRequest + " milliseconds between each request.");
+
+		lastThrottleUpdate = LocalDateTime.now();
+		consumedRequests = getConsumedRequests();
+
+		final double delta = TICK_RATE / timeBetweenEachRequest;
+
+		if(delta < 0)
+			return 1;
+
+		return delta;
 	}
 }
