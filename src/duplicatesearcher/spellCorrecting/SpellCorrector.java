@@ -1,3 +1,5 @@
+package duplicatesearcher.spellCorrecting;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +19,11 @@ public class SpellCorrector {
 		return correctedWords;
 	}
 	
-	//Nu garanteras en returnerad sträng men det finns ingen "treshold", man kan använda sig av det i LevenShtein konstruktorn om det blir att föredra
+	//Nu garanteras en returnerad strÃ¤ng men det finns ingen "treshold", man kan anvÃ¤nda sig av det i LevenShtein konstruktorn om det blir att fÃ¶redra
 	public static String correctWord(String textSubject, List<String> words){
 		String tmp = "";
 		int distance;
-		int closestDistance = 100; //fulfix går att lösa på snyggare vis!?
+		int closestDistance = 100; //fulfix gÃ¥r att lÃ¶sa pÃ¥ snyggare vis!?
 		
 		for(String word : words){
 			distance = lev.apply(textSubject, word);
@@ -37,7 +39,7 @@ public class SpellCorrector {
 		return tmp;
 	}
 	
-	//Bara för denna simpla version del, ska ju använda ordboken egentligen samt JUnittester istället
+	//Bara fÃ¶r denna simpla version del, ska ju anvÃ¤nda ordboken egentligen samt JUnittester istÃ¤llet
 	public static void fillWords(){
 		words.add("hej");
 		words.add("tjena");
