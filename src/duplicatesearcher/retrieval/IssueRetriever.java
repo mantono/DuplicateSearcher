@@ -54,16 +54,19 @@ public class IssueRetriever extends GitHubTask implements IssueFetcher
 		
 		List<Issue> issues;
 		if(amount > 20_000)
-			issues = new ArrayList<Issue>(1000);
+			issues = new ArrayList<Issue>(10_000);
 		else
 			issues = new ArrayList<Issue>(amount);
 		
+		int iterations = 0;
 		final PageIterator<Issue> issuePages = service.pageIssues(repo.getOwner(), repo.getName(), filter);
 		while(issues.size() < amount && issuePages.hasNext())
 		{
-			checkQuota();
 			printProgress("downloading issues", issues.size(), amount);
 			issues.addAll(issuePages.next());
+			if(iterations++ % 50 == 0)
+				autoThrottle();
+			threadSleep();
 		}
 		
 		while(issues.size() > amount)
