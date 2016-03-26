@@ -29,8 +29,24 @@ public class ExperimentSetGenerator
 	public ExperimentSetGenerator(final RepositoryId repo, final Set<Issue> issues, final Map<Integer, List<Comment>> issuesWithcomments)
 	{
 		this.duplicateParser = new RegexFinder(repo);
-		this.allIssues = createMap(issues);
+		Set<Issue> issuesNoPullRequests = filterPullRequests(issues);
+		this.allIssues = createMap(issuesNoPullRequests);
 		this.comments = issuesWithcomments;
+	}
+
+	private Set<Issue> filterPullRequests(Set<Issue> issues)
+	{
+		System.out.println("Set size before filtering pull requests: " + issues.size());
+		final Set<Issue> noPullRequets = new HashSet<Issue>(issues.size()); 
+		
+		for(Issue issue : issues)
+		{
+			if(issue.getPullRequest() == null)
+				noPullRequets.add(issue);
+		}
+		System.out.println("Set size after filtering pull requests: " + noPullRequets);
+		
+		return noPullRequets;
 	}
 
 	private Map<Integer, Issue> createMap(Set<Issue> issues)
