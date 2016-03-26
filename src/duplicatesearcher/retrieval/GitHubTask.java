@@ -17,12 +17,14 @@ public abstract class GitHubTask
 	private final GitHubClient client;
 	private int sleepTime = 720;
 	private LocalDateTime lastThrottleUpdate = LocalDateTime.now();
+	private LocalDateTime rateResetTime;
 	private int consumedRequests = -1;
 	private float consumedRequestsSinceLastThrottle = 50;
 
 	public GitHubTask(final GitHubClient client)
 	{
 		this.client = client;
+		this.rateResetTime = LocalDateTime.now();
 	}
 
 	public GitHubClient getClient()
@@ -41,26 +43,30 @@ public abstract class GitHubTask
 		return client.getRequestLimit() - client.getRemainingRequests();
 	}
 
-	protected int checkQuota()
+	protected void forcedSleep()
 	{
-		final long tenMinutes = 600 * 1000;
-		final int remainingRequests = client.getRemainingRequests();
-
-		if(remainingRequests < 100 && remainingRequests != -1)
+		try
 		{
-			System.out.println("Request quota has almost been reached (" + remainingRequests
-					+ " requests left), cannot make a request to the API at the moment.");
-			sleep(tenMinutes);
+			updateRemainingRequests();
 		}
-		else if(remainingRequests < consumedRequestsSinceLastThrottle * 2)
+		catch(IOException e)
 		{
-			System.out.println("At the current rate of request usage (" + consumedRequestsSinceLastThrottle
-					+ ") we will soon use up our remaining request quota (" + remainingRequests + ").");
-			System.out.println("Thread will pause for a brief moment");
-			sleep(tenMinutes);
+			e.printStackTrace();
+			System.exit(2);
 		}
+		final long thirtySeconds = 30 * 1000;
+		while(rateResetTime.isAfter(LocalDateTime.now()))
+			sleep(thirtySeconds);
+	}
 
-		return remainingRequests;
+	private void updateRemainingRequests() throws IOException
+	{
+		final GitHubRequest updateRateLimit = new GitHubRequest();
+		updateRateLimit.setUri("/rate_limit");
+		final GitHubResponse response = client.get(updateRateLimit);
+		final String resetTime = response.getHeader("X-RateLimit-Reset");
+		final long resetTimeParsed = Long.parseLong(resetTime);
+		rateResetTime = LocalDateTime.ofEpochSecond(resetTimeParsed, 0, ZoneOffset.ofHours(1));
 	}
 
 	private void sleep(final long sleepTime)
@@ -90,14 +96,12 @@ public abstract class GitHubTask
 
 	protected void autoThrottle()
 	{
-		checkQuota();
 		final double consumedRequestRate = getConsumedRequestsPercentrage();
-		final double delta = getDelta() + 0.5;
-		sleepTime = (int) (10 + TICK_RATE * consumedRequestRate * delta);
+		final double delta = getDelta() + 1;
+		sleepTime = (int) (TICK_RATE * 2 * consumedRequestRate * delta);
 		System.out.println("Delta: " + delta);
 		System.out.println("Used " + consumedRequestRate * 100 + "% of hourly request quota.");
 		System.out.println("Thread will sleep for " + sleepTime + " milliseconds between each request.");
-
 	}
 
 	private double getDelta()

@@ -46,6 +46,9 @@ public class CommentRetriever extends GitHubTask
 		int end = issuesThatHasComments.size();
 		for(Issue issue : issuesThatHasComments)
 		{
+			final int remainingRequests = getClient().getRemainingRequests();
+			if(remainingRequests < 10 && remainingRequests != -1)
+				forcedSleep();
 			final List<Comment> commentsFromIssue = issueService.getComments(repo, issue.getNumber());
 			comments.put(issue, commentsFromIssue);
 			i += commentsFromIssue.size();
