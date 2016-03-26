@@ -52,10 +52,13 @@ public class ExperimentSetGenerator
 
 		generatedCorpus = new HashSet<Issue>((int) (size * 1.1));
 		final int duplicateAmount = (int) (size * duplicateRatio);
+		
+		if(duplicates.isEmpty() && duplicateRatio > 0)
+			throw new IllegalArgumentException("Requested duplicates in the generated set, but this corpus contains no identified duplicates.");
 
 		generatedCorpus.addAll(getRandomElements(duplicates, duplicateAmount/2));
-		generatedCorpus.addAll(getMasterIssues());
-		generatedCorpus.addAll(getRandomElements(nonDuplicates, size - duplicateAmount));
+		generatedCorpus.addAll(getMasterIssues(generatedCorpus));
+		generatedCorpus.addAll(getRandomElements(nonDuplicates, size - generatedCorpus.size()));
 	}
 	
 	public void generateRandomIntervalSet(final int size, final float minDuplicateRatio, final float maxDuplicateRatio)
@@ -66,12 +69,12 @@ public class ExperimentSetGenerator
 		generateSet(size, ratio);
 	}
 
-	private Collection<? extends Issue> getMasterIssues()
+	private Collection<? extends Issue> getMasterIssues(Set<Issue> duplicateSet)
 	{
 		Set<Issue> masterIssues = new HashSet<Issue>();
-		for(Issue issue : duplicates)
+		for(Issue issue : duplicateSet)
 		{
-			List<Comment> commentsForIssue = allIssues.get(issue.getNumber());
+			List<Comment> commentsForIssue = allIssues.get(issue);
 			final int master = findMaster(commentsForIssue);
 			if(master != -1)
 				masterIssues.add(idIssueMap.get(master));
@@ -120,11 +123,12 @@ public class ExperimentSetGenerator
 	private Set<Issue> findKnownDuplicates()
 	{
 		duplicates = new HashSet<Issue>(allIssues.size() / 2);
-		Iterator<Issue> iter = idIssueMap.values().iterator();
+		Iterator<Entry<Issue, List<Comment>>> iter = allIssues.entrySet().iterator();
 		while (iter.hasNext())
 		{
-			final Issue issue = iter.next();
-			List<Comment> issueComments = allIssues.get(issue.getNumber());
+			final Entry<Issue, List<Comment>> entry = iter.next();
+			final Issue issue = entry.getKey();
+			final List<Comment> issueComments = entry.getValue();
 			if (duplicateParser.isTaggedAsDuplicate(issueComments) || isLabeledAsDuplicates(issue))
 				duplicates.add(issue);
 		}

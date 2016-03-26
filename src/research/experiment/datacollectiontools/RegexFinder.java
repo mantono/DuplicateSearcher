@@ -66,8 +66,7 @@ public class RegexFinder
 
 	private Matcher parseCommentForReferences(Comment comment)
 	{
-		final String regex = "https?://github\\.com/" + repository.getOwner() + "/" + repository.getName()
-				+ "/issues/\\d+";
+		final String regex = "#\\d+";
 		final Pattern pattern = Pattern.compile(regex);
 		return pattern.matcher(comment.getBody());
 	}
@@ -107,7 +106,7 @@ public class RegexFinder
 		while(matcher.find())
 		{
 			final String occurence = input.substring(matcher.start(), matcher.end());
-			final String[] divided = occurence.split("/");
+			final String[] divided = occurence.split("#");
 			final String number = divided[divided.length - 1];
 			final int id = Integer.parseInt(number);
 			ids.add(id);
