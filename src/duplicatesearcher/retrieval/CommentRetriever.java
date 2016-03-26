@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
-import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
