@@ -145,5 +145,16 @@ public class ExperimentSetGenerator
 	{
 		return generatedCorpus;
 	}
+	
+	public void printCorpusData()
+	{
+		final float duplicateRatio = duplicates.size()/(float) allIssues.size();
+		
+		System.out.println("*** Corpus Statistics ***");
+		System.out.println("\tNon duplicate issues: " + nonDuplicates.size());
+		System.out.println("\tDuplicate issues: " + duplicates.size());
+		System.out.println("\tTotal amount of issues: " + allIssues.size());
+		System.out.println("\tDuplicate ratio: " + duplicateRatio*100 + "%");
+	}
 
 }
