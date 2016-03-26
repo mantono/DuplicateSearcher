@@ -14,6 +14,7 @@ public abstract class GitHubTask
 	private int sleepTime = 720;
 	private LocalDateTime lastThrottleUpdate = LocalDateTime.now();
 	private int consumedRequests = -1;
+	private float consumedRequestsSinceLastThrottle = 50;
 
 	public GitHubTask(final GitHubClient client)
 	{
@@ -38,21 +39,38 @@ public abstract class GitHubTask
 
 	protected int checkQuota()
 	{
+		final long tenMinutes = 600 * 1000;
 		final int remainingRequests = client.getRemainingRequests();
-		if(remainingRequests < 100 && remainingRequests != -1 || remainingRequests < consumedRequests * 2)
+
+		if(remainingRequests < 100 && remainingRequests != -1)
 		{
-			System.err.println("Request quota has almost been reached, cannot make a request to the API at the moment.");
-			try
-			{
-				final long tenMinutes = 600 * 1000;
-				Thread.sleep(tenMinutes);
-			}
-			catch(InterruptedException e)
-			{
-				e.printStackTrace();
-			}
+			System.out.println("Request quota has almost been reached (" + remainingRequests
+					+ " requests left), cannot make a request to the API at the moment.");
+			sleep(tenMinutes);
 		}
+		else if(remainingRequests < consumedRequestsSinceLastThrottle * 2)
+		{
+			System.out.println("At the current rate of request usage (" + consumedRequestsSinceLastThrottle
+					+ ") we will soon use up our remaining request quota (" + remainingRequests + ").");
+			System.out.println("Thread will pause for a brief moment");
+			sleep(tenMinutes);
+		}
+
 		return remainingRequests;
+	}
+
+	private void sleep(final long sleepTime)
+	{
+		try
+		{
+			Thread.sleep(sleepTime);
+		}
+		catch(InterruptedException e)
+		{
+			System.err.println("Sleeping thread was interrupted.");
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	protected double getConsumedRequestsPercentrage()
@@ -63,14 +81,7 @@ public abstract class GitHubTask
 
 	protected void threadSleep()
 	{
-		try
-		{
-			Thread.sleep(sleepTime);
-		}
-		catch(InterruptedException e)
-		{
-			e.printStackTrace();
-		}
+		sleep(sleepTime);
 	}
 
 	protected void autoThrottle()
