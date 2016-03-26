@@ -9,10 +9,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
+import org.eclipse.egit.github.core.PullRequest;
 import org.eclipse.egit.github.core.RepositoryId;
 
 /**
@@ -22,34 +24,36 @@ public class ExperimentSetGenerator
 {
 	private final SecureRandom random = new SecureRandom();
 	private final RegexFinder duplicateParser;
-	private final Map<Integer, List<Comment>> comments;
-	private final Map<Integer, Issue> allIssues;
+	private final Map<Issue, List<Comment>> allIssues;
+	private final Map<Integer, Issue> idIssueMap;
 	private Set<Issue> closedIssues, openIssues, nonDuplicates, duplicates, generatedCorpus;
 
-	public ExperimentSetGenerator(final RepositoryId repo, final Set<Issue> issues, final Map<Integer, List<Comment>> issuesWithcomments)
+	public ExperimentSetGenerator(final RepositoryId repo, final Map<Issue, List<Comment>> issuesWithcomments)
 	{
 		this.duplicateParser = new RegexFinder(repo);
-		Set<Issue> issuesNoPullRequests = filterPullRequests(issues);
-		this.allIssues = createMap(issuesNoPullRequests);
-		this.comments = issuesWithcomments;
+		this.allIssues = filterPullRequests(issuesWithcomments);
+		this.idIssueMap = createIdIssueMap(allIssues.keySet());
 	}
 
-	private Set<Issue> filterPullRequests(Set<Issue> issues)
+	private Map<Issue, List<Comment>> filterPullRequests(Map<Issue, List<Comment>> input)
 	{
-		System.out.println("Set size before filtering pull requests: " + issues.size());
-		final Set<Issue> noPullRequets = new HashSet<Issue>(issues.size()); 
+		Map<Issue, List<Comment>> filteredMap = new HashMap<Issue, List<Comment>>(input);
+		System.out.println("Map size before filtering pull requests: " + filteredMap.size()); 
 		
-		for(Issue issue : issues)
+		final Iterator<Entry<Issue, List<Comment>>> iter = filteredMap.entrySet().iterator();
+		while(iter.hasNext())
 		{
-			if(issue.getPullRequest() == null)
-				noPullRequets.add(issue);
+			final Entry<Issue, List<Comment>> entry = iter.next();
+			final PullRequest pullRequest = entry.getKey().getPullRequest();
+			if(pullRequest != null && pullRequest.getId() != 0)
+				iter.remove();
 		}
-		System.out.println("Set size after filtering pull requests: " + noPullRequets);
+		System.out.println("Map size after filtering pull requests: " + filteredMap.size());
 		
-		return noPullRequets;
+		return filteredMap;
 	}
 
-	private Map<Integer, Issue> createMap(Set<Issue> issues)
+	private Map<Integer, Issue> createIdIssueMap(Set<Issue> issues)
 	{
 		Map<Integer, Issue> issueMap = new HashMap<Integer, Issue>(issues.size());
 		for(Issue issue : issues)
@@ -63,7 +67,7 @@ public class ExperimentSetGenerator
 			throw new IllegalArgumentException();
 		duplicates = findKnownDuplicates();
 		nonDuplicates = findNonDuplicates();
-		assert duplicates.size() + nonDuplicates.size() == comments.size() : "Size doesn't add upp";
+		assert duplicates.size() + nonDuplicates.size() == allIssues.size() : "Size doesn't add upp";
 
 		generatedCorpus = new HashSet<Issue>((int) (size * 1.1));
 		final int duplicateAmount = (int) (size * duplicateRatio);
@@ -86,10 +90,10 @@ public class ExperimentSetGenerator
 		Set<Issue> masterIssues = new HashSet<Issue>();
 		for(Issue issue : duplicates)
 		{
-			List<Comment> commentsForIssue = comments.get(issue.getNumber());
+			List<Comment> commentsForIssue = allIssues.get(issue.getNumber());
 			final int master = findMaster(commentsForIssue);
 			if(master != -1)
-				masterIssues.add(allIssues.get(master));
+				masterIssues.add(idIssueMap.get(master));
 		}
 		
 		return masterIssues;
@@ -118,6 +122,8 @@ public class ExperimentSetGenerator
 
 	private static Collection<? extends Issue> getRandomElements(Set<Issue> set, int amount)
 	{
+		if(set.isEmpty())
+			throw new IllegalArgumentException("Given set is empty.");
 		List<Issue> listFromSet = new ArrayList<Issue>(set);
 		Collections.shuffle(listFromSet);
 		return listFromSet.subList(0, amount);
@@ -125,19 +131,19 @@ public class ExperimentSetGenerator
 
 	private Set<Issue> findNonDuplicates()
 	{
-		Set<Issue> filteredNonDuplicates = new HashSet<Issue>(allIssues.values());
+		Set<Issue> filteredNonDuplicates = new HashSet<Issue>(idIssueMap.values());
 		filteredNonDuplicates.removeAll(duplicates);
 		return filteredNonDuplicates;
 	}
 
 	private Set<Issue> findKnownDuplicates()
 	{
-		duplicates = new HashSet<Issue>(comments.size() / 2);
-		Iterator<Issue> iter = allIssues.values().iterator();
+		duplicates = new HashSet<Issue>(allIssues.size() / 2);
+		Iterator<Issue> iter = idIssueMap.values().iterator();
 		while (iter.hasNext())
 		{
 			final Issue issue = iter.next();
-			List<Comment> issueComments = comments.get(issue.getNumber());
+			List<Comment> issueComments = allIssues.get(issue.getNumber());
 			if (duplicateParser.isTaggedAsDuplicate(issueComments) || isLabeledAsDuplicates(issue))
 				duplicates.add(issue);
 		}
