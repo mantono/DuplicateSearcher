@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
-import org.eclipse.egit.github.core.PullRequest;
 import org.eclipse.egit.github.core.RepositoryId;
 
 /**
@@ -31,7 +30,7 @@ public class ExperimentSetGenerator
 	public ExperimentSetGenerator(final RepositoryId repo, final Map<Issue, List<Comment>> issuesWithcomments)
 	{
 		this.duplicateParser = new RegexFinder(repo);
-		this.allIssues = filterPullRequests(issuesWithcomments);
+		this.allIssues = issuesWithcomments;
 		this.idIssueMap = createIdIssueMap(allIssues.keySet());
 	}
 
