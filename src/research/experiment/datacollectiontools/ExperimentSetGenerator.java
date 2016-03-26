@@ -35,24 +35,6 @@ public class ExperimentSetGenerator
 		this.idIssueMap = createIdIssueMap(allIssues.keySet());
 	}
 
-	private Map<Issue, List<Comment>> filterPullRequests(Map<Issue, List<Comment>> input)
-	{
-		Map<Issue, List<Comment>> filteredMap = new HashMap<Issue, List<Comment>>(input);
-		System.out.println("Map size before filtering pull requests: " + filteredMap.size()); 
-		
-		final Iterator<Entry<Issue, List<Comment>>> iter = filteredMap.entrySet().iterator();
-		while(iter.hasNext())
-		{
-			final Entry<Issue, List<Comment>> entry = iter.next();
-			final PullRequest pullRequest = entry.getKey().getPullRequest();
-			if(pullRequest != null && pullRequest.getId() != 0)
-				iter.remove();
-		}
-		System.out.println("Map size after filtering pull requests: " + filteredMap.size());
-		
-		return filteredMap;
-	}
-
 	private Map<Integer, Issue> createIdIssueMap(Set<Issue> issues)
 	{
 		Map<Integer, Issue> issueMap = new HashMap<Integer, Issue>(issues.size());
