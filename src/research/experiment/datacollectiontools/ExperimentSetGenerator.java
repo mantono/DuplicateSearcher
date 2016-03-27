@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
+import org.eclipse.egit.github.core.Label;
 import org.eclipse.egit.github.core.RepositoryId;
 
 /**
@@ -137,7 +138,12 @@ public class ExperimentSetGenerator
 
 	private boolean isLabeledAsDuplicates(Issue issue)
 	{
-		// TODO fix me
+		List<Label> labels = issue.getLabels();
+		
+		for(Label label : labels)
+			if(label.getName().equals("duplicate"))
+				return true;
+		
 		return false;
 	}
 
