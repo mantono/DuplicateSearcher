@@ -5,17 +5,10 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class TokenizerTest
 {
-
-	@Before
-	public void setUp() throws Exception
-	{
-	}
-
 	@Test
 	public void testGetProcessedDataSimple()
 	{
@@ -58,25 +51,13 @@ public class TokenizerTest
 	@Test
 	public void testPurge()
 	{
-		final String input = "this ::is:: the;: ;way: it @all looks in the  end... just''* #words%";
-		final String expected = "this   is   the    way  it  all looks in the  end    just     words ";
+		final String input = "this ::is:: the;: ;way: it @all looks in //the  end... just''* #words%";
+		final String expected = "this   is   the    way  it  all looks in   the  end    just     words ";
 		
 		Tokenizer tokenizer = new Tokenizer("");
 		final String output = tokenizer.purge(input);
 		
 		assertEquals(expected, output);
-	}
-
-	@Test
-	public void testLowerCase()
-	{
-		final String input = "I AM KIND OF CRAZY SO I WRITE EVERYTHING IN CAPS!!";
-		Tokenizer tokenizer = new Tokenizer(input);
-		final String[] output = tokenizer.split(input);
-		tokenizer.lowerCase(output);
-		final String[] expected = {"i", "am", "kind", "of", "crazy", "so", "i", "write", "everything", "in", "caps!!"};
-
-		assertArrayEquals(expected, output);
 	}
 
 	@Test
@@ -111,38 +92,4 @@ public class TokenizerTest
 
 		assertArrayEquals(expected, output);
 	}
-
-	@Test
-	public void testSplitSentenceWithDash()
-	{
-		final String input = "We believe in fruit loops and/or AI.";
-		Tokenizer tokenizer = new Tokenizer(input);
-		final String[] output = tokenizer.split(input);
-		final String[] expected = {"We", "believe", "in", "fruit", "loops", "and", "or", "AI."};
-
-		assertArrayEquals(expected, output);
-	}
-
-	@Test
-	public void testSplitSentenceWithHyphens()
-	{
-		final String input = "This-sentence-has a --lot-- - of - hyphens.-";
-		Tokenizer tokenizer = new Tokenizer(input);
-		final String[] output = tokenizer.split(input);
-		final String[] expected = {"This", "sentence", "has", "a", "lot", "of", "hyphens."};
-
-		assertArrayEquals(expected, output);
-	}
-
-	@Test
-	public void testSplitSentenceWithUnderscore()
-	{
-		final String input = "This looks like a_C_variable.";
-		Tokenizer tokenizer = new Tokenizer(input);
-		final String[] output = tokenizer.split(input);
-		final String[] expected = {"This", "looks", "like", "a", "C", "variable."};
-
-		assertArrayEquals(expected, output);
-	}
-
 }

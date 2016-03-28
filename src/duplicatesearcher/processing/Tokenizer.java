@@ -23,25 +23,18 @@ public class Tokenizer implements TokenProcessor
 	private String[] tokenize(String input)
 	{
 		input = purge(input);
-		String[] tokens = split(input);
-		lowerCase(tokens);
-		return tokens;
-	}
-	
-	public void lowerCase(String[] tokens)
-	{
-		for(int i = 0; i < tokens.length; i++)
-			tokens[i] = tokens[i].toLowerCase();
+		input = input.toLowerCase();
+		return split(input);
 	}
 
 	public String purge(String input)
 	{
-		return input.replaceAll("\\W", " ");
+		return input.replaceAll("[\\W_]", " ");
 	}
 
 	public String[] split(String input)
 	{
-		return input.trim().split("[\\s/\\-_]+");
+		return input.trim().split("[\\s]+");
 	}
 
 	private Set<String> convertToSet(String[] tokens)
