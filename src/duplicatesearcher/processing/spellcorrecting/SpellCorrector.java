@@ -1,4 +1,4 @@
-package duplicatesearcher.spellCorrecting;
+package duplicatesearcher.processing.spellCorrecting;
 
 import java.util.ArrayList;
 import java.util.List;
