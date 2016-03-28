@@ -17,17 +17,40 @@ public class TokenizerTest
 	}
 
 	@Test
-	public void testGetProcessedData()
+	public void testGetProcessedDataSimple()
 	{
 		final String input = "This is four tokens.";
 		Tokenizer tokenizer = new Tokenizer(input);
-		
+
 		final Set<String> output = tokenizer.getProcessedData();
 		final Set<String> expected = new HashSet<String>(4);
 		expected.add("this");
 		expected.add("is");
 		expected.add("four");
 		expected.add("tokens");
+
+		assertEquals(expected, output);
+	}
+	
+	
+	@Test
+	public void testGetProcessedDataComplex()
+	{
+		final String input = "* * * Well then, 'THIS' could \n certainly \t @prove__ to be a-challenge...\0";
+		Tokenizer tokenizer = new Tokenizer(input);
+		
+		final Set<String> output = tokenizer.getProcessedData();
+		final Set<String> expected = new HashSet<String>(4);
+		expected.add("well");
+		expected.add("then");
+		expected.add("this");
+		expected.add("could");
+		expected.add("certainly");
+		expected.add("prove");
+		expected.add("to");
+		expected.add("be");
+		expected.add("a");
+		expected.add("challenge");
 		
 		assertEquals(expected, output);
 	}
@@ -35,13 +58,25 @@ public class TokenizerTest
 	@Test
 	public void testPurge()
 	{
-		fail("Not yet implemented");
+		final String[] input = {"this", "::is::", "the;:", ";way:", "it", "@all",  "looks,", "in", "the", "end...", "just''*", "#words%"};
+		final String[] expected = {"this", "is", "the", "way", "it", "all",  "looks", "in", "the", "end", "just", "words" };
+		
+		Tokenizer tokenizer = new Tokenizer("");
+		tokenizer.purge(input);
+		
+		assertArrayEquals(expected, input);
 	}
-	
+
 	@Test
 	public void testLowerCase()
 	{
-		fail("Not yet implemented");
+		final String input = "I AM KIND OF CRAZY SO I WRITE EVERYTHING IN CAPS!!";
+		Tokenizer tokenizer = new Tokenizer(input);
+		final String[] output = tokenizer.split(input);
+		tokenizer.lowerCase(output);
+		final String[] expected = {"i", "am", "kind", "of", "crazy", "so", "i", "write", "everything", "in", "caps!!"};
+
+		assertArrayEquals(expected, output);
 	}
 
 	@Test
@@ -51,10 +86,10 @@ public class TokenizerTest
 		Tokenizer tokenizer = new Tokenizer(input);
 		final String[] output = tokenizer.split(input);
 		final String[] expected = {"This", "is", "four", "tokens."};
-		
+
 		assertArrayEquals(expected, output);
 	}
-	
+
 	@Test
 	public void testSplitSentenceWithMultipleWhitespace()
 	{
@@ -62,10 +97,10 @@ public class TokenizerTest
 		Tokenizer tokenizer = new Tokenizer(input);
 		final String[] output = tokenizer.split(input);
 		final String[] expected = {"This", "sentence", "has", "a", "lot", "of", "whitespace."};
-		
+
 		assertArrayEquals(expected, output);
 	}
-	
+
 	@Test
 	public void testSplitSentenceWithNewLine()
 	{
@@ -73,10 +108,10 @@ public class TokenizerTest
 		Tokenizer tokenizer = new Tokenizer(input);
 		final String[] output = tokenizer.split(input);
 		final String[] expected = {"This", "sentence", "has", "two", "new", "line", "characters."};
-		
+
 		assertArrayEquals(expected, output);
 	}
-	
+
 	@Test
 	public void testSplitSentenceWithDash()
 	{
@@ -84,14 +119,30 @@ public class TokenizerTest
 		Tokenizer tokenizer = new Tokenizer(input);
 		final String[] output = tokenizer.split(input);
 		final String[] expected = {"We", "believe", "in", "fruit", "loops", "and", "or", "AI."};
-		
+
 		assertArrayEquals(expected, output);
 	}
 
 	@Test
-	public void testConvertToSet()
+	public void testSplitSentenceWithHyphens()
 	{
-		fail("Not yet implemented");
+		final String input = "This-sentence-has a --lot-- - of - hyphens.-";
+		Tokenizer tokenizer = new Tokenizer(input);
+		final String[] output = tokenizer.split(input);
+		final String[] expected = {"This", "sentence", "has", "a", "lot", "of", "hyphens."};
+
+		assertArrayEquals(expected, output);
+	}
+
+	@Test
+	public void testSplitSentenceWithUnderscore()
+	{
+		final String input = "This looks like a_C_variable.";
+		Tokenizer tokenizer = new Tokenizer(input);
+		final String[] output = tokenizer.split(input);
+		final String[] expected = {"This", "looks", "like", "a", "C", "variable."};
+
+		assertArrayEquals(expected, output);
 	}
 
 }

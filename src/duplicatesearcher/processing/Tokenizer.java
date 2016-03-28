@@ -30,22 +30,22 @@ public class Tokenizer implements TokenProcessor
 	
 	public void lowerCase(String[] tokens)
 	{
-		// TODO Auto-generated method stub
-		
+		for(int i = 0; i < tokens.length; i++)
+			tokens[i] = tokens[i].toLowerCase();
 	}
 
 	public void purge(String[] tokens)
 	{
-		// TODO Auto-generated method stub
-		
+		for(int i = 0; i < tokens.length; i++)
+			tokens[i] = tokens[i].replaceAll("\\W", "");
 	}
 
 	public String[] split(String input)
 	{
-		return input.trim().split("[\\s/]+");
+		return input.trim().split("[\\s/\\-_]+");
 	}
 
-	public Set<String> convertToSet(String[] tokens)
+	private Set<String> convertToSet(String[] tokens)
 	{
 		return new HashSet<String>(Arrays.<String>asList(tokens));
 	}
