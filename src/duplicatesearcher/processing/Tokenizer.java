@@ -22,9 +22,9 @@ public class Tokenizer implements TokenProcessor
 
 	private String[] tokenize(String input)
 	{
+		input = purge(input);
 		String[] tokens = split(input);
 		lowerCase(tokens);
-		purge(tokens);
 		return tokens;
 	}
 	
@@ -34,10 +34,9 @@ public class Tokenizer implements TokenProcessor
 			tokens[i] = tokens[i].toLowerCase();
 	}
 
-	public void purge(String[] tokens)
+	public String purge(String input)
 	{
-		for(int i = 0; i < tokens.length; i++)
-			tokens[i] = tokens[i].replaceAll("\\W", "");
+		return input.replaceAll("\\W", " ");
 	}
 
 	public String[] split(String input)

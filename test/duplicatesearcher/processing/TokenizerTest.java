@@ -58,13 +58,13 @@ public class TokenizerTest
 	@Test
 	public void testPurge()
 	{
-		final String[] input = {"this", "::is::", "the;:", ";way:", "it", "@all",  "looks,", "in", "the", "end...", "just''*", "#words%"};
-		final String[] expected = {"this", "is", "the", "way", "it", "all",  "looks", "in", "the", "end", "just", "words" };
+		final String input = "this ::is:: the;: ;way: it @all looks in the  end... just''* #words%";
+		final String expected = "this   is   the    way  it  all looks in the  end    just     words ";
 		
 		Tokenizer tokenizer = new Tokenizer("");
-		tokenizer.purge(input);
+		final String output = tokenizer.purge(input);
 		
-		assertArrayEquals(expected, input);
+		assertEquals(expected, output);
 	}
 
 	@Test
