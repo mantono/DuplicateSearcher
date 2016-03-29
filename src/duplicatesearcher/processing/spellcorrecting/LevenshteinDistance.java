@@ -1,4 +1,4 @@
-package duplicatesearcher.processing.spellCorrecting;
+package duplicatesearcher.processing.spellcorrecting;
 
 /*
 
