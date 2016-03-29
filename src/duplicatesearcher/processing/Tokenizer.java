@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Tokenizer implements TokenProcessor
+public class Tokenizer
 {
 	final String data;
 	
@@ -13,11 +13,9 @@ public class Tokenizer implements TokenProcessor
 		this.data = input;
 	}
 
-	@Override
-	public Set<String> getProcessedData()
+	public String[] getTokens()
 	{
-		final String[] tokens = tokenize(data);
-		return convertToSet(tokens);
+		return tokenize(data);
 	}
 
 	private String[] tokenize(String input)
@@ -36,10 +34,4 @@ public class Tokenizer implements TokenProcessor
 	{
 		return input.trim().split("[\\s]+");
 	}
-
-	private Set<String> convertToSet(String[] tokens)
-	{
-		return new HashSet<String>(Arrays.<String>asList(tokens));
-	}
-
 }
