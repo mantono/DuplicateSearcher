@@ -1,4 +1,4 @@
-package duplicatesearcher.analysis;
+package duplicatesearcher.analysis.frequency;
 
 import duplicatesearcher.processing.Tokenizer;
 

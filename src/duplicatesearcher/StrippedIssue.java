@@ -10,6 +10,8 @@ import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+
 /**
  * StrippedIssue is a simplified version of {@link Issue}, containing only the
  * data that is crucial to similarity analysis. All textual data is stored in a

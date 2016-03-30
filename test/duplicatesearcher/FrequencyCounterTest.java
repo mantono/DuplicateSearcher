@@ -8,6 +8,8 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+
 public class FrequencyCounterTest
 {
 
