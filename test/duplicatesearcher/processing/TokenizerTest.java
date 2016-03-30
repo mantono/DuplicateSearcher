@@ -15,14 +15,9 @@ public class TokenizerTest
 		final String input = "This is four tokens.";
 		Tokenizer tokenizer = new Tokenizer(input);
 
-		final Set<String> output = tokenizer.getProcessedData();
-		final Set<String> expected = new HashSet<String>(4);
-		expected.add("this");
-		expected.add("is");
-		expected.add("four");
-		expected.add("tokens");
-
-		assertEquals(expected, output);
+		final String[] output = tokenizer.getTokens();
+		final String[] expected = new String[]{"this", "is", "four", "tokens"};
+		assertArrayEquals(expected, output);
 	}
 	
 	
@@ -32,20 +27,9 @@ public class TokenizerTest
 		final String input = "* * * Well then, 'THIS' could \n certainly \t @prove__ to be a-challenge...\0";
 		Tokenizer tokenizer = new Tokenizer(input);
 		
-		final Set<String> output = tokenizer.getProcessedData();
-		final Set<String> expected = new HashSet<String>(4);
-		expected.add("well");
-		expected.add("then");
-		expected.add("this");
-		expected.add("could");
-		expected.add("certainly");
-		expected.add("prove");
-		expected.add("to");
-		expected.add("be");
-		expected.add("a");
-		expected.add("challenge");
-		
-		assertEquals(expected, output);
+		final String[] output = tokenizer.getTokens();
+		final String[] expected = new String[]{"well", "then", "this", "could", "certainly", "prove", "to", "be", "a", "challenge"};
+		assertArrayEquals(expected, output);
 	}
 
 	@Test
