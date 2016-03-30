@@ -13,8 +13,9 @@ import org.eclipse.egit.github.core.Label;
 /**
  * StrippedIssue is a simplified version of {@link Issue}, containing only the
  * data that is crucial to similarity analysis. All textual data is stored in a
- * way that makes more sense from a statistical point of view rather than a semantical.
- *
+ * way that makes more sense from a statistical point of view rather than a
+ * semantical.
+ * 
  */
 public class StrippedIssue
 {
@@ -37,13 +38,24 @@ public class StrippedIssue
 
 	private Map<String, Integer> mapStrings(List<Comment> commentData)
 	{
-		final FrequencyCounter freq = new FrequencyCounter(commentData);
+		final TermFrequencyCounter freq = new TermFrequencyCounter(commentData);
 		return freq.getTokenFrequency();
 	}
 
 	private Map<String, Integer> mapString(String input)
 	{
-		final FrequencyCounter freq = new FrequencyCounter(input);
+		final TermFrequencyCounter freq = new TermFrequencyCounter(input);
 		return freq.getTokenFrequency();
+	}
+
+	/**
+	 * Check if this issue contains enough textual data to actually be analyzed
+	 * and compared to other issues (after stop lists and are applied)
+	 * 
+	 * @return true if it is considered viable for analysis, else false.
+	 */
+	public boolean isViable()
+	{
+		return true;
 	}
 }

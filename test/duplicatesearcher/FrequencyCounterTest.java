@@ -15,15 +15,14 @@ public class FrequencyCounterTest
 	public void testGetTokenFrequency()
 	{
 		final String input = "one two two three three three";
-		final FrequencyCounter fc = new FrequencyCounter(input);
-		final Map<String, Integer> frequency = fc.getTokenFrequency();
+		final TermFrequencyCounter fc = new TermFrequencyCounter();
+		final int added = fc.add(input);
 		
-		final Map<String, Integer> expected = new HashMap<String, Integer>();
-		expected.put("one", 1);
-		expected.put("two", 2);
-		expected.put("three", 3);
-		
-		assertEquals(expected, frequency);
+		assertEquals(6, added);
+		assertEquals(0, fc.getTokenFrequency("zero"));
+		assertEquals(1, fc.getTokenFrequency("one"));
+		assertEquals(2, fc.getTokenFrequency("two"));
+		assertEquals(3, fc.getTokenFrequency("three"));
 	}
 
 }
