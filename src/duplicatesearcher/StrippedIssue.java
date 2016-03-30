@@ -25,6 +25,7 @@ public class StrippedIssue
 	private final Date dateCreated;
 	private final Set<Label> labels;
 	private final Map<String, Integer> title, body, comments;
+	private boolean flaggedBad = false;
 
 	public StrippedIssue(final Issue issue, final List<Comment> comments)
 	{
@@ -58,6 +59,6 @@ public class StrippedIssue
 	 */
 	public boolean isViable()
 	{
-		return true;
+		return !flaggedBad;
 	}
 }
