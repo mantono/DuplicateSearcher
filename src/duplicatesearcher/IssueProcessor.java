@@ -2,17 +2,20 @@ package duplicatesearcher;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.eclipse.egit.github.core.Comment;
+import org.eclipse.egit.github.core.Issue;
 
 import duplicatesearcher.analysis.Duplicate;
 
 /**
- * DuplicateSearcher is the main component of this artifact. It controls and
- * interacts with all other major components used for parsing, manipulating
- * and analyzing issues, as well as searching for duplicates.
+ * Issue is controls and interacts with all other major components used for
+ * parsing and manipulating issues.
  *
  */
-public class DuplicateSearcher
+public class IssueProcessor
 {
 	public final static int SPELL_CORRECTION = 1;
 	public final static int STEMMING = 1 << 1;
@@ -25,32 +28,15 @@ public class DuplicateSearcher
 	public final static int FILTER_BAD = 1 << 8;
 
 	private final int flags;
-	private final double threshold;
-	/**
-	 * Replace this with a graph to (possibly) improve performance
-	 */
-	private final Set<StrippedIssue> issues;
 
-	public DuplicateSearcher(final Collection<StrippedIssue> issues, final double threshold, final int flags)
+	public IssueProcessor(final int flags)
 	{
-		this.issues = new HashSet<StrippedIssue>(issues);
-		this.threshold = threshold;
 		this.flags = flags;
 	}
-	
-	public DuplicateSearcher(final Collection<StrippedIssue> issues, final double threshold, final int... flags)
-	{
-		this(issues, threshold, andFlags(flags));
-	}
-	
-	public DuplicateSearcher(final double threshold, final int flags)
-	{
-		this(new HashSet<StrippedIssue>(0), threshold, flags);
-	}
 
-	public DuplicateSearcher(final double threshold, final int... flags)
+	public IssueProcessor(final int... flags)
 	{
-		this(threshold, andFlags(flags));
+		this.flags = andFlags(flags);
 	}
 
 	private static int andFlags(int[] flagArray)
@@ -60,8 +46,13 @@ public class DuplicateSearcher
 			flagMasked |= flag;
 		return flagMasked;
 	}
+	
+	public StrippedIssue process(final Issue issue, final List<Comment> comments)
+	{
+		return process(new StrippedIssue(issue, comments));
+	}
 
-	private void parse(Set<StrippedIssue> issues)
+	public StrippedIssue process(final StrippedIssue issue)
 	{
 		if(run(SPELL_CORRECTION))
 			System.out.println(SPELL_CORRECTION);
@@ -80,7 +71,7 @@ public class DuplicateSearcher
 		if(run(FILTER_BAD))
 			System.out.println(FILTER_BAD);
 
-		return null;
+		return issue;
 	}
 
 	private boolean run(int flag)
