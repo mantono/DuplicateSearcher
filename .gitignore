@@ -32,4 +32,4 @@ lib
 .ant_targets
 
 # Downloaded data from GitHub
-datasets
+datasets*
