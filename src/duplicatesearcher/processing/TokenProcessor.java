@@ -2,8 +2,11 @@ package duplicatesearcher.processing;
 
 import java.util.Set;
 
+import duplicatesearcher.StrippedIssue;
+
 /**
- * An interface for each component in the artifact
+ * An interface for each component in the artifact that manipulates content in
+ * issues.
  *
  */
 public interface TokenProcessor
@@ -13,5 +16,5 @@ public interface TokenProcessor
 	 * 
 	 * @return a set of {@link String} elements after they have been processed.
 	 */
-	Set<String> getProcessedData();
+	StrippedIssue process(final StrippedIssue input);
 }
