@@ -1,4 +1,4 @@
-<project name="DuplicateSearcher" default="compile" basedir=".">
+<project name="DuplicateSearcher" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 <description>
 	Ant build file for project Duplicate Searcher
@@ -38,28 +38,13 @@
 
 <target name="libs" description="Download and/or compile dependency libraries">
 	<!-- See https://github.com/mantono/DuplicateSearcher/wiki/Frameworks for links to projects and APIs -->
+	<ivy:retrieve />
 	<get dest="${libs}" verbose="true" usetimestamp="true">
-		<!-- GSON -->
-		<url url="http://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2.jar" />
-		<url url="http://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2.jar.md5" />
-		<!-- Snowball -->
-		<url url="http://snowball.tartarus.org/dist/libstemmer_java.tgz" />
-		<!-- Egit/GitHub API client -->
-		<url url="http://repo1.maven.org/maven2/org/eclipse/mylyn/github/org.eclipse.egit.github.core/2.1.5/org.eclipse.egit.github.core-2.1.5.jar" />
-		<url url="http://repo1.maven.org/maven2/org/eclipse/mylyn/github/org.eclipse.egit.github.core/2.1.5/org.eclipse.egit.github.core-2.1.5-sources.jar" />
+
 		<!-- Apache Commons (sandbox) - Levenshtein Distance -->
 		<url url="https://github.com/apache/commons-text/blob/master/src/main/java/org/apache/commons/text/similarity/LevenshteinDistance.java" />
 		<url url="https://github.com/apache/commons-text/blob/master/NOTICE.txt" />
 		<url url="https://github.com/apache/commons-text/blob/master/LICENSE.txt" />
-	</get>
-</target>
-
-<target name="downloaddoc" description="Download JavaDocs for dependency libraries">
-	<get dest="${libsdownload}" verbose="true" usetimestamp="true">
-		<!-- GSON -->
-		<url url="http://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2-javadoc.jar" />
-		<!-- Egit/GitHub API client -->
-		<url url="http://repo1.maven.org/maven2/org/eclipse/mylyn/github/org.eclipse.egit.github.core/2.1.5/org.eclipse.egit.github.core-2.1.5-javadoc.jar" />
 	</get>
 </target>
 
@@ -83,11 +68,6 @@
 <target name="javadoc" description="Compiles JavaDocs for this project" depends="init">
 	<javadoc packagenames="duplicatesearcher.*,research.*" access="package" additionalparam="-link http://docs.oracle.com/javase/8/docs/api/ " author="false" sourcepath="src" destdir="${doc}" source="1.8">
 	</javadoc>
-</target>
-
-<target name="extdoc" description="Download and generate JavaDocs for external frameworks" depends="downloaddoc">
-	<unzip src="${libsdownload}/org.eclipse.egit.github.core-2.1.5-javadoc.jar" dest="${extdoc}/egit.github.core-2.1.5-javadoc" />
-	<unzip src="${libsdownload}/gson-2.6.2-javadoc.jar" dest="${extdoc}/gson-2.6.2-javadoc" />
 </target>
 
 <target name="package" description="Package files to JAR" depends="test,javadoc">

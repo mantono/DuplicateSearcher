@@ -1,0 +1,7 @@
+<ivy-module version="2.0">
+    <info organisation="se.su.dsv.bergmann" module="duplicate-searcher"/>
+    <dependencies>
+        <dependency org="org.eclipse.mylyn.github" name="org.eclipse.egit.github.core" rev="2.1.5"/>
+        <dependency org="com.github.rholder" name="snowball-stemmer" rev="1.3.0.581.1"/>
+    </dependencies>
+</ivy-module>
