@@ -10,6 +10,7 @@ import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 
+import duplicatesearcher.analysis.frequency.FrequencyCounter;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 
 /**
@@ -24,7 +25,7 @@ public class StrippedIssue
 	private final int number, userId;
 	private final Date dateCreated;
 	private final Set<Label> labels;
-	private final Map<String, Integer> title, body, comments;
+	private final FrequencyCounter title, body, comments;
 	private boolean flaggedBad = false;
 
 	public StrippedIssue(final Issue issue, final List<Comment> comments)
@@ -34,21 +35,22 @@ public class StrippedIssue
 		this.userId = issue.getUser().getId();
 		this.labels = new HashSet<Label>(issue.getLabels());
 
-		this.title = mapString(issue.getTitle());
-		this.body = mapString(issue.getBody());
+		this.title = new TermFrequencyCounter();
+		title.add(issue.getTitle());
+		
+		this.body = new TermFrequencyCounter();
+		body.add(issue.getBody());
+		
 		this.comments = mapStrings(comments);
 	}
 
-	private Map<String, Integer> mapStrings(List<Comment> commentData)
+	private TermFrequencyCounter mapStrings(List<Comment> commentData)
 	{
-		final TermFrequencyCounter freq = new TermFrequencyCounter(commentData);
-		return freq.getTokenFrequency();
-	}
-
-	private Map<String, Integer> mapString(String input)
-	{
-		final TermFrequencyCounter freq = new TermFrequencyCounter(input);
-		return freq.getTokenFrequency();
+		final TermFrequencyCounter freq = new TermFrequencyCounter();
+		for(Comment comment : commentData)
+			freq.add(comment.getBody());
+		
+		return freq;
 	}
 
 	/**
