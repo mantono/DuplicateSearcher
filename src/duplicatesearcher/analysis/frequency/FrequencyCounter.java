@@ -2,6 +2,7 @@ package duplicatesearcher.analysis.frequency;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This abstract class counts the occurences of a String token in an issue.
@@ -11,7 +12,6 @@ public abstract class FrequencyCounter
 {
 	private final Map<String, Integer> frequency = new HashMap<String, Integer>();
 	
-	public abstract int add(final String input);
 	public abstract double getWeight(final String token);
 	
 	public int getTokenFrequency(final String token)
@@ -22,9 +22,19 @@ public abstract class FrequencyCounter
 		return frequency.get(token);
 	}
 	
+	public Set<String> getTokens()
+	{
+		return frequency.keySet();
+	}
+	
 	public int size()
 	{
 		return frequency.size();
+	}
+	
+	public void clear()
+	{
+		frequency.clear();
 	}
 	
 	public int remove(final String key)

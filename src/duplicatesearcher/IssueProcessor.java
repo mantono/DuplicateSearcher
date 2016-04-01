@@ -54,6 +54,8 @@ public class IssueProcessor
 
 	public StrippedIssue process(final StrippedIssue issue)
 	{
+		if(run(PARSE_COMMENTS))
+			System.out.println(PARSE_COMMENTS);
 		if(run(SPELL_CORRECTION))
 			System.out.println(SPELL_CORRECTION);
 		if(run(STEMMING))

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.rmi.CORBA.Tie;
+
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
@@ -25,7 +27,7 @@ public class StrippedIssue
 	private final int number, userId;
 	private final Date dateCreated;
 	private final Set<Label> labels;
-	private final FrequencyCounter title, body, comments;
+	private final TermFrequencyCounter title, body, comments;
 	private boolean flaggedBad = false;
 
 	public StrippedIssue(final Issue issue, final List<Comment> comments)
@@ -62,5 +64,27 @@ public class StrippedIssue
 	public boolean isViable()
 	{
 		return !flaggedBad;
+	}
+
+	/**
+	 * @return the number
+	 */
+	public int getNumber()
+	{
+		return number;
+	}
+	
+	public double getWeight(final String token)
+	{
+		return body.getWeight(token);
+	}
+
+	public Set<String> wordSet()
+	{
+		Set<String> tokens = new HashSet<String>(body.size()*2);
+		tokens.addAll(title.getTokens());
+		tokens.addAll(body.getTokens());
+		tokens.addAll(comments.getTokens());
+		return tokens;
 	}
 }

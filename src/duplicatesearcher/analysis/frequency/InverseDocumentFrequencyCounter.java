@@ -4,28 +4,28 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import duplicatesearcher.StrippedIssue;
 import duplicatesearcher.processing.Tokenizer;
 
 public class InverseDocumentFrequencyCounter extends FrequencyCounter
 {
-	private int documents = 0;
+	private final Set<Integer> documents = new HashSet<Integer>();
 	
-	@Override
-	public int add(final String input)
+	public int add(final StrippedIssue input)
 	{
-		documents++;
-		final Tokenizer tokenizer = new Tokenizer(input);
-		final String[] tokens = tokenizer.getTokens();
-		final Set<String> uniqueTokens = new HashSet<String>(Arrays.asList(tokens));
-		for(String str : uniqueTokens)
+		if(!documents.add(input.getNumber()))
+			return 0;
+		
+		final Set<String> tokens = input.wordSet();
+		for(String str : tokens)
 			increment(str);
 		
-		return tokens.length;
+		return tokens.size();
 	}
 	
 	@Override
 	public double getWeight(final String token)
 	{
-		return 1+ Math.log10(documents/getTokenFrequency(token));
+		return 1+ Math.log10(documents.size()/getTokenFrequency(token));
 	}
 }
