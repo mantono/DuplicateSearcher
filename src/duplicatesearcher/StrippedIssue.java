@@ -10,18 +10,23 @@ import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 
+import duplicatesearcher.analysis.frequency.FrequencyCounter;
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+
 /**
  * StrippedIssue is a simplified version of {@link Issue}, containing only the
  * data that is crucial to similarity analysis. All textual data is stored in a
- * way that makes more sense from a statistical point of view rather than a semantical.
- *
+ * way that makes more sense from a statistical point of view rather than a
+ * semantical.
+ * 
  */
 public class StrippedIssue
 {
 	private final int number, userId;
 	private final Date dateCreated;
 	private final Set<Label> labels;
-	private final Map<String, Integer> title, body, comments;
+	private final FrequencyCounter title, body, comments;
+	private boolean flaggedBad = false;
 
 	public StrippedIssue(final Issue issue, final List<Comment> comments)
 	{
@@ -30,20 +35,32 @@ public class StrippedIssue
 		this.userId = issue.getUser().getId();
 		this.labels = new HashSet<Label>(issue.getLabels());
 
-		this.title = mapString(issue.getTitle());
-		this.body = mapString(issue.getBody());
+		this.title = new TermFrequencyCounter();
+		title.add(issue.getTitle());
+		
+		this.body = new TermFrequencyCounter();
+		body.add(issue.getBody());
+		
 		this.comments = mapStrings(comments);
 	}
 
-	private Map<String, Integer> mapStrings(List<Comment> commentData)
+	private TermFrequencyCounter mapStrings(List<Comment> commentData)
 	{
-		final FrequencyCounter freq = new FrequencyCounter(commentData);
-		return freq.getTokenFrequency();
+		final TermFrequencyCounter freq = new TermFrequencyCounter();
+		for(Comment comment : commentData)
+			freq.add(comment.getBody());
+		
+		return freq;
 	}
 
-	private Map<String, Integer> mapString(String input)
+	/**
+	 * Check if this issue contains enough textual data to actually be analyzed
+	 * and compared to other issues (after stop lists and are applied)
+	 * 
+	 * @return true if it is considered viable for analysis, else false.
+	 */
+	public boolean isViable()
 	{
-		final FrequencyCounter freq = new FrequencyCounter(input);
-		return freq.getTokenFrequency();
+		return !flaggedBad;
 	}
 }
