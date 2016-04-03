@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 cd /tmp
 git clone https://git-wip-us.apache.org/repos/asf/ant-ivy.git &&
 cd ant-ivy &&
