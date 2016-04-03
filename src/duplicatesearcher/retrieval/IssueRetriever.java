@@ -1,80 +1,127 @@
 package duplicatesearcher.retrieval;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.PageIterator;
 import org.eclipse.egit.github.core.service.IssueService;
 
-public class IssueRetriever extends GitHubTask implements IssueFetcher
+public class IssueRetriever extends GitHubTask
 {
 	private final IssueService service;
 	private final Map<String, String> filter = new HashMap<String, String>();
 	private final RepositoryId repo;
+	private final int issueCount;
+	private int iterations = 0;
 	
 	public IssueRetriever(final GitHubClient client, final RepositoryId repo)
 	{
 		super(client);
 		this.service = new IssueService(client);
 		this.repo = repo;
-	}
-
-	@Override
-	public Collection<Issue> getOpenIssues(int amount)
-	{
-		return getIssues(IssueService.STATE_OPEN, amount);
-	}
-
-	@Override
-	public Collection<Issue> getOpenIssues()
-	{
-		return getOpenIssues(Integer.MAX_VALUE);
-	}
-
-	@Override
-	public Collection<Issue> getClosedIssues(int amount)
-	{
-		return getIssues(IssueService.STATE_CLOSED, amount);
-	}
-
-	@Override
-	public Collection<Issue> getClosedIssues()
-	{
-		return getClosedIssues(Integer.MAX_VALUE);
+		this.issueCount = getAmountOfIssues();
 	}
 	
-	private Collection<Issue> getIssues(final String state, final int amount)
+	private int getAmountOfIssues()
 	{
-		filter.put("state", state);
+		filter.put("state", "all");
+		filter.put("sort", "created");
+		filter.put("direction", "desc");
 		
-		List<Issue> issues;
-		if(amount > 20_000)
-			issues = new ArrayList<Issue>(10_000);
-		else
-			issues = new ArrayList<Issue>(amount);
+		final PageIterator<Issue> issuePages = service.pageIssues(repo.getOwner(), repo.getName(), filter);
+		Collection<Issue> issues = issuePages.next();
+		return getNumberOfHighestId(issues);
+	}
+
+	private int getNumberOfHighestId(Collection<Issue> issues)
+	{
+		int id = -1;
+		
+		for(Issue issue: issues)
+			if(issue.getNumber() > id)
+				id = issue.getNumber();
+		
+		return id;
+	}
+
+	public Map<Issue, List<Comment>> getIssues() throws IOException
+	{
+		System.out.println(repo + " contains " + issueCount + " issues and pull requests");
+		filter.put("direction", "asc");
+		Map<Issue, List<Comment>> issues = new HashMap<Issue, List<Comment>>(issueCount);
+		List<Issue> issuesToProcess = new ArrayList<Issue>(30);
 		
 		int iterations = 0;
 		final PageIterator<Issue> issuePages = service.pageIssues(repo.getOwner(), repo.getName(), filter);
-		while(issues.size() < amount && issuePages.hasNext())
+		while(issuePages.hasNext())
 		{
-			final int remainingRequests = getClient().getRemainingRequests();
-			if(remainingRequests < 10 && remainingRequests != -1)
-				forcedSleep();
-			printProgress("downloading issues", issues.size(), amount);
-			issues.addAll(issuePages.next());
-			if(iterations++ % 50 == 0)
-				autoThrottle();
-			threadSleep();
+			printProgress("downloading issues", issues.size(), issueCount);
+			
+			issuesToProcess.addAll(issuePages.next());
+			removePullRequests(issuesToProcess);
+			issues.putAll(downloadComments(issuesToProcess));
+			issuesToProcess.clear();
+			
+			sleep();
 		}
 		
-		while(issues.size() > amount)
-			issues.remove(issues.size()-1);
 		
 		return issues;
+	}
+	
+	private void sleep()
+	{
+		final int remainingRequests = getClient().getRemainingRequests();
+		if(remainingRequests < 10 && remainingRequests != -1)
+			forcedSleep();
+		if(iterations++ % 50 == 0)
+			autoThrottle();
+		threadSleep();
+	}
+
+	private Map<Issue, List<Comment>> downloadComments(List<Issue> issuesToProcess) throws IOException
+	{
+		final int first = issuesToProcess.get(0).getNumber();
+		final int last = issuesToProcess.get(issuesToProcess.size()-1).getNumber();
+		System.out.println("Downloading comments for issues " + first + " - " + last);
+		
+		final Map<Issue, List<Comment>> issues = new HashMap<Issue, List<Comment>>(150);
+		for(Issue issue : issuesToProcess)
+		{
+			final List<Comment> commentsFromIssue = service.getComments(repo, issue.getNumber());
+			if(commentsFromIssue == null)
+				issues.put(issue, new ArrayList<Comment>(0));
+			else
+				issues.put(issue, commentsFromIssue);
+			
+			final int remainingRequests = getClient().getRemainingRequests();
+			
+			sleep();
+
+		}
+		
+		return issues;
+	}
+
+	private void removePullRequests(List<Issue> issuesToProcess)
+	{
+		Iterator<Issue> iter = issuesToProcess.iterator();
+		while(iter.hasNext())
+		{
+			final Issue issue = iter.next();
+			if(issue.getPullRequest().getHtmlUrl() != null)
+				iter.remove();
+		}
 	}
 }
