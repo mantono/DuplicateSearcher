@@ -1,5 +1,6 @@
 package duplicatesearcher.analysis.frequency;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -8,8 +9,12 @@ import java.util.Set;
  * This abstract class counts the occurences of a String token in an issue.
  *
  */
-public abstract class FrequencyCounter
+public abstract class FrequencyCounter implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7141714544833012285L;
 	private final Map<String, Integer> frequency = new HashMap<String, Integer>();
 	
 	public abstract double getWeight(final String token);
@@ -55,6 +60,8 @@ public abstract class FrequencyCounter
 
 	protected int increment(String token)
 	{
+		if(token == null || token.length() == 0)
+			return 0;
 		if(!frequency.containsKey(token))
 		{
 			frequency.put(token, 1);
