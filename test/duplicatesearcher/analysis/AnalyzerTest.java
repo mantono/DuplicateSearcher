@@ -1,7 +1,5 @@
 package duplicatesearcher.analysis;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,8 +13,6 @@ import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
 import org.junit.Test;
 
-import com.sun.xml.internal.ws.api.ha.HaInfo;
-
 import duplicatesearcher.StrippedIssue;
 
 import research.experiment.datacollectiontools.DatasetFileManager;
@@ -27,24 +23,38 @@ public class AnalyzerTest
 	@Test
 	public void testFindDuplicatesStrippedIssueDouble() throws ClassNotFoundException, IOException
 	{
-		RepositoryId repo = new RepositoryId("telegramdesktop", "tdesktop");
+		RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
 		DatasetFileManager data = new DatasetFileManager(repo);
 		data.load();
 		Map<Issue, List<Comment>> dataMap = data.getDataset();
-		
+		System.out.println(dataMap.size());
+
 		HashSet<StrippedIssue> issues = new HashSet<StrippedIssue>(dataMap.size());
 		Iterator<Entry<Issue, List<Comment>>> iter = dataMap.entrySet().iterator();
-		
+		int pulls = 0;
+		int noPulls = 0;
+
 		while(iter.hasNext())
 		{
 			final Entry<Issue, List<Comment>> entry = iter.next();
-			issues.add(new StrippedIssue(entry.getKey(), entry.getValue()));
+			final Issue issue = entry.getKey();
+			assert issue.getPullRequest().getHtmlUrl() == null: "Pull requests should no longer exist in any data set. Remove this data set and download a new one.";
+
+			final StrippedIssue createdIssue = new StrippedIssue(issue, entry.getValue());
+			if(createdIssue.isViable())
+				issues.add(createdIssue);
+
 		}
-		
+
+		System.out.println(pulls + " / " + noPulls);
+
 		final Analyzer analyzer = new Analyzer(issues);
-		Set<Duplicate> result = analyzer.findDuplicates(0.5);
-		
+		Set<Duplicate> result = analyzer.findDuplicates(0.1);
+
 		System.out.print(result);
+
+		System.out.println("*** FINISHED ***");
+
 	}
 
 }
