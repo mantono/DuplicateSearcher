@@ -59,7 +59,7 @@
 	</junit>
 </target>
 
-<target name="compile" description="Compile code" depends="clean,init">
+<target name="compile" description="Compile code" depends="clean,init,libs">
 	<javac includeantruntime="true" srcdir="${src}:${test}" destdir="${build}">
 		<classpath refid="project.class.path" />
 	</javac>
