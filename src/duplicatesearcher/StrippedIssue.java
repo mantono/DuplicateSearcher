@@ -74,14 +74,14 @@ public class StrippedIssue
 		return number;
 	}
 	
-	public double getWeight(final String token)
+	public double getWeight(final Token token)
 	{
 		return body.getWeight(token);
 	}
 
-	public Set<String> wordSet()
+	public Set<Token> wordSet()
 	{
-		Set<String> tokens = new HashSet<String>(body.size()*2);
+		Set<Token> tokens = new HashSet<Token>(body.size()*2);
 		tokens.addAll(title.getTokens());
 		tokens.addAll(body.getTokens());
 		tokens.addAll(comments.getTokens());

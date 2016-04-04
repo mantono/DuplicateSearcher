@@ -12,6 +12,7 @@ import java.util.TreeSet;
 import org.eclipse.egit.github.core.Issue;
 
 import duplicatesearcher.StrippedIssue;
+import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.FrequencyCounter;
 import duplicatesearcher.analysis.frequency.InverseDocumentFrequencyCounter;
 
@@ -30,8 +31,12 @@ public class Analyzer
 	private void analyzeData(Collection<StrippedIssue> issueData)
 	{
 		for(StrippedIssue issue : issueData)
-			idfCounter.add(issue);
+			addTokenData(issue);
+	}
 
+	private void addTokenData(StrippedIssue issue)
+	{
+		idfCounter.add(issue.getNumber(), issue.wordSet());
 	}
 
 	public boolean add(final StrippedIssue issue)
@@ -57,14 +62,14 @@ public class Analyzer
 	{
 		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
 
-		final Map<String, Double> queryWeight = weightMap(issue);
+		final Map<Token, Double> queryWeight = weightMap(issue);
 
 		for(StrippedIssue issueInCollection : issues)
 		{
 			if(issue.getNumber() == issueInCollection.getNumber())
 				continue;
-			Map<String, Double> issueWeight = weightMap(issueInCollection);
-			Map<String, Double> queryNormalized = new HashMap<String, Double>(queryWeight);
+			Map<Token, Double> issueWeight = weightMap(issueInCollection);
+			Map<Token, Double> queryNormalized = new HashMap<Token, Double>(queryWeight);
 
 			try
 			{
@@ -79,11 +84,11 @@ public class Analyzer
 				continue;
 			}
 
-			Set<String> union = new HashSet<String>(queryWeight.keySet());
+			Set<Token> union = new HashSet<Token>(queryWeight.keySet());
 			union.addAll(issueWeight.keySet());
 
 			double similarity = 0;
-			for(String token : union)
+			for(Token token : union)
 			{
 				double weight1, weight2;
 				weight1 = weight2 = 0;
@@ -127,10 +132,10 @@ public class Analyzer
 		return duplicates;
 	}
 
-	private void normalizeVector(Map<String, Double> queryToNormalize)
+	private void normalizeVector(Map<Token, Double> queryToNormalize)
 	{
 		double sum = 0;
-		for(Entry<String, Double> pair : queryToNormalize.entrySet())
+		for(Entry<Token, Double> pair : queryToNormalize.entrySet())
 		{
 			double squared = Math.pow(pair.getValue(), 2);
 			queryToNormalize.put(pair.getKey(), squared);
@@ -140,7 +145,7 @@ public class Analyzer
 		final double divider = Math.sqrt(sum);
 		double sumOfRoots = 0;
 
-		for(Entry<String, Double> pair : queryToNormalize.entrySet())
+		for(Entry<Token, Double> pair : queryToNormalize.entrySet())
 		{
 			double normalized = pair.getValue() / divider;
 			if(normalized == 0 || Double.isNaN(normalized))
@@ -156,11 +161,11 @@ public class Analyzer
 
 	}
 
-	private Map<String, Double> weightMap(StrippedIssue issue)
+	private Map<Token, Double> weightMap(StrippedIssue issue)
 	{
-		final Set<String> tokens = issue.wordSet();
-		final Map<String, Double> queryWeight = new HashMap<String, Double>(tokens.size());
-		for(String token : tokens)
+		final Set<Token> tokens = issue.wordSet();
+		final Map<Token, Double> queryWeight = new HashMap<Token, Double>(tokens.size());
+		for(Token token : tokens)
 		{
 			final double tfWeight = issue.getWeight(token);
 			final double idfWeight = idfCounter.getWeight(token);
