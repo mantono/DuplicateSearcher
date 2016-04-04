@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import duplicatesearcher.Token;
+
 public class Tokenizer
 {
 	private final static String UNWANTED = "([\\W_A-Z])";
@@ -16,16 +18,27 @@ public class Tokenizer
 		this.data = input;
 	}
 
-	public String[] getTokens()
+	public Token[] getTokens()
 	{
-		return tokenize(data);
+		final String[] strings = tokenize(data);
+		final Token[] tokens = createTokens(strings);
+		return tokens;
 	}
 
-	private String[] tokenize(String input)
+	public String[] tokenize(String input)
 	{
 		input = purge(input);
 		input = input.toLowerCase();
 		return split(input);
+	}
+
+	private Token[] createTokens(String[] strings)
+	{
+		final Token[] tokens = new Token[strings.length];
+		for(int i = 0; i < strings.length; i++)
+			tokens[i] = new Token(strings[i]);
+		
+		return tokens;
 	}
 
 	public String purge(String input)
