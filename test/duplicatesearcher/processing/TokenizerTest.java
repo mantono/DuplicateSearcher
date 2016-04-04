@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import duplicatesearcher.Token;
+
 public class TokenizerTest
 {
 	@Test
@@ -15,20 +17,22 @@ public class TokenizerTest
 		final String input = "This is four tokens.";
 		Tokenizer tokenizer = new Tokenizer(input);
 
-		final String[] output = tokenizer.getTokens();
-		final String[] expected = new String[]{"this", "is", "four", "tokens"};
+		final Token[] output = tokenizer.getTokens();
+		final Token[] expected = new Token[]{new Token("this"), new Token("is"), new Token("four"),
+				new Token("tokens")};
 		assertArrayEquals(expected, output);
 	}
-	
-	
+
 	@Test
 	public void testGetProcessedDataComplex()
 	{
 		final String input = "* * * Well then, 'THIS' could \n certainly \t @prove__ to be a-challenge...\0";
 		Tokenizer tokenizer = new Tokenizer(input);
-		
-		final String[] output = tokenizer.getTokens();
-		final String[] expected = new String[]{"well", "then", "this", "could", "certainly", "prove", "to", "be", "a", "challenge"};
+
+		final Token[] output = tokenizer.getTokens();
+		final Token[] expected = new Token[]{new Token("well"), new Token("then"), new Token("this"),
+				new Token("could"), new Token("certainly"), new Token("prove"), new Token("to"), new Token("be"),
+				new Token("a"), new Token("challenge")};
 		assertArrayEquals(expected, output);
 	}
 
@@ -37,10 +41,10 @@ public class TokenizerTest
 	{
 		final String input = "this ::is:: the;: ;way: it @all looks in //the  end... just''* #words%";
 		final String expected = "this   is   the    way  it  all looks in   the  end    just     words ";
-		
+
 		Tokenizer tokenizer = new Tokenizer("");
 		final String output = tokenizer.purge(input);
-		
+
 		assertEquals(expected, output);
 	}
 
@@ -76,7 +80,7 @@ public class TokenizerTest
 
 		assertArrayEquals(expected, output);
 	}
-	
+
 	@Test
 	public void testIsToken()
 	{
