@@ -1,12 +1,11 @@
 package duplicatesearcher;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.rmi.CORBA.Tie;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
@@ -22,20 +21,30 @@ import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
  * semantical.
  * 
  */
-public class StrippedIssue
+public class StrippedIssue implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5824632540290288567L;
 	private final int number, userId;
-	private final Date dateCreated;
+	private final Date dateCreated, dateUpdated;
 	private final Set<Label> labels;
 	private final TermFrequencyCounter title, body, comments;
+	private final boolean closed;
+	private final String state;
 	private boolean flaggedBad = false;
 
 	public StrippedIssue(final Issue issue, final List<Comment> comments)
 	{
 		this.number = issue.getNumber();
 		this.dateCreated = issue.getCreatedAt();
+		this.dateUpdated = issue.getUpdatedAt();
 		this.userId = issue.getUser().getId();
 		this.labels = new HashSet<Label>(issue.getLabels());
+		
+		this.closed = issue.getClosedAt() != null;
+		this.state = issue.getState();
 
 		this.title = new TermFrequencyCounter();
 		title.add(issue.getTitle());
@@ -45,8 +54,29 @@ public class StrippedIssue
 		
 		this.comments = mapStrings(comments);
 	}
+	
+	public StrippedIssue(int number, int userId, Date created, Date updated, Set<Label> labels, String title, String body, Collection<Comment> comments, boolean closed, String state)
+	{
+		this.number = number;
+		this.userId = userId;
+		
+		this.dateCreated = created;
+		this.dateUpdated = updated;
+		
+		this.labels = labels;
+		
+		this.title = new TermFrequencyCounter();
+		this.title.add(title);
+		
+		this.body = new TermFrequencyCounter();
+		this.body.add(body);
+		this.comments = mapStrings(comments);
+		
+		this.closed = closed;
+		this.state = state;
+	}
 
-	private TermFrequencyCounter mapStrings(List<Comment> commentData)
+	private TermFrequencyCounter mapStrings(Collection<Comment> commentData)
 	{
 		final TermFrequencyCounter freq = new TermFrequencyCounter();
 		for(Comment comment : commentData)
@@ -63,6 +93,8 @@ public class StrippedIssue
 	 */
 	public boolean isViable()
 	{
+		if(title.size() + body.size() < 8)
+			System.out.println("Possible low quality/non-viable issue: " + number);
 		return !flaggedBad;
 	}
 
@@ -78,13 +110,58 @@ public class StrippedIssue
 	{
 		return body.getWeight(token);
 	}
+	
+	public FrequencyCounter getTitle()
+	{
+		return title;
+	}
+	
+	public FrequencyCounter getBody()
+	{
+		return body;
+	}
+	
+	public FrequencyCounter getComments()
+	{
+		return comments;
+	}
 
 	public Set<String> wordSet()
 	{
-		Set<String> tokens = new HashSet<String>(body.size()*2);
+		Set<String> tokens = new HashSet<String>(comments.getTokens());
 		tokens.addAll(title.getTokens());
 		tokens.addAll(body.getTokens());
-		tokens.addAll(comments.getTokens());
+		
 		return tokens;
+	}
+
+	public Set<Label> getLabels()
+	{
+		return labels;
+	}
+
+	public int getUserId()
+	{
+		return userId;
+	}
+
+	public Date getDateUpdated()
+	{
+		return dateUpdated;
+	}
+
+	public Date getDateCreated()
+	{
+		return dateCreated;
+	}
+
+	public boolean isClosed()
+	{
+		return closed;
+	}
+
+	public String getState()
+	{
+		return state;
 	}
 }
