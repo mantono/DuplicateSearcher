@@ -1,12 +1,10 @@
 package duplicatesearcher.retrieval;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.concurrent.TimeUnit;
-
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.GitHubRequest;
 import org.eclipse.egit.github.core.client.GitHubResponse;
@@ -20,6 +18,7 @@ public abstract class GitHubTask
 	private LocalDateTime rateResetTime;
 	private int consumedRequests = -1;
 	private float consumedRequestsSinceLastThrottle = 50;
+	private final DecimalFormat format = new DecimalFormat("#.####");
 
 	public GitHubTask(final GitHubClient client)
 	{
@@ -32,10 +31,10 @@ public abstract class GitHubTask
 		return client;
 	}
 
-	protected void printProgress(final String task, int current, int total)
+	protected void printProgress(int current, int total)
 	{
-		final float progress = current / (float) total;
-		System.out.println("Progress " + task + ": " + progress);
+		final float progress = (current / (float) total)*100;
+		System.out.print("\nProgress: " + format.format(progress)+ "% ");
 	}
 
 	protected int getConsumedRequests()
@@ -68,7 +67,7 @@ public abstract class GitHubTask
 		final long resetTimeParsed = Long.parseLong(resetTime);
 		rateResetTime = LocalDateTime.ofEpochSecond(resetTimeParsed, 0, ZoneOffset.ofHours(1));
 	}
-
+	
 	private void sleep(final long sleepTime)
 	{
 		try
@@ -96,12 +95,14 @@ public abstract class GitHubTask
 
 	protected void autoThrottle()
 	{
-		final double consumedRequestRate = getConsumedRequestsPercentrage();
 		final double delta = getDelta() + 1;
-		sleepTime = (int) (TICK_RATE * 2 * consumedRequestRate * delta);
-		System.out.println("Delta: " + delta);
-		System.out.println("Used " + consumedRequestRate * 100 + "% of hourly request quota.");
-		System.out.println("Thread will sleep for " + sleepTime + " milliseconds between each request.");
+		sleepTime = (int) (TICK_RATE * 2 * getConsumedRequestsPercentrage() * delta);
+	}
+	
+	protected void printStats()
+	{
+		System.out.print("| Consumed API requests: " + format.format(getConsumedRequestsPercentrage() * 100) + "% ");
+		System.out.print("| Sleep time between requests: " + sleepTime + " ms ");		
 	}
 
 	private double getDelta()
@@ -111,10 +112,6 @@ public abstract class GitHubTask
 		double timeBetweenEachRequest = elapsedTimeSinceLastThrottle / consumedRequestsSinceLastThrottle;
 		if(consumedRequests == -1)
 			timeBetweenEachRequest = 720;
-
-		System.out.println(consumedRequestsSinceLastThrottle + " requests done in "
-				+ elapsedTimeSinceLastThrottle / 1000.0 + " seconds.");
-		System.out.println("Averaging " + timeBetweenEachRequest + " milliseconds between each request.");
 
 		lastThrottleUpdate = LocalDateTime.now();
 		consumedRequests = getConsumedRequests();
