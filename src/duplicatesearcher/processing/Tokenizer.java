@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Tokenizer
-{
-	final String data;
+{ 
+	private final String data;
 	
 	public Tokenizer(final String input)
 	{
