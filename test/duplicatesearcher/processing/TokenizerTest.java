@@ -76,4 +76,17 @@ public class TokenizerTest
 
 		assertArrayEquals(expected, output);
 	}
+	
+	@Test
+	public void testIsToken()
+	{
+		assertTrue(Tokenizer.isToken("good"));
+		assertFalse(Tokenizer.isToken("this one has whitespace"));
+		assertFalse(Tokenizer.isToken(" "));
+		assertFalse(Tokenizer.isToken("*bad*"));
+		assertFalse(Tokenizer.isToken("_bad_"));
+		assertFalse(Tokenizer.isToken("_bad_"));
+		assertFalse(Tokenizer.isToken("bad."));
+		assertFalse(Tokenizer.isToken("BAD"));
+	}
 }
