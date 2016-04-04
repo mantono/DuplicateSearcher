@@ -26,6 +26,7 @@ public class InverseDocumentFrequencyCounter extends FrequencyCounter
 	@Override
 	public double getWeight(final String token)
 	{
-		return 1+ Math.log10(documents.size()/getTokenFrequency(token));
+		final double inverseFrequency = documents.size()/(double)getTokenFrequency(token);
+		return 1+ Math.log10(inverseFrequency);
 	}
 }
