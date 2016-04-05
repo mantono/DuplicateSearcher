@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.eclipse.egit.github.core.Issue;
-
 import duplicatesearcher.StrippedIssue;
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.FrequencyCounter;
@@ -36,7 +34,7 @@ public class Analyzer
 
 	private void addTokenData(StrippedIssue issue)
 	{
-		idfCounter.add(issue.getNumber(), issue.wordSet());
+		idfCounter.add(issue.getNumber(), issue.getAll().getTokens());
 	}
 
 	public boolean add(final StrippedIssue issue)
@@ -62,13 +60,13 @@ public class Analyzer
 	{
 		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
 
-		final Map<Token, Double> queryWeight = weightMap(issue);
+		final Map<Token, Double> queryWeight = weightMap(issue.getAll());
 
 		for(StrippedIssue issueInCollection : issues)
 		{
 			if(issue.getNumber() == issueInCollection.getNumber())
 				continue;
-			Map<Token, Double> issueWeight = weightMap(issueInCollection);
+			Map<Token, Double> issueWeight = weightMap(issueInCollection.getAll());
 			Map<Token, Double> queryNormalized = new HashMap<Token, Double>(queryWeight);
 
 			try
@@ -154,13 +152,13 @@ public class Analyzer
 		
 	}
 
-	private Map<Token, Double> weightMap(StrippedIssue issue)
+	private Map<Token, Double> weightMap(FrequencyCounter frequency)
 	{
-		final Set<Token> tokens = issue.wordSet();
+		final Set<Token> tokens = frequency.getTokens();
 		final Map<Token, Double> queryWeight = new HashMap<Token, Double>(tokens.size());
 		for(Token token : tokens)
 		{
-			final double tfWeight = issue.getWeight(token);
+			final double tfWeight = frequency.getWeight(token);
 			final double idfWeight = idfCounter.getWeight(token);
 			final double tfIdfWeight = tfWeight * idfWeight;
 			queryWeight.put(token, tfIdfWeight);
