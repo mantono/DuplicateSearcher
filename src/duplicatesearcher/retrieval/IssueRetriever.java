@@ -93,8 +93,6 @@ public class IssueRetriever extends GitHubTask
 
 	private Map<Issue, List<Comment>> downloadComments(List<Issue> issuesToProcess) throws IOException
 	{
-		final int first = issuesToProcess.get(0).getNumber();
-		final int last = issuesToProcess.get(issuesToProcess.size()-1).getNumber();
 		System.out.println("");
 		
 		final Map<Issue, List<Comment>> issues = new HashMap<Issue, List<Comment>>(150);
