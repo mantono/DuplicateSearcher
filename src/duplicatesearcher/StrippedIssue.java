@@ -180,4 +180,10 @@ public class StrippedIssue implements Serializable
 	{
 		return state;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "" + number;
+	}
 }
