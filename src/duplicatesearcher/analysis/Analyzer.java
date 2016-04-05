@@ -138,27 +138,20 @@ public class Analyzer
 		for(Entry<Token, Double> pair : queryToNormalize.entrySet())
 		{
 			double squared = Math.pow(pair.getValue(), 2);
-			queryToNormalize.put(pair.getKey(), squared);
 			sum += squared;
 		}
 
 		final double divider = Math.sqrt(sum);
-		double sumOfRoots = 0;
 
 		for(Entry<Token, Double> pair : queryToNormalize.entrySet())
 		{
 			double normalized = pair.getValue() / divider;
 			if(normalized == 0 || Double.isNaN(normalized))
-			{
 				queryToNormalize.put(pair.getKey(), 0.0);
-			}
 			else
-			{
 				queryToNormalize.put(pair.getKey(), normalized);
-				sumOfRoots += normalized;
-			}
 		}
-
+		
 	}
 
 	private Map<Token, Double> weightMap(StrippedIssue issue)
