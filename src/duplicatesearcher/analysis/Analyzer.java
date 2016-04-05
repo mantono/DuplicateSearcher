@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -60,96 +59,61 @@ public class Analyzer
 	{
 		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
 
-		final Map<Token, Double> queryWeight = weightMap(issue.getAll());
+		final Map<Token, Double> query = weightMap(issue.getAll());
+		Map<Token, Double> queryNormalized = new Normalizer(query).normalizeVector();
 
 		for(StrippedIssue issueInCollection : issues)
 		{
 			if(issue.getNumber() == issueInCollection.getNumber())
 				continue;
+			
 			Map<Token, Double> issueWeight = weightMap(issueInCollection.getAll());
-			Map<Token, Double> queryNormalized = new HashMap<Token, Double>(queryWeight);
+			issueWeight = new Normalizer(issueWeight).normalizeVector();
 
-			try
-			{
-				normalizeVector(queryNormalized);
-				normalizeVector(issueWeight);
-			}
-			catch(ArithmeticException exception)
-			{
-				System.out.println("Error on normalizing vectors for " + issue.getNumber() + " and "
-						+ issueInCollection.getNumber());
-				System.out.println(exception.getMessage());
-				continue;
-			}
-
-			Set<Token> union = new HashSet<Token>(queryWeight.keySet());
-			union.addAll(issueWeight.keySet());
-
-			double similarity = 0;
-			for(Token token : union)
-			{
-				double weight1, weight2;
-				weight1 = weight2 = 0;
-				if(queryNormalized.containsKey(token))
-					weight1 = queryNormalized.get(token);
-				if(issueWeight.containsKey(token))
-					weight2 = issueWeight.get(token);
-				similarity += weight1 * weight2;
-			}
+			final double similarity = vectorMultiplication(issueWeight, queryNormalized);
 
 			if(similarity >= threshold)
-			{
-				StrippedIssue master, duplicate;
-				if(issue.getNumber() < issueInCollection.getNumber())
-				{
-					master = issue;
-					duplicate = issueInCollection;
-				}
-				else
-				{
-					master = issueInCollection;
-					duplicate = issue;
-				}
-				try
-				{
-					duplicates.add(new Duplicate(duplicate, master, similarity));
-				}
-				catch(IllegalArgumentException exception)
-				{
-					System.out.println("\n" + exception.getMessage());
-					System.out.println("Master ID: " + master.getNumber());
-					System.out.println("Duplicate ID: " + duplicate.getNumber());
-					System.out.println("Cosine similarity: " + similarity);
-					System.out.println("\t" + issueWeight);
-					System.out.println("\t" + queryWeight);
-					System.exit(1);
-				}
-			}
+				createDuplicate(issue, issueInCollection, similarity, duplicates);
 		}
 
 		return duplicates;
 	}
 
-	private void normalizeVector(Map<Token, Double> queryToNormalize)
+	private double vectorMultiplication(Map<Token, Double> vector1, Map<Token, Double> vector2)
 	{
-		double sum = 0;
-		for(Entry<Token, Double> pair : queryToNormalize.entrySet())
+		double similarity = 0;
+		
+		Set<Token> union = new HashSet<Token>(vector1.keySet());
+		union.addAll(vector2.keySet());
+		
+		for(Token token : union)
 		{
-			double squared = Math.pow(pair.getValue(), 2);
-			sum += squared;
-		}
-
-		final double divider = Math.sqrt(sum);
-
-		for(Entry<Token, Double> pair : queryToNormalize.entrySet())
-		{
-			double normalized = pair.getValue() / divider;
-			if(normalized == 0 || Double.isNaN(normalized))
-				queryToNormalize.put(pair.getKey(), 0.0);
-			else
-				queryToNormalize.put(pair.getKey(), normalized);
+			double weight1, weight2;
+			weight1 = weight2 = 0;
+			if(vector1.containsKey(token))
+				weight1 = vector1.get(token);
+			if(vector2.containsKey(token))
+				weight2 = vector2.get(token);
+			similarity += weight1 * weight2;
 		}
 		
+		return similarity;
+	}
+
+	private void createDuplicate(StrippedIssue issue1, StrippedIssue issue2, double similarity, Set<Duplicate> duplicates)
+	{
+		StrippedIssue master, duplicate;
+		if(issue1.getNumber() < issue2.getNumber())
+		{
+			master = issue1;
+			duplicate = issue2;
+		}
+		else
+		{
+			master = issue2;
+			duplicate = issue1;
+		}
+		duplicates.add(new Duplicate(duplicate, master, similarity));
 	}
 
 	private Map<Token, Double> weightMap(FrequencyCounter frequency)

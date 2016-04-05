@@ -1,7 +1,5 @@
 package duplicatesearcher.analysis;
 
-import org.eclipse.egit.github.core.Issue;
-
 import duplicatesearcher.StrippedIssue;
 
 public class Duplicate implements Comparable<Duplicate>
