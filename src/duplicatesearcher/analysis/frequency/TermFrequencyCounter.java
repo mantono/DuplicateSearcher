@@ -85,6 +85,28 @@ public class TermFrequencyCounter implements FrequencyCounter
 		return addString(input);
 	}
 
+	public int add(final TermFrequencyCounter counter)
+	{
+		int increase = 0;
+		for (Map.Entry<Token, Integer> e : counter.frequency.entrySet())
+		{
+			if (!frequency.containsKey(e.getKey()))
+			{
+				frequency.put(e.getKey(), e.getValue());
+			}
+			else
+			{
+				Token token = e.getKey();
+				int freq = e.getValue();
+				int freqOld = frequency.get(token);
+				frequency.put(token, freq+freqOld);
+			}
+			increase += e.getValue();
+		}
+		
+		return increase;
+	}
+
 	@Override
 	public double getWeight(Token token)
 	{
