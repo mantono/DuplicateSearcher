@@ -8,12 +8,17 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import duplicatesearcher.Token;
+
 public class TermFrequencyCounterTest
 {
 	private TermFrequencyCounter tfc;
+	private final static Token ONE = new Token("one");
+	private final static Token TWO = new Token("two");
+	private final static Token THREE = new Token("three");
 
 	@Before
-	public void setUp() throws Exception
+	public void setUp()
 	{
 		tfc = new TermFrequencyCounter();
 		tfc.add("one two two three three three");
@@ -22,17 +27,17 @@ public class TermFrequencyCounterTest
 	@Test
 	public void testGetWeight()
 	{
-		assertEquals(1, tfc.getWeight("one"), 0.00001);
+		assertEquals(1, tfc.getWeight(ONE), 0.00001);
 		tfc.add("one");
-		assertEquals(1.693147180, tfc.getWeight("one"), 0.00001);
+		assertEquals(1.693147180, tfc.getWeight(ONE), 0.00001);
 		tfc.add("one");
-		assertEquals(2.098612288, tfc.getWeight("one"), 0.00001);
+		assertEquals(2.098612288, tfc.getWeight(ONE), 0.00001);
 	}
 	
 	@Test
 	public void testGetWeightWithZeroTokens()
 	{
-		assertEquals(0, tfc.getWeight("zero"), 0.00001);
+		assertEquals(0, tfc.getWeight(new Token("zero")), 0.00001);
 	}
 
 	@Test
@@ -46,19 +51,19 @@ public class TermFrequencyCounterTest
 	@Test
 	public void testGetTokenFrequency()
 	{
-		assertEquals(1, tfc.getTokenFrequency("one"));
-		assertEquals(2, tfc.getTokenFrequency("two"));
-		assertEquals(3, tfc.getTokenFrequency("three"));	
+		assertEquals(1, tfc.getTokenFrequency(ONE));
+		assertEquals(2, tfc.getTokenFrequency(TWO));
+		assertEquals(3, tfc.getTokenFrequency(THREE));	
 	}
 
 	@Test
 	public void testGetTokens()
 	{
-		Set<String> tokens = tfc.getTokens();
-		Set<String> expected = new HashSet<String>(6);
-		expected.add("one");
-		expected.add("two");
-		expected.add("three");
+		Set<Token> tokens = tfc.getTokens();
+		Set<Token> expected = new HashSet<Token>(6);
+		expected.add(ONE);
+		expected.add(TWO);
+		expected.add(THREE);
 		
 		assertEquals(expected, tokens);
 	}
@@ -80,30 +85,30 @@ public class TermFrequencyCounterTest
 	@Test
 	public void testRemove()
 	{
-		assertEquals(3, tfc.remove("three"));
-		assertEquals(0, tfc.getTokenFrequency("three"));
+		assertEquals(3, tfc.remove(THREE));
+		assertEquals(0, tfc.getTokenFrequency(new Token("three")));
 	}
 
 	@Test
 	public void testChange()
 	{
-		assertEquals(2, tfc.getTokenFrequency("two"));
-		assertTrue(tfc.change("two", "new"));
-		assertFalse(tfc.change("two", "new"));
-		assertEquals(0, tfc.getTokenFrequency("two"));
-		assertEquals(2, tfc.getTokenFrequency("new"));
+		assertEquals(2, tfc.getTokenFrequency(TWO));
+		assertTrue(tfc.change(TWO, new Token("new")));
+		assertFalse(tfc.change(TWO, new Token("new")));
+		assertEquals(0, tfc.getTokenFrequency(TWO));
+		assertEquals(2, tfc.getTokenFrequency(new Token("new")));
 	}
 
 	@Test
 	public void testIncrement()
 	{
-		assertEquals(2, tfc.increment("one"));
+		assertEquals(2, tfc.increment(ONE));
 	}
 	
 	@Test
 	public void testIncrementNewToken()
 	{
-		assertEquals(1, tfc.increment("newToken"));
+		assertEquals(1, tfc.increment(new Token("newtoken")));
 	}
 	
 	@Test
@@ -115,7 +120,7 @@ public class TermFrequencyCounterTest
 	@Test
 	public void testIncrementZeroLengthToken()
 	{
-		assertEquals(0, tfc.increment(""));
+		assertEquals(0, tfc.increment(new Token("")));
 	}
 
 }

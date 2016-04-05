@@ -106,7 +106,7 @@ public class StrippedIssue implements Serializable
 		return number;
 	}
 	
-	public double getWeight(final String token)
+	public double getWeight(final Token token)
 	{
 		return body.getWeight(token);
 	}
@@ -126,9 +126,9 @@ public class StrippedIssue implements Serializable
 		return comments;
 	}
 
-	public Set<String> wordSet()
+	public Set<Token> wordSet()
 	{
-		Set<String> tokens = new HashSet<String>(comments.getTokens());
+		Set<Token> tokens = new HashSet<Token>(body.size()*2);
 		tokens.addAll(title.getTokens());
 		tokens.addAll(body.getTokens());
 		
