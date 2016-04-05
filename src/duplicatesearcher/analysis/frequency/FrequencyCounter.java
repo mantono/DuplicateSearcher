@@ -1,6 +1,8 @@
 package duplicatesearcher.analysis.frequency;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import duplicatesearcher.Token;
 
@@ -12,4 +14,5 @@ public interface FrequencyCounter extends Serializable
 {	
 	int getTokenFrequency(final Token token);
 	double getWeight(final Token token);
+	Set<Token> getTokens();
 }

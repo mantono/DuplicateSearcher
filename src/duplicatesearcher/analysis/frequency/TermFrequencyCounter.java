@@ -1,6 +1,7 @@
 package duplicatesearcher.analysis.frequency;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ public class TermFrequencyCounter implements FrequencyCounter
 {
 	private final Map<Token, Integer> frequency = new HashMap<Token, Integer>();
 
+	@Override
 	public int getTokenFrequency(final Token token)
 	{
 		if(!frequency.containsKey(token))
@@ -19,9 +21,10 @@ public class TermFrequencyCounter implements FrequencyCounter
 		return frequency.get(token);
 	}
 
+	@Override
 	public Set<Token> getTokens()
 	{
-		return frequency.keySet();
+		return new HashSet<Token>(frequency.keySet());
 	}
 
 	public int size()

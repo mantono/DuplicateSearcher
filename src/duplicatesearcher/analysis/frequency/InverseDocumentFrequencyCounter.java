@@ -37,6 +37,12 @@ public class InverseDocumentFrequencyCounter implements FrequencyCounter
 		return 1 + Math.log10(inverseFrequency);
 	}
 	
+	@Override
+	public Set<Token> getTokens()
+	{
+		return new HashSet<Token>(frequency.keySet());
+	}
+	
 	/**
 	 * Add a {@link Token} to the counter.
 	 * @param id is the identifying number of the document from which the token belongs to.
