@@ -31,8 +31,6 @@ public class AnalyzerTest
 
 		HashSet<StrippedIssue> issues = new HashSet<StrippedIssue>(dataMap.size());
 		Iterator<Entry<Issue, List<Comment>>> iter = dataMap.entrySet().iterator();
-		int pulls = 0;
-		int noPulls = 0;
 
 		while(iter.hasNext())
 		{
@@ -45,8 +43,6 @@ public class AnalyzerTest
 				issues.add(createdIssue);
 
 		}
-
-		System.out.println(pulls + " / " + noPulls);
 
 		final Analyzer analyzer = new Analyzer(issues);
 		Set<Duplicate> result = analyzer.findDuplicates(0.1);
