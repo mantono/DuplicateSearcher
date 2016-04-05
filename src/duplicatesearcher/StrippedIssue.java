@@ -30,7 +30,7 @@ public class StrippedIssue implements Serializable
 	private final int number, userId;
 	private final Date dateCreated, dateUpdated;
 	private final Set<Label> labels;
-	private final TermFrequencyCounter title, body, comments;
+	private final TermFrequencyCounter all, title, body, comments;
 	private final boolean closed;
 	private final String state;
 	private boolean flaggedBad = false;
@@ -53,6 +53,11 @@ public class StrippedIssue implements Serializable
 		body.add(issue.getBody());
 		
 		this.comments = mapStrings(comments);
+		
+		this.all = new TermFrequencyCounter();
+		this.all.add(title);
+		this.all.add(body);
+		this.all.add(this.comments);
 	}
 	
 	public StrippedIssue(int number, int userId, Date created, Date updated, Set<Label> labels, String title, String body, Collection<Comment> comments, boolean closed, String state)
@@ -71,6 +76,11 @@ public class StrippedIssue implements Serializable
 		this.body = new TermFrequencyCounter();
 		this.body.add(body);
 		this.comments = mapStrings(comments);
+		
+		this.all = new TermFrequencyCounter();
+		this.all.add(title);
+		this.all.add(body);
+		this.all.add(this.comments);
 		
 		this.closed = closed;
 		this.state = state;
@@ -108,7 +118,12 @@ public class StrippedIssue implements Serializable
 	
 	public double getWeight(final Token token)
 	{
-		return body.getWeight(token);
+		return all.getWeight(token);
+	}
+	
+	public FrequencyCounter getAll()
+	{
+		return all;
 	}
 	
 	public FrequencyCounter getTitle()
@@ -126,6 +141,7 @@ public class StrippedIssue implements Serializable
 		return comments;
 	}
 
+	@Deprecated
 	public Set<Token> wordSet()
 	{
 		Set<Token> tokens = new HashSet<Token>(body.size()*2);
