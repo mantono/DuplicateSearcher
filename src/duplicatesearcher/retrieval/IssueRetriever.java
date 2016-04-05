@@ -66,7 +66,8 @@ public class IssueRetriever extends GitHubTask
 		final PageIterator<Issue> issuePages = service.pageIssues(repo.getOwner(), repo.getName(), filter);
 		while(issuePages.hasNext())
 		{
-			printProgress("downloading issues", issues.size(), issueCount);
+			printProgress(issues.size(), issueCount);
+			printStats();
 			
 			issuesToProcess.addAll(issuePages.next());
 			removePullRequests(issuesToProcess);
@@ -92,9 +93,7 @@ public class IssueRetriever extends GitHubTask
 
 	private Map<Issue, List<Comment>> downloadComments(List<Issue> issuesToProcess) throws IOException
 	{
-		final int first = issuesToProcess.get(0).getNumber();
-		final int last = issuesToProcess.get(issuesToProcess.size()-1).getNumber();
-		System.out.println("Downloading comments for issues " + first + " - " + last);
+		System.out.println("");
 		
 		final Map<Issue, List<Comment>> issues = new HashMap<Issue, List<Comment>>(150);
 		for(Issue issue : issuesToProcess)
@@ -107,6 +106,9 @@ public class IssueRetriever extends GitHubTask
 			
 			final int remainingRequests = getClient().getRemainingRequests();
 			
+			System.out.print(".");
+			if(iterations % 10 == 0)
+				System.out.print(" ");
 			sleep();
 
 		}

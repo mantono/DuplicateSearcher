@@ -45,7 +45,7 @@ public class DatasetFileManager
 		Object object = objectStream.readObject();
 		objectStream.close();
 		issueData = (Map<Issue, List<Comment>>) object;
-		System.out.println("Object loaded from  disk <-- " + fileName);
+		System.out.println("Object loaded from disk <-- " + fileName);
 	}
 
 	public void save() throws IOException
