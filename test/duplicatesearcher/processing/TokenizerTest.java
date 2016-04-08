@@ -52,7 +52,7 @@ public class TokenizerTest
 	public void testPurgeWithApostrophe()
 	{
 		final String input = "We're supposed to replace we're with we are.";
-		final String expected = "We are supposed to replace we are with we are.";
+		final String expected = "We are supposed to replace we are with we are";
 		
 		Tokenizer tokenizer = new Tokenizer("");
 		final String output = tokenizer.purge(input);
