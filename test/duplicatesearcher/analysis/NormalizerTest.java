@@ -8,8 +8,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sun.beans.WeakCache;
-
 import duplicatesearcher.Token;
 
 public class NormalizerTest
