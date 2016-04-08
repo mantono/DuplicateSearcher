@@ -41,6 +41,13 @@ public class TermFrequencyCounter implements FrequencyCounter
 	{
 		return frequency.remove(three);
 	}
+	
+	public int remove(final String token)
+	{
+		if(!Tokenizer.isToken(token))
+			return 0;
+		return remove(new Token(token));
+	}
 
 	public boolean change(final Token currentKey, final Token newKey)
 	{
