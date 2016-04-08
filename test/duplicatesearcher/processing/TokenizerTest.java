@@ -59,6 +59,54 @@ public class TokenizerTest
 		
 		assertEquals(expected, output);
 	}
+	
+	@Test
+	public void testPurgeWithHttpsUrl()
+	{
+		final String input = "Here is a link https://github.com/mantono/DuplicateSearcher that we want to be removed.";
+		final String expected = "Here is a link that we want to be removed";
+		
+		Tokenizer tokenizer = new Tokenizer("");
+		final String output = tokenizer.purge(input);
+		
+		assertEquals(expected, output);
+	}
+	
+	@Test
+	public void testPurgeWithHttpUrl()
+	{
+		final String input = "Here is a link http://github.com/mantono/DuplicateSearcher that we want to be removed.";
+		final String expected = "Here is a link that we want to be removed";
+		
+		Tokenizer tokenizer = new Tokenizer("");
+		final String output = tokenizer.purge(input);
+		
+		assertEquals(expected, output);
+	}
+	
+	@Test
+	public void testPurgeWithUrlAndDashes()
+	{
+		final String input = "Here is a link github.com/mantono/DuplicateSearcher that we want to be removed.";
+		final String expected = "Here is a link that we want to be removed";
+		
+		Tokenizer tokenizer = new Tokenizer("");
+		final String output = tokenizer.purge(input);
+		
+		assertEquals(expected, output);
+	}
+	
+	@Test
+	public void testPurgeWithUrl()
+	{
+		final String input = "Here is a link github.com that we want to be removed.";
+		final String expected = "Here is a link that we want to be removed";
+		
+		Tokenizer tokenizer = new Tokenizer("");
+		final String output = tokenizer.purge(input);
+		
+		assertEquals(expected, output);
+	}
 
 	@Test
 	public void testSplitRegularSentence()
