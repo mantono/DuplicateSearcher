@@ -127,7 +127,7 @@ public class ExperimentSetGenerator
 	{
 		duplicates = new HashSet<Issue>(allIssues.size() / 2);
 		Iterator<Entry<Issue, List<Comment>>> iter = allIssues.entrySet().iterator();
-		while (iter.hasNext())
+		while(iter.hasNext())
 		{
 			final Entry<Issue, List<Comment>> entry = iter.next();
 			final Issue issue = entry.getKey();
@@ -143,7 +143,7 @@ public class ExperimentSetGenerator
 		List<Label> labels = issue.getLabels();
 		
 		for(Label label : labels)
-			if(label.getName().equals("duplicate"))
+			if(label.getName().toLowerCase().equals("duplicate"))
 				return true;
 		
 		return false;
