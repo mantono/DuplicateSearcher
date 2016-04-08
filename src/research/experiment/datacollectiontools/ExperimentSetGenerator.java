@@ -26,6 +26,7 @@ public class ExperimentSetGenerator
 	private final RegexFinder duplicateParser;
 	private final Map<Issue, List<Comment>> allIssues;
 	private final Map<Integer, Issue> idIssueMap;
+	private final RepositoryId repo;
 	private Set<Issue> closedIssues, openIssues, nonDuplicates, duplicates, generatedCorpus;
 
 	public ExperimentSetGenerator(final RepositoryId repo, final Map<Issue, List<Comment>> issuesWithcomments)
@@ -33,6 +34,7 @@ public class ExperimentSetGenerator
 		this.duplicateParser = new RegexFinder(repo);
 		this.allIssues = issuesWithcomments;
 		this.idIssueMap = createIdIssueMap(allIssues.keySet());
+		this.repo = repo;
 	}
 
 	private Map<Integer, Issue> createIdIssueMap(Set<Issue> issues)
@@ -157,10 +159,11 @@ public class ExperimentSetGenerator
 		final float duplicateRatio = duplicates.size()/(float) allIssues.size();
 		
 		System.out.println("*** Corpus Statistics ***");
-		System.out.println("\tNon duplicate issues: " + nonDuplicates.size());
-		System.out.println("\tDuplicate issues: " + duplicates.size());
-		System.out.println("\tTotal amount of issues: " + allIssues.size());
-		System.out.println("\tDuplicate ratio: " + duplicateRatio*100 + "%");
+		System.out.println(" - " + repo.getOwner() + "/" + repo.getName());
+		System.out.println("  - Non duplicate issues: " + nonDuplicates.size());
+		System.out.println("  - Duplicate issues: " + duplicates.size());
+		System.out.println("  - Total amount of issues: " + allIssues.size());
+		System.out.println("  - Duplicate ratio: **" + duplicateRatio*100 + "%**");
 	}
 
 }
