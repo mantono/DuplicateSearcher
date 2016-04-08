@@ -140,15 +140,7 @@ public class StrippedIssue implements Serializable
 	{
 		return comments;
 	}
-
-	@Deprecated
-	public Set<Token> wordSet()
 	{
-		Set<Token> tokens = new HashSet<Token>(body.size()*2);
-		tokens.addAll(title.getTokens());
-		tokens.addAll(body.getTokens());
-		
-		return tokens;
 	}
 
 	public Set<Label> getLabels()
