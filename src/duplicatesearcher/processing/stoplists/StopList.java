@@ -35,7 +35,7 @@ public class StopList
 
 	/**
 	 * Removes all tokens that are present in the stop word list from the given input set.
-	 * @param input the {@link Set} that will from which stop words will be removed.
+	 * @param input the {@link Set} from which stop words will be removed.
 	 * @return the amount of words that were removed.
 	 */
 	public int removeStopWords(Set<Token> input)
