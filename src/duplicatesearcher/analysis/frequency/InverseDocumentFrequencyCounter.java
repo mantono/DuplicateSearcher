@@ -40,7 +40,7 @@ public class InverseDocumentFrequencyCounter implements FrequencyCounter
 	@Override
 	public Set<Token> getTokens()
 	{
-		return new HashSet<Token>(frequency.keySet());
+		return frequency.keySet();
 	}
 	
 	/**

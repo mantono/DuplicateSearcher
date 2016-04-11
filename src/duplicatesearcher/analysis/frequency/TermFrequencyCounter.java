@@ -24,7 +24,7 @@ public class TermFrequencyCounter implements FrequencyCounter
 	@Override
 	public Set<Token> getTokens()
 	{
-		return new HashSet<Token>(frequency.keySet());
+		return frequency.keySet();
 	}
 
 	public int size()
