@@ -3,12 +3,12 @@ package duplicatesearcher.processing.stoplists;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import duplicatesearcher.Token;
 import duplicatesearcher.processing.Tokenizer;
 
@@ -18,6 +18,8 @@ public class StopList
 
 	public StopList(final File stopListFile) throws IOException
 	{
+		if(!stopListFile.exists())
+			throw new NoSuchFileException("File " + stopListFile.getCanonicalPath() + " could not be found.");
 		readFileContent(stopListFile);
 	}
 
