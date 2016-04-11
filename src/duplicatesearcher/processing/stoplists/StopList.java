@@ -46,5 +46,14 @@ public class StopList
 		input.removeAll(stopWords);
 		return sizeBefore - input.size();
 	}
+	
+	/**
+	 * Retrieves the content of this stop list.
+	 * @return a set of tokens which consists of the current stop list.
+	 */
+	public Set<Token> getStopWords()
+	{
+		return stopWords;
+	}
 
 }
