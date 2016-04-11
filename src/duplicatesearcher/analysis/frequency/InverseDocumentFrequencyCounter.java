@@ -1,13 +1,11 @@
 package duplicatesearcher.analysis.frequency;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import duplicatesearcher.Token;
-import duplicatesearcher.processing.Tokenizer;
 
 /**
  * The {@link InverseDocumentFrequencyCounter} measures in how many documents a
