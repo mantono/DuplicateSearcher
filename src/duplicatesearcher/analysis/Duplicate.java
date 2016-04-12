@@ -11,7 +11,7 @@ public class Duplicate implements Comparable<Duplicate>
 	public Duplicate(final StrippedIssue duplicate, final StrippedIssue master,
 			final double similarity)
 	{
-		if (similarity > 1)
+		if (similarity > 1.00000001)
 			throw new IllegalArgumentException("Similarity cannot be greater than 1.0");
 		if (similarity < 0)
 			throw new IllegalArgumentException("Similarity cannot be negative");
