@@ -1,0 +1,2 @@
+The content in this folder comes from the ReqSimile project.
+Homepage: https://sourceforge.net/projects/reqsimile/
