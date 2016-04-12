@@ -24,9 +24,11 @@ public class IssueProcessor
 	{
 		this.flags = EnumSet.copyOf(Arrays.asList(flags));
 	}
-	
+
 	public StrippedIssue process(final Issue issue, final List<Comment> comments)
 	{
+		final String pullRequestError = "Pull requests should no longer exist in any data set. Remove this data set and download a new one.";
+		assert issue.getPullRequest().getHtmlUrl() == null: pullRequestError;
 		return process(new StrippedIssue(issue, comments));
 	}
 
