@@ -13,6 +13,8 @@ import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
 import org.junit.Test;
 
+import duplicatesearcher.IssueProcessor;
+import duplicatesearcher.ProcessingFlags;
 import duplicatesearcher.StrippedIssue;
 
 import research.experiment.datacollectiontools.DatasetFileManager;
@@ -32,13 +34,14 @@ public class AnalyzerTest
 		HashSet<StrippedIssue> issues = new HashSet<StrippedIssue>(dataMap.size());
 		Iterator<Entry<Issue, List<Comment>>> iter = dataMap.entrySet().iterator();
 
+		final IssueProcessor processor = new IssueProcessor(ProcessingFlags.PARSE_COMMENTS, ProcessingFlags.STOP_LIST_COMMON);
+		
 		while(iter.hasNext())
 		{
 			final Entry<Issue, List<Comment>> entry = iter.next();
-			final Issue issue = entry.getKey();
-			assert issue.getPullRequest().getHtmlUrl() == null: "Pull requests should no longer exist in any data set. Remove this data set and download a new one.";
 
-			final StrippedIssue createdIssue = new StrippedIssue(issue, entry.getValue());
+			StrippedIssue createdIssue = processor.process(entry.getKey(), entry.getValue());
+			
 			if(createdIssue.isViable())
 				issues.add(createdIssue);
 
