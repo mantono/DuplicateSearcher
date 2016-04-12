@@ -41,7 +41,7 @@ public class Analyzer
 		return issues.add(issue);
 	}
 
-	public Set<Duplicate> findDuplicates(final double threshold)
+	public SortedSet<Duplicate> findDuplicates(final double threshold)
 	{
 		if(threshold > 1)
 			throw new IllegalArgumentException("Threshold cannot be greater than 1.0");
@@ -55,7 +55,7 @@ public class Analyzer
 		return duplicates;
 	}
 
-	public Set<Duplicate> findDuplicates(final StrippedIssue issue, final double threshold)
+	public SortedSet<Duplicate> findDuplicates(final StrippedIssue issue, final double threshold)
 	{
 		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
 
