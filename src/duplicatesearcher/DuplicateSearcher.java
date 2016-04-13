@@ -37,33 +37,33 @@ public class DuplicateSearcher
 		this.issueData = fileManager.getDataset();
 		this.processedIssues = new HashSet<StrippedIssue>(issueData.size());
 	}
-	
-	public int processIssues()
+
+	public int processIssues() throws IOException
 	{
 		processedIssues.clear();
 		Iterator<Entry<Issue, List<Comment>>> iter = issueData.entrySet().iterator();
-		
+
 		while(iter.hasNext())
 		{
 			final Entry<Issue, List<Comment>> entry = iter.next();
 
 			StrippedIssue createdIssue = processor.process(entry.getKey(), entry.getValue());
-			
+
 			if(createdIssue.isViable())
 				processedIssues.add(createdIssue);
 
 		}
-		
+
 		return processedIssues.size();
 	}
-	
+
 	public int analyzeIssues(final double threshold)
 	{
 		analyzer = new Analyzer(processedIssues);
 		duplicates = analyzer.findDuplicates(threshold);
 		return duplicates.size();
 	}
-	
+
 	public SortedSet<Duplicate> getDuplicates()
 	{
 		return duplicates;
@@ -74,7 +74,7 @@ public class DuplicateSearcher
 		final LocalDateTime start = LocalDateTime.now();
 		
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
-		final IssueProcessor processor = new IssueProcessor(ProcessingFlags.PARSE_COMMENTS);
+		final IssueProcessor processor = new IssueProcessor(ProcessingFlags.PARSE_COMMENTS, ProcessingFlags.STOP_LIST_COMMON);
 		DuplicateSearcher searcher = new DuplicateSearcher(repo, processor);
 		searcher.processIssues();
 		searcher.analyzeIssues(0.5);
