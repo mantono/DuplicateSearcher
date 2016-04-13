@@ -64,7 +64,7 @@ public class Analyzer
 
 		for(StrippedIssue issueInCollection : issues)
 		{
-			if(issue.getNumber() == issueInCollection.getNumber())
+			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
 			
 			Map<Token, Double> issueWeight = weightMap(issueInCollection.getAll());
