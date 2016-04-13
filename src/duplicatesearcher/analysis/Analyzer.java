@@ -113,7 +113,17 @@ public class Analyzer
 			master = issue2;
 			duplicate = issue1;
 		}
-		duplicates.add(new Duplicate(duplicate, master, similarity));
+		
+		try
+		{
+			duplicates.add(new Duplicate(duplicate, master, similarity));
+		}
+		catch(IllegalArgumentException exception)
+		{
+			System.err.println("\n" + exception.getMessage());
+			System.err.println("\t" + duplicate.getNumber() + " --> " + master.getNumber());
+			System.err.println("\tSimilarity: " + similarity);
+		}
 	}
 
 	private Map<Token, Double> weightMap(FrequencyCounter frequency)
