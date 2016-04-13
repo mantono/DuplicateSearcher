@@ -75,6 +75,8 @@ public class DatasetFileManager
 
 	public Map<Issue, List<Comment>> getDataset()
 	{
+		if(issueData == null)
+			throw new IllegalStateException("It seems like you are trying to get the data before it has been loaded from disk. Invoke \"load()\" prior to this command.");
 		return issueData;
 	}
 
