@@ -33,3 +33,6 @@ lib
 
 # Downloaded data from GitHub
 datasets*
+
+# Ignore proper dictionary since it will be very large and probably a symlink
+dictionary/dict.txt
