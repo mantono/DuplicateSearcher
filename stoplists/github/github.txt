@@ -1,0 +1,12 @@
+git
+github
+commit
+issue
+issues
+dupe
+duplicate
+duplicates
+bug
+alpha
+beta
+release
