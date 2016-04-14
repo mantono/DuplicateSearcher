@@ -20,11 +20,13 @@ public class IssueProcessor
 	private final EnumSet<ProcessingFlags> flags;
 	
 	private final StopList stopListCommon;
+	private final StopList stopListGitHub;
 
 	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException
 	{
 		this.flags = flags;
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
+		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
 	}
 
 	public IssueProcessor(final ProcessingFlags... flags) throws IOException
@@ -50,7 +52,7 @@ public class IssueProcessor
 		if(run(ProcessingFlags.STOP_LIST_COMMON))
 			removeStopWords(stopListCommon, issue);
 		if(run(ProcessingFlags.STOP_LIST_GITHUB))
-			System.out.println(ProcessingFlags.STOP_LIST_GITHUB);
+			removeStopWords(stopListGitHub, issue);
 		if(run(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
 			System.out.println(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC);
 		if(run(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC))
