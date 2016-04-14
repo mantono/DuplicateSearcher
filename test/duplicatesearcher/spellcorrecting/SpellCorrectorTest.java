@@ -5,12 +5,15 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import duplicatesearcher.Token;
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 
 public class SpellCorrectorTest
@@ -42,17 +45,19 @@ public class SpellCorrectorTest
 	@Test
 	public void correctWordListTest()
 	{
-		List<Token> list = new ArrayList<Token>();
-		List<Token> expected = new ArrayList<Token>();
+		TermFrequencyCounter tokens = new TermFrequencyCounter();
+		Set<Token> expected = new HashSet<Token>();
 
-		list.add(new Token("hejs")); // hej
-		list.add(new Token("slanka")); // slank
-		list.add(new Token("gurkansa")); // of�r�ndrad
-		list.add(new Token("gurkan")); // gurka
-		list.add(new Token("regeringen"));// of�r�ndrad
-		list.add(new Token("issueprocessor"));// of�r�ndrad
+		tokens.add("hejs"); // hej
+		tokens.add("slanka"); // slank
+		tokens.add("gurkansa"); // oförändrad
+		tokens.add("gurkan"); // gurka
+		tokens.add("regeringen");// oförändrad
+		tokens.add("issueprocessor");// oförändrad
 
-		list = sc.correctWords(list);
+		final int changed = sc.process(tokens);
+		
+		assertEquals(3, changed);
 
 		expected.add(new Token("hej"));
 		expected.add(new Token("slank"));
@@ -61,8 +66,19 @@ public class SpellCorrectorTest
 		expected.add(new Token("regeringen"));
 		expected.add(new Token("issueprocessor"));
 
-		assertEquals(expected, list);
+		assertEquals(expected, tokens.getTokens());
 
+	}
+	
+	@Test
+	public void isMisspelledTest()
+	{
+		assertTrue(sc.isMisspelled(new Token("bla")));
+		assertTrue(sc.isMisspelled(new Token("felfelfel")));
+		assertTrue(sc.isMisspelled(new Token("")));
+		assertFalse(sc.isMisspelled(new Token("apelsin")));
+		assertFalse(sc.isMisspelled(new Token("gurka")));
+		assertFalse(sc.isMisspelled(new Token("slank")));
 	}
 
 	@Test

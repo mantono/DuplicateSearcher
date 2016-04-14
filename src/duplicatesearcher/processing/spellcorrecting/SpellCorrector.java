@@ -70,7 +70,7 @@ public class SpellCorrector implements TokenProcessor {
 	 * @return true if the input token is not correctly spelled,
 	 * else false.
 	 */
-	public boolean isMisspelled(final CharSequence token){
+	public boolean isMisspelled(final Token token){
 		return !dictionary.contains(token);
 	}
 	
