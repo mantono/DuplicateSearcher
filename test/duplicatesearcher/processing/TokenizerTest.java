@@ -152,6 +152,7 @@ public class TokenizerTest
 		assertFalse(Tokenizer.isToken("_bad_"));
 		assertFalse(Tokenizer.isToken("bad."));
 		assertFalse(Tokenizer.isToken("BAD"));
+		assertFalse(Tokenizer.isToken(null));
 	}
 	
 	@Test
