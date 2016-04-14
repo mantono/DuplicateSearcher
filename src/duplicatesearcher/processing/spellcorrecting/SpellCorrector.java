@@ -1,78 +1,58 @@
 package duplicatesearcher.processing.spellcorrecting;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
 public class SpellCorrector {
-	static LevenshteinDistance lev = new LevenshteinDistance();
-	static ArrayList<String> words = new ArrayList<String>();
-	static ArrayList<String> wordsToBeCorrected = new ArrayList<String>();
+	static LevenshteinDistance lev = new LevenshteinDistance(2); // Kan s�tta treshhold i SpellCorrectors kontruktor ist�llet? Kankse �r att f�redra?
+	static HashSet<String> words;
+	
+	public SpellCorrector(){
+		Path path = Paths.get("dictionary/dict.txt");
+		try {
+			List<String> dictionary = Files.readAllLines(path);
+			words = new HashSet<String>(dictionary);;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+	}
 	
 	public static List<String> correctWords(List<String> list){
 		ArrayList<String> correctedWords = new ArrayList<>();
 		
 		for(String word : list){
-			correctedWords.add(correctWord(word, words));
+			correctedWords.add(correctWord(word));
 		}
 		
 		return correctedWords;
 	}
 	
-	//Nu garanteras en returnerad sträng men det finns ingen "treshold", man kan använda sig av det i LevenShtein konstruktorn om det blir att föredra
-	public static String correctWord(String textSubject, List<String> words){
-		String tmp = "";
-		int distance;
+	public static String correctWord(String textSubject){
+		String tmp = textSubject;
+		int newDistance;
 		int closestDistance = 100; //fulfix går att lösa på snyggare vis!?
 		
 		for(String word : words){
-			distance = lev.apply(textSubject, word);
+			newDistance = lev.apply(textSubject, word);
 			
-			if(distance == 0)
+			if(newDistance == -1)
+				continue;
+			else if(newDistance == 0)
 				return textSubject;
-			else if(distance<closestDistance){
+			else if(newDistance<closestDistance){
 				tmp = word;
-				closestDistance = distance;
+				closestDistance = newDistance;
 			}
 		}
 		
 		return tmp;
-	}
-	
-	//Bara för denna simpla version del, ska ju använda ordboken egentligen samt JUnittester istället
-	public static void fillWords(){
-		words.add("hej");
-		words.add("tjena");
-		words.add("duplicate");
-		words.add("sverige");
-		words.add("kandidat");
-		words.add("troll");
-		words.add("boll");
-		words.add("television");
-		words.add("televisioner");
-		
-		wordsToBeCorrected.add("sverge");
-		wordsToBeCorrected.add("trllo");
-		wordsToBeCorrected.add("broll");
-		wordsToBeCorrected.add("kandat");
-		wordsToBeCorrected.add("duplicat");
-		wordsToBeCorrected.add("tjean");
-		wordsToBeCorrected.add("televisioneer");
-		wordsToBeCorrected.add("televisionen");
-		wordsToBeCorrected.add("tjen");
-		wordsToBeCorrected.add("hejsan");
-		
-	}
-	
-	public static void main(String[] args) {
-		fillWords();
-		System.out.println(wordsToBeCorrected);
-		
-		List<String> correctedWords = correctWords(wordsToBeCorrected);
-		System.out.println(correctedWords);
-		
-		
-		
-	}
-
+	}	
 }
