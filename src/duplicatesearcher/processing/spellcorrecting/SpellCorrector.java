@@ -1,46 +1,59 @@
 package duplicatesearcher.processing.spellcorrecting;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import duplicatesearcher.Token;
+import duplicatesearcher.processing.Tokenizer;
 
 
 public class SpellCorrector {
-	static LevenshteinDistance lev = new LevenshteinDistance(2); // Kan sätta treshhold i SpellCorrectors kontruktor istället? Kankse är att föredra?
-	static HashSet<String> words;
+	static LevenshteinDistance lev; 
+	static HashSet<Token> words;
 	
-	public SpellCorrector(){
-		Path path = Paths.get("dictionary/dict.txt");
-		try {
-			List<String> dictionary = Files.readAllLines(path);
-			words = new HashSet<String>(dictionary);;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
+	public SpellCorrector(final File dictionaryFile, int threshold) throws IOException {
+		lev = new LevenshteinDistance(threshold);
+		
+		if(!dictionaryFile.exists())
+			throw new NoSuchFileException("File " + dictionaryFile.getCanonicalPath() + " could not be found.");
+		readFileContent(dictionaryFile);
 	}
 	
-	public static List<String> correctWords(List<String> list){
-		ArrayList<String> correctedWords = new ArrayList<>();
+
+	private void readFileContent(File dictionaryFile) throws IOException
+	{
+		final Path path = Paths.get(dictionaryFile.toURI());
+		List<String> listLines = Files.readAllLines(path);
+		for(String line : listLines)
+		{
+			final Tokenizer tokenizer = new Tokenizer(line);
+			for(Token token : tokenizer.getTokens())
+				words.add(token);
+		}
+	}
+	
+	public static List<Token> correctWords(List<Token> list){
+		List<Token> correctedWords = new ArrayList<>();
 		
-		for(String word : list){
+		for(Token word : list){
 			correctedWords.add(correctWord(word));
 		}
 		
 		return correctedWords;
 	}
 	
-	public static String correctWord(String textSubject){
-		String tmp = textSubject;
+	public static Token correctWord(Token textSubject){
+		Token tmp = textSubject;
 		int newDistance;
 		int closestDistance = Integer.MAX_VALUE;
 		
-		for(String word : words){
+		for(Token word : words){
 			newDistance = lev.apply(textSubject, word);
 			
 			if(newDistance == -1)
