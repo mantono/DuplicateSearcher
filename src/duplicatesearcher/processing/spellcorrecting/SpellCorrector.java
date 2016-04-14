@@ -14,11 +14,11 @@ import duplicatesearcher.processing.Tokenizer;
 
 
 public class SpellCorrector {
-	static LevenshteinDistance lev; 
-	static HashSet<Token> words;
+	private final LevenshteinDistance lev;
+	private final HashSet<Token> dictionary;
 	
 	public SpellCorrector(final File dictionaryFile, int threshold) throws IOException {
-		lev = new LevenshteinDistance(threshold);
+		this.lev = new LevenshteinDistance(threshold);
 		
 		if(!dictionaryFile.exists())
 			throw new NoSuchFileException("File " + dictionaryFile.getCanonicalPath() + " could not be found.");
@@ -34,11 +34,11 @@ public class SpellCorrector {
 		{
 			final Tokenizer tokenizer = new Tokenizer(line);
 			for(Token token : tokenizer.getTokens())
-				words.add(token);
+				dictionary.add(token);
 		}
 	}
 	
-	public static List<Token> correctWords(List<Token> list){
+	public List<Token> correctWords(List<Token> list){
 		List<Token> correctedWords = new ArrayList<>();
 		
 		for(Token word : list){
@@ -48,12 +48,12 @@ public class SpellCorrector {
 		return correctedWords;
 	}
 	
-	public static Token correctWord(Token textSubject){
+	public Token correctWord(Token textSubject){
 		Token tmp = textSubject;
 		int newDistance;
 		int closestDistance = Integer.MAX_VALUE;
 		
-		for(Token word : words){
+		for(Token word : dictionary){
 			newDistance = lev.apply(textSubject, word);
 			
 			if(newDistance == -1)
