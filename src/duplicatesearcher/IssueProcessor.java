@@ -48,7 +48,10 @@ public class IssueProcessor
 	{
 		final String pullRequestError = "Pull requests should no longer exist in any data set. Remove this data set and download a new one.";
 		assert issue.getPullRequest().getHtmlUrl() == null: pullRequestError;
-		return process(new StrippedIssue(issue, comments));
+		StrippedIssue strippedIssue = new StrippedIssue(issue, comments); 
+		strippedIssue = process(strippedIssue);
+		strippedIssue.createFrequencyCounterForAll();
+		return strippedIssue;
 	}
 
 	public StrippedIssue process(final StrippedIssue issue) throws IOException
@@ -56,7 +59,7 @@ public class IssueProcessor
 		if(!run(ProcessingFlags.PARSE_COMMENTS))
 			issue.removeComments();
 		if(run(ProcessingFlags.SPELL_CORRECTION))
-			System.out.println(ProcessingFlags.SPELL_CORRECTION);
+			spellCorrection(issue);
 		if(run(ProcessingFlags.STOP_LIST_COMMON))
 			removeStopWords(stopListCommon, issue);
 		if(run(ProcessingFlags.STOP_LIST_GITHUB))
@@ -75,13 +78,18 @@ public class IssueProcessor
 		return issue;
 	}
 
+	private void spellCorrection(StrippedIssue issue)
+	{
+		spell.process(issue.getTitle());
+		spell.process(issue.getBody());
+		spell.process(issue.getComments());
+	}
+
 	private void stem(StrippedIssue issue)
 	{
 		stem(issue.getTitle());
 		stem(issue.getBody());
-		if(run(ProcessingFlags.PARSE_COMMENTS))
-			stem(issue.getComments());
-		stem(issue.getAll());
+		stem(issue.getComments());
 	}
 
 	private void stem(TermFrequencyCounter counter)
@@ -103,9 +111,7 @@ public class IssueProcessor
 	{
 		stopList.removeStopWords(issue.getTitle().getTokens());
 		stopList.removeStopWords(issue.getBody().getTokens());
-		if(run(ProcessingFlags.PARSE_COMMENTS))
-			stopList.removeStopWords(issue.getComments().getTokens());
-		stopList.removeStopWords(issue.getAll().getTokens());
+		stopList.removeStopWords(issue.getComments().getTokens());
 	}
 
 	private boolean run(ProcessingFlags flag)
