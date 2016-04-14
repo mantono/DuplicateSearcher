@@ -57,8 +57,6 @@ public class IssueProcessor
 			issue.removeComments();
 		if(run(ProcessingFlags.SPELL_CORRECTION))
 			System.out.println(ProcessingFlags.SPELL_CORRECTION);
-		if(run(ProcessingFlags.STEMMING))
-			stem(issue);
 		if(run(ProcessingFlags.STOP_LIST_COMMON))
 			removeStopWords(stopListCommon, issue);
 		if(run(ProcessingFlags.STOP_LIST_GITHUB))
@@ -69,6 +67,8 @@ public class IssueProcessor
 			System.out.println(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC);
 		if(run(ProcessingFlags.SYNONYMS))
 			System.out.println(ProcessingFlags.SYNONYMS);
+		if(run(ProcessingFlags.STEMMING))
+			stem(issue);
 		if(run(ProcessingFlags.FILTER_BAD))
 			System.out.println(ProcessingFlags.FILTER_BAD);
 
