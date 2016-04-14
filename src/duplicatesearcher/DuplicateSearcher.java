@@ -76,6 +76,7 @@ public class DuplicateSearcher
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
 		final IssueProcessor processor = new IssueProcessor(
 				ProcessingFlags.PARSE_COMMENTS,
+				ProcessingFlags.SPELL_CORRECTION,
 				ProcessingFlags.STOP_LIST_COMMON,
 				ProcessingFlags.STOP_LIST_GITHUB,
 				ProcessingFlags.STEMMING
