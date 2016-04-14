@@ -37,6 +37,7 @@ public class SpellCorrectorTest {
 	
 	@Test
 	public void correctWordListTest(){
+<<<<<<< HEAD
 		List<Token> list = new ArrayList<Token>();
 		List<Token> listTest = new ArrayList<Token>();
 		
@@ -55,8 +56,28 @@ public class SpellCorrectorTest {
 		listTest.add(new Token("gurka"));
 		listTest.add(new Token("regeringen"));
 		listTest.add(new Token("issueprocessor"));
+=======
+		List<String> list = new ArrayList<String>();
+		List<String> expected = new ArrayList<String>();
 		
-		assertEquals(list, listTest);
+		list.add("hejs"); //hej
+		list.add("slanka"); //slank
+		list.add("gurkansa"); //oförändrad
+		list.add("gurkan"); //gurka
+		list.add("regeringen");//oförändrad
+		list.add("issueprocessor");//oförändrad
+		
+		list = sc.correctWords(list);
+		
+		expected.add("hej");
+		expected.add("slank");
+		expected.add("gurkansa");
+		expected.add("gurka");
+		expected.add("regeringen");
+		expected.add("issueprocessor");
+>>>>>>> origin/master
+		
+		assertEquals(expected, list);
 		
 	}
 	
