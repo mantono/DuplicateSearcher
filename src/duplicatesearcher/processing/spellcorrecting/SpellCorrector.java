@@ -46,7 +46,19 @@ public class SpellCorrector {
 			correctedWords.add(correctWord(word));
 		}
 		
-		return correctedWords;
+		return spellCorrections;
+	}
+	
+	/**
+	 * Check if a {@link CharSequence} is misspelled.
+	 * It is considered correctly spelled if it exists in this
+	 * instance's dictionary.
+	 * @param token the input that will be checked.
+	 * @return true if the input token is not correctly spelled,
+	 * else false.
+	 */
+	public boolean isMisspelled(final CharSequence token){
+		return !dictionary.contains(token);
 	}
 	
 	public Token correctWord(Token textSubject){
