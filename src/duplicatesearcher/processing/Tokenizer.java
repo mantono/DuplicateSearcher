@@ -8,6 +8,7 @@ public class Tokenizer
 {
 	private final static String UNWANTED = "([\\W_A-Z])";
 	private final static String REPLACE = "[\\W_]";
+	private final static String EMOJI = "\\:\\S+\\:";
 	private final String data;
 	
 	public Tokenizer(final String input)
@@ -24,9 +25,15 @@ public class Tokenizer
 
 	public String[] tokenize(String input)
 	{
+		input = removeEmojis(input);
 		input = purge(input);
 		input = input.toLowerCase();
 		return split(input);
+	}
+
+	public String removeEmojis(String input)
+	{
+		return input.replaceAll(EMOJI, " ");
 	}
 
 	private Token[] createTokens(String[] strings)

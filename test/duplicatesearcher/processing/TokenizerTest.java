@@ -153,4 +153,14 @@ public class TokenizerTest
 		assertFalse(Tokenizer.isToken("bad."));
 		assertFalse(Tokenizer.isToken("BAD"));
 	}
+	
+	@Test
+	public void testRemoveEmojis()
+	{
+		final String input = ":8ball: keep this :+1: :-1: :100: :and this:";
+		final String expected = "  keep this       :and this:";
+		Tokenizer tokenizer = new Tokenizer(input);
+		final String output = tokenizer.removeEmojis(input);
+		assertEquals(expected, output);
+	}
 }
