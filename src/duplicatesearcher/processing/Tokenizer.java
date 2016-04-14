@@ -57,6 +57,8 @@ public class Tokenizer
 	
 	public static boolean isToken(final String input)
 	{
+		if(input == null)
+			return false;
 		Pattern pattern = Pattern.compile(UNWANTED);
 		return !pattern.matcher(input).find();
 	}
