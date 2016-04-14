@@ -6,14 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import duplicatesearcher.Token;
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.processing.TokenProcessor;
 import duplicatesearcher.processing.Tokenizer;
 
 
-public class SpellCorrector {
+public class SpellCorrector implements TokenProcessor {
 	private final LevenshteinDistance lev;
 	private final HashSet<Token> dictionary;
 	
@@ -39,11 +42,21 @@ public class SpellCorrector {
 		}
 	}
 	
-	public List<Token> correctWords(List<Token> list){
-		List<Token> correctedWords = new ArrayList<>();
+	@Override
+	public int process(final TermFrequencyCounter tokens){
+		Set<Token> issueTokensCopy = new HashSet<Token>(tokens.getTokens());
+		int spellCorrections = 0;
 		
-		for(Token word : list){
-			correctedWords.add(correctWord(word));
+		for(Token token : issueTokensCopy)
+		{
+			if(!isMisspelled(token))
+				continue;
+			Token tokenSpellCorrected = correctWord(token);
+			if(!token.equals(tokenSpellCorrected))
+			{
+				tokens.change(token, tokenSpellCorrected);
+				spellCorrections++;
+			}
 		}
 		
 		return spellCorrections;
