@@ -38,7 +38,7 @@ public class SpellCorrector {
 	public static String correctWord(String textSubject){
 		String tmp = textSubject;
 		int newDistance;
-		int closestDistance = 100; //fulfix går att lösa på snyggare vis!?
+		int closestDistance = Integer.MAX_VALUE;
 		
 		for(String word : words){
 			newDistance = lev.apply(textSubject, word);
