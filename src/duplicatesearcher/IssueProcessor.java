@@ -11,6 +11,7 @@ import org.eclipse.egit.github.core.Issue;
 
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.Stemmer;
+import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
 
 /**
@@ -25,12 +26,14 @@ public class IssueProcessor
 	private final StopList stopListCommon;
 	private final StopList stopListGitHub;
 	private final Stemmer stemmer = new Stemmer();
+	private final SpellCorrector spell;
 
 	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException
 	{
 		this.flags = flags;
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
+		this.spell = new SpellCorrector(new File("dictionary/dict.txt"), 2);
 	}
 
 	public IssueProcessor(final ProcessingFlags... flags) throws IOException
