@@ -145,22 +145,22 @@ public class StrippedIssue implements Serializable
 		return all.getWeight(token);
 	}
 	
-	public FrequencyCounter getAll()
+	public TermFrequencyCounter getAll()
 	{
 		return all;
 	}
 	
-	public FrequencyCounter getTitle()
+	public TermFrequencyCounter getTitle()
 	{
 		return title;
 	}
 	
-	public FrequencyCounter getBody()
+	public TermFrequencyCounter getBody()
 	{
 		return body;
 	}
 	
-	public FrequencyCounter getComments()
+	public TermFrequencyCounter getComments()
 	{
 		return comments;
 	}
