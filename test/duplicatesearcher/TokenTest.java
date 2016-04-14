@@ -37,5 +37,23 @@ public class TokenTest
 		assertTrue(ONE.equals(new Token("one")));
 		assertFalse(ONE.equals(TWO));
 	}
+	
+	@Test
+	public void testEqualsWithString()
+	{
+		final String string = "test";
+		final Token token = new Token("test");
+		assertTrue(token.equals(string));
+		assertEquals(string.hashCode(), token.hashCode());
+	}
+	
+	@Test
+	public void testEqualsWithCharSequence()
+	{
+		final String string = "test";
+		final CharSequence token = new Token("test");
+		assertTrue(token.equals(string));
+		assertEquals(string.hashCode(), token.hashCode());
+	}
 
 }
