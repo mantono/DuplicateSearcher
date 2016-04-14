@@ -1,8 +1,7 @@
 package duplicatesearcher.processing;
 
-import java.util.Set;
-
-import duplicatesearcher.StrippedIssue;
+import duplicatesearcher.Token;
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 
 /**
  * An interface for each component in the artifact that manipulates content in
@@ -12,9 +11,10 @@ import duplicatesearcher.StrippedIssue;
 public interface TokenProcessor
 {
 	/**
-	 * Retrieves the input data in its processed form.
 	 * 
-	 * @return a set of {@link String} elements after they have been processed.
+	 * @param tokens a {@link TermFrequencyCounter} containing instances of
+	 * {@link Token} which will be modified.
+	 * @return the number of elements that were modified.
 	 */
-	StrippedIssue process(final StrippedIssue input);
+	int process(final TermFrequencyCounter tokens);
 }
