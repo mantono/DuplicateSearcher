@@ -14,7 +14,7 @@ import duplicatesearcher.processing.Stemmer;
 import duplicatesearcher.processing.stoplists.StopList;
 
 /**
- * Issue is controls and interacts with all other major components used for
+ * IssueProcessor controls and interacts with all other major components used for
  * parsing and manipulating issues.
  *
  */
