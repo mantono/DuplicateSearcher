@@ -20,7 +20,7 @@ public class SpellCorrectorTest
 	@Before
 	public void setUp() throws IOException
 	{
-		sc = new SpellCorrector(new File("dictionary/dict.txt"), 2);
+		sc = new SpellCorrector(new File("dictionary/test.txt"), 2);
 	}
 
 	@Test
