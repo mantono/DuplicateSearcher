@@ -72,13 +72,18 @@ public class DuplicateSearcher
 	public static void main(String[] args) throws ClassNotFoundException, IOException
 	{
 		final LocalDateTime start = LocalDateTime.now();
-		
+
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
-		final IssueProcessor processor = new IssueProcessor(ProcessingFlags.PARSE_COMMENTS, ProcessingFlags.STOP_LIST_COMMON);
+		final IssueProcessor processor = new IssueProcessor(
+				ProcessingFlags.PARSE_COMMENTS,
+				ProcessingFlags.STOP_LIST_COMMON,
+				ProcessingFlags.STOP_LIST_GITHUB,
+				ProcessingFlags.STEMMING
+				);
 		DuplicateSearcher searcher = new DuplicateSearcher(repo, processor);
 		searcher.processIssues();
-		searcher.analyzeIssues(0.5);
-		
+		searcher.analyzeIssues(0.4);
+
 		final LocalDateTime end = LocalDateTime.now();
 		System.out.println(searcher.getDuplicates());
 		final Duration elpasedTime = Duration.between(start, end);
