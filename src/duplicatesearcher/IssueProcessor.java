@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
@@ -80,8 +83,11 @@ public class IssueProcessor
 
 	private void stem(TermFrequencyCounter counter)
 	{
-		for(Token token : counter.getTokens())
+		Set<Token> issueTokensCopy = new HashSet<Token>(counter.getTokens());
+		Iterator<Token> tokens = issueTokensCopy.iterator();
+		while(tokens.hasNext())
 		{
+			final Token token = tokens.next();
 			stemmer.setCurrentToken(token);
 			stemmer.stem();
 			final Token stemmedToken = stemmer.getCurrentToken();
