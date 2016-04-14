@@ -53,11 +53,6 @@ public class StrippedIssue implements Serializable
 		body.add(issue.getBody());
 		
 		this.comments = mapStrings(comments);
-		
-		this.all = new TermFrequencyCounter();
-		this.all.add(title);
-		this.all.add(body);
-		this.all.add(this.comments);
 	}
 	
 	public StrippedIssue(final Issue issue)
@@ -78,10 +73,6 @@ public class StrippedIssue implements Serializable
 		body.add(issue.getBody());
 		
 		this.comments = new TermFrequencyCounter();
-		
-		this.all = new TermFrequencyCounter();
-		this.all.add(title);
-		this.all.add(body);
 	}
 	
 	public StrippedIssue(int number, int userId, Date created, Date updated, Set<Label> labels, String title, String body, Collection<Comment> comments, boolean closed, String state)
@@ -100,11 +91,6 @@ public class StrippedIssue implements Serializable
 		this.body = new TermFrequencyCounter();
 		this.body.add(body);
 		this.comments = mapStrings(comments);
-		
-		this.all = new TermFrequencyCounter();
-		this.all.add(title);
-		this.all.add(body);
-		this.all.add(this.comments);
 		
 		this.closed = closed;
 		this.state = state;
@@ -168,9 +154,20 @@ public class StrippedIssue implements Serializable
 	public void removeComments()
 	{
 		comments = new TermFrequencyCounter();
+		if(all != null && all.size() > 0)
+		{
+			all = new TermFrequencyCounter();
+			all.add(title);
+			all.add(body);
+		}
+	}
+	
+	public void createFrequencyCounterForAll()
+	{
 		all = new TermFrequencyCounter();
 		all.add(title);
 		all.add(body);
+		all.add(this.comments);
 	}
 
 	public Set<Label> getLabels()
