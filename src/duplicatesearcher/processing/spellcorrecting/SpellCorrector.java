@@ -19,6 +19,7 @@ public class SpellCorrector {
 	
 	public SpellCorrector(final File dictionaryFile, int threshold) throws IOException {
 		this.lev = new LevenshteinDistance(threshold);
+		this.dictionary = new HashSet<Token>();
 		
 		if(!dictionaryFile.exists())
 			throw new NoSuchFileException("File " + dictionaryFile.getCanonicalPath() + " could not be found.");
