@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.processing.Stemmer;
 import duplicatesearcher.processing.stoplists.StopList;
 
 /**
@@ -21,6 +24,7 @@ public class IssueProcessor
 	
 	private final StopList stopListCommon;
 	private final StopList stopListGitHub;
+	private final Stemmer stemmer = new Stemmer();
 
 	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException
 	{
@@ -48,7 +52,7 @@ public class IssueProcessor
 		if(run(ProcessingFlags.SPELL_CORRECTION))
 			System.out.println(ProcessingFlags.SPELL_CORRECTION);
 		if(run(ProcessingFlags.STEMMING))
-			System.out.println(ProcessingFlags.STEMMING);
+			stem(issue);
 		if(run(ProcessingFlags.STOP_LIST_COMMON))
 			removeStopWords(stopListCommon, issue);
 		if(run(ProcessingFlags.STOP_LIST_GITHUB))
@@ -63,6 +67,27 @@ public class IssueProcessor
 			System.out.println(ProcessingFlags.FILTER_BAD);
 
 		return issue;
+	}
+
+	private void stem(StrippedIssue issue)
+	{
+		stem(issue.getTitle());
+		stem(issue.getBody());
+		if(run(ProcessingFlags.PARSE_COMMENTS))
+			stem(issue.getComments());
+		stem(issue.getAll());
+	}
+
+	private void stem(TermFrequencyCounter counter)
+	{
+		for(Token token : counter.getTokens())
+		{
+			stemmer.setCurrentToken(token);
+			stemmer.stem();
+			final Token stemmedToken = stemmer.getCurrentToken();
+			if(!token.equals(stemmedToken))
+				counter.change(token, stemmedToken);
+		}
 	}
 
 	private void removeStopWords(StopList stopList, StrippedIssue issue) throws IOException
