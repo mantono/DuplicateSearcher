@@ -14,6 +14,7 @@ public class Tokenizer
 	private final static String LL_SUFFIX = "'ll";
 	private final static String APOSTROPHE = "'";
 	private final static String URL = "http[s]?://[\\w+\\.]+\\w{2,}[/\\w]*";
+	private final static String DOMAIN = "\\b[\\w+.]*\\w+\\.\\w{2,}[/\\w]*";
 	private final String data;
 	
 	public Tokenizer(final String input)
@@ -40,7 +41,9 @@ public class Tokenizer
 
 	public String removeURLs(String input)
 	{
-		return input.replaceAll(URL, "");
+		input = input.replaceAll(URL, "");
+		input = input.replaceAll(DOMAIN, "");
+		return input;
 	}
 
 	public String removeApostrophes(String input)
