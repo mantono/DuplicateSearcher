@@ -49,7 +49,7 @@ public class TokenizerTest
 	}
 	
 	@Test
-	public void testPurgeWithApostrophe()
+	public void testRemoveApostrophe()
 	{
 		final String input = "We're and we'll, because it's our destiny. Shouldn't it be?";
 		final String expected = "We are and we will, because it our destiny. Shouldnt it be?";
@@ -61,49 +61,49 @@ public class TokenizerTest
 	}
 	
 	@Test
-	public void testPurgeWithHttpsUrl()
+	public void testRemoveURLsWithHttpsUrl()
 	{
 		final String input = "Here is a link https://github.com/mantono/DuplicateSearcher that we want to be removed.";
-		final String expected = "Here is a link that we want to be removed";
+		final String expected = "Here is a link  that we want to be removed.";
 		
 		Tokenizer tokenizer = new Tokenizer("");
-		final String output = tokenizer.purge(input);
+		final String output = tokenizer.removeURLs(input);
 		
 		assertEquals(expected, output);
 	}
 	
 	@Test
-	public void testPurgeWithHttpUrl()
+	public void testRemoveURLsWithHttpUrl()
 	{
 		final String input = "Here is a link http://github.com/mantono/DuplicateSearcher that we want to be removed.";
-		final String expected = "Here is a link that we want to be removed";
+		final String expected = "Here is a link  that we want to be removed.";
 		
 		Tokenizer tokenizer = new Tokenizer("");
-		final String output = tokenizer.purge(input);
+		final String output = tokenizer.removeURLs(input);
 		
 		assertEquals(expected, output);
 	}
 	
 	@Test
-	public void testPurgeWithUrlAndDashes()
+	public void testRemoveURLsWithUrlAndDashes()
 	{
 		final String input = "Here is a link github.com/mantono/DuplicateSearcher that we want to be removed.";
-		final String expected = "Here is a link that we want to be removed";
+		final String expected = "Here is a link  that we want to be removed.";
 		
 		Tokenizer tokenizer = new Tokenizer("");
-		final String output = tokenizer.purge(input);
+		final String output = tokenizer.removeURLs(input);
 		
 		assertEquals(expected, output);
 	}
 	
 	@Test
-	public void testPurgeWithUrl()
+	public void testRemoveURLsWithDomainName()
 	{
 		final String input = "Here is a link github.com that we want to be removed.";
-		final String expected = "Here is a link that we want to be removed";
+		final String expected = "Here is a link  that we want to be removed.";
 		
 		Tokenizer tokenizer = new Tokenizer("");
-		final String output = tokenizer.purge(input);
+		final String output = tokenizer.removeURLs(input);
 		
 		assertEquals(expected, output);
 	}

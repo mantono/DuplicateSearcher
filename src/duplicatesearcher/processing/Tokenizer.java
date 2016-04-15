@@ -13,6 +13,7 @@ public class Tokenizer
 	private final static String S_SUFFIX = "'s";
 	private final static String LL_SUFFIX = "'ll";
 	private final static String APOSTROPHE = "'";
+	private final static String URL = "http[s]?://[\\w+\\.]+\\w{2,}[/\\w]*";
 	private final String data;
 	
 	public Tokenizer(final String input)
@@ -30,10 +31,16 @@ public class Tokenizer
 	public String[] tokenize(String input)
 	{
 		input = input.toLowerCase();
+		input = removeURLs(input);
 		input = removeApostrophes(input);
 		input = removeEmojis(input);
 		input = purge(input);
 		return split(input);
+	}
+
+	public String removeURLs(String input)
+	{
+		return input.replaceAll(URL, "");
 	}
 
 	public String removeApostrophes(String input)
