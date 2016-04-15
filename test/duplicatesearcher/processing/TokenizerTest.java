@@ -51,11 +51,11 @@ public class TokenizerTest
 	@Test
 	public void testPurgeWithApostrophe()
 	{
-		final String input = "We're supposed to replace we're with we are.";
-		final String expected = "We are supposed to replace we are with we are";
+		final String input = "We're and we'll, because it's our destiny. Shouldn't it be?";
+		final String expected = "We are and we will, because it our destiny. Shouldnt it be?";
 		
 		Tokenizer tokenizer = new Tokenizer("");
-		final String output = tokenizer.purge(input);
+		final String output = tokenizer.removeApostrophes(input);
 		
 		assertEquals(expected, output);
 	}

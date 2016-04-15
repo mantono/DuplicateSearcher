@@ -9,6 +9,10 @@ public class Tokenizer
 	private final static String UNWANTED = "([\\W_A-Z])";
 	private final static String REPLACE = "[\\W_]";
 	private final static String EMOJI = "\\:\\S+\\:";
+	private final static String RE_SUFFIX = "'re";
+	private final static String S_SUFFIX = "'s";
+	private final static String LL_SUFFIX = "'ll";
+	private final static String APOSTROPHE = "'";
 	private final String data;
 	
 	public Tokenizer(final String input)
@@ -25,10 +29,20 @@ public class Tokenizer
 
 	public String[] tokenize(String input)
 	{
+		input = input.toLowerCase();
+		input = removeApostrophes(input);
 		input = removeEmojis(input);
 		input = purge(input);
-		input = input.toLowerCase();
 		return split(input);
+	}
+
+	public String removeApostrophes(String input)
+	{
+		input = input.replaceAll(RE_SUFFIX, " are");
+		input = input.replaceAll(S_SUFFIX, "");
+		input = input.replaceAll(LL_SUFFIX, " will");
+		input = input.replaceAll(APOSTROPHE, "");
+		return input;
 	}
 
 	public String removeEmojis(String input)
