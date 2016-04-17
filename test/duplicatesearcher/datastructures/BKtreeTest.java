@@ -3,6 +3,7 @@ package duplicatesearcher.datastructures;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,25 +20,9 @@ public class BKtreeTest
 	{
 		this.tree = new BKtree("test");
 		tree.insert("a");
-		tree.insert("a");
-	}
-
-	@Test
-	public void testHashCode()
-	{
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testBKtreeCharSequence()
-	{
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testBKtreeCharSequenceInt()
-	{
-		fail("Not yet implemented");
+		tree.insert("ab");
+		tree.insert("abc");
+		tree.insert("xyz");
 	}
 
 	@Test
@@ -50,21 +35,26 @@ public class BKtreeTest
 	}
 	
 	@Test
-	public void testFind()
+	public void testFindSameWord()
 	{
-		tree.insert("test");
-		tree.insert("testxxx");
-		tree.insert("testzzz");
+		Collection<CharSequence> foundWords = tree.find("test", 1);
+		assertTrue(foundWords.contains("test"));
 		
-		System.out.println(tree.find(lev, new ArrayList<CharSequence>(), "test"));
-		System.out.println(tree.find(lev, new ArrayList<CharSequence>(), "testa"));
-		System.out.println(tree.find(lev, new ArrayList<CharSequence>(), "testxxx"));
+		foundWords = tree.find("abc", 1);
+		assertTrue(foundWords.toString(), foundWords.contains("abc"));
 	}
-
+	
 	@Test
-	public void testCompareTo()
+	public void testFindWordWithDistanceTwo()
 	{
-		fail("Not yet implemented");
+		Collection<CharSequence> foundWords = tree.find("test", 2);
+		assertTrue(foundWords.contains("test"));
+		assertEquals(1, foundWords.size());
+		
+		foundWords = tree.find("ab", 2);
+		assertTrue(foundWords.contains("a"));
+		assertTrue(foundWords.contains("ab"));
+		assertTrue(foundWords.contains("abc"));
+		assertEquals(3, foundWords.size());
 	}
-
 }
