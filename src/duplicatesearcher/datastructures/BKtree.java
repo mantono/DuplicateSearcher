@@ -20,11 +20,6 @@ public class BKtree
 		this.word = word;
 	}
 
-	public BKtree(final CharSequence word, final int distance)
-	{
-		this.word = word;
-	}
-
 	public boolean insert(final CharSequence word)
 	{
 		final byte distance = (byte) (int) LEVENSHTEIN.apply(this.word, word);
@@ -39,7 +34,7 @@ public class BKtree
 		}
 		else
 		{
-			children.put(distance, new BKtree(word, distance));
+			children.put(distance, new BKtree(word));
 			return true;
 		}
 	}
