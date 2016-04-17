@@ -15,12 +15,14 @@ import duplicatesearcher.analysis.frequency.InverseDocumentFrequencyCounter;
 
 public class Analyzer
 {
+	private final Weight weights;
 	private final Collection<StrippedIssue> issues;
 	private final InverseDocumentFrequencyCounter idfCounter;
 
-	public Analyzer(final Collection<StrippedIssue> issues)
+	public Analyzer(final Collection<StrippedIssue> issues, final Weight weights)
 	{
 		this.issues = issues;
+		this.weights = weights;
 		this.idfCounter = new InverseDocumentFrequencyCounter();
 		analyzeData(issues);
 	}
