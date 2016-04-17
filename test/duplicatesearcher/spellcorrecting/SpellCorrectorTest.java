@@ -85,5 +85,29 @@ public class SpellCorrectorTest
 	{
 		assertEquals(new Token("a"), new Token("a"));
 	}
+	
+	@Test
+	public void performanceTest() throws IOException
+	{
+		final SpellCorrector largeDict = new SpellCorrector(new File("/usr/share/dict/words"));
+		
+		LocalDateTime startTime = LocalDateTime.now();
+		
+		Token token1 = largeDict.correctWord("ambigous", 2); //ambiguous
+		Token token2 = largeDict.correctWord("kingdoom", 3); //kingdom
+		Token token3 = largeDict.correctWord("heelp", 1); //help
+		
+		LocalDateTime endTime = LocalDateTime.now();
+		Duration elpasedTime = Duration.between(startTime, endTime);
+		
+		// Check correctness
+		assertEquals(new Token("ambiguous"), token1);
+		assertEquals(new Token("kingdom"), token2);
+		assertEquals(new Token("help"), token3);
+		
+		// Test performance
+		assertTrue(elpasedTime.getSeconds() < 2);
+		System.out.println(elpasedTime);
+	}
 
 }
