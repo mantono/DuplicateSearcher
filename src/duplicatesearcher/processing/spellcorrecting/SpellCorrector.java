@@ -98,11 +98,12 @@ public class SpellCorrector implements TokenProcessor {
 
 	private Token tokenFrom(SortedMap<Integer, List<CharSequence>> foundWords, CharSequence textSubject)
 	{
-		if(foundWords.isEmpty())
-			return new Token(textSubject);
-		List<CharSequence> listOfBestWords = foundWords.get(foundWords.firstKey());
-		final Token correctToken = new Token(listOfBestWords.get(0));
-		return correctToken;
+		for(Entry<Integer, List<CharSequence>> entry : foundWords.entrySet())
+			for(CharSequence word : entry.getValue())
+				if(Tokenizer.isToken(word))
+					return new Token(word);
+		
+		return new Token(textSubject);
 	}
 	
 	public Map<Token, Token> getCorrections()
