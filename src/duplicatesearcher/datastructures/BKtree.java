@@ -1,9 +1,8 @@
 package duplicatesearcher.datastructures;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -39,19 +38,24 @@ public class BKtree
 		}
 	}
 	
-	public Collection<CharSequence> find(final CharSequence misspelledWord, final int maxDistance)
+	public SortedMap<Integer, List<CharSequence>> find(final CharSequence misspelledWord, final int maxDistance)
 	{
-		return find(new ArrayList<CharSequence>(), misspelledWord, maxDistance);
+		return find(new TreeMap<Integer, List<CharSequence>>(), misspelledWord, maxDistance);
 	}
 
-	public Collection<CharSequence> find(final Collection<CharSequence> values, final CharSequence misspelledWord, final int maxDistance)
+	public SortedMap<Integer, List<CharSequence>> find(final SortedMap<Integer, List<CharSequence>> values, final CharSequence misspelledWord, final int maxDistance)
 	{
 		final int distanceToRoot = LEVENSHTEIN.apply(word, misspelledWord);
 		final int lowerBound = distanceToRoot - maxDistance;
 		final int upperBound = distanceToRoot + maxDistance;		
 		
 		if(distanceToRoot <= maxDistance)
-			values.add(word);
+		{
+			if(!values.containsKey(distanceToRoot))
+				values.put(distanceToRoot, new LinkedList<CharSequence>());
+			List<CharSequence> list = values.get(distanceToRoot);
+			list.add(word);
+		}
 		
 		if(children.isEmpty())
 			return values;
