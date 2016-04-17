@@ -11,7 +11,6 @@ import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 
-import duplicatesearcher.analysis.frequency.FrequencyCounter;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.CodeExtractor;
 
