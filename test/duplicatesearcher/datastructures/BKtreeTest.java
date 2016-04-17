@@ -18,6 +18,8 @@ public class BKtreeTest
 	public void setUp() throws Exception
 	{
 		this.tree = new BKtree("test");
+		tree.insert("a");
+		tree.insert("a");
 	}
 
 	@Test
@@ -41,19 +43,18 @@ public class BKtreeTest
 	@Test
 	public void testInsert()
 	{
-		assertFalse(tree.insert(lev, "test"));
-		assertTrue(tree.insert(lev, "testa"));
-		assertFalse(tree.insert(lev, "testa"));
-		assertTrue(tree.insert(lev, "tes"));
+		assertFalse(tree.insert("test"));
+		assertTrue(tree.insert("testa"));
+		assertFalse(tree.insert("testa"));
+		assertTrue(tree.insert("tes"));
 	}
 	
 	@Test
 	public void testFind()
 	{
-		LevenshteinDistance levInsert = new LevenshteinDistance();
-		tree.insert(levInsert, "test");
-		tree.insert(levInsert, "testxxx");
-		tree.insert(levInsert, "testzzz");
+		tree.insert("test");
+		tree.insert("testxxx");
+		tree.insert("testzzz");
 		
 		System.out.println(tree.find(lev, new ArrayList<CharSequence>(), "test"));
 		System.out.println(tree.find(lev, new ArrayList<CharSequence>(), "testa"));

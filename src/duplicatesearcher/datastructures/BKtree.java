@@ -9,6 +9,7 @@ import duplicatesearcher.processing.spellcorrecting.LevenshteinDistance;
 
 public class BKtree
 {
+	private final static LevenshteinDistance LEVENSHTEIN = new LevenshteinDistance();
 	private final CharSequence word;
 	private Map<Byte, BKtree> children;
 
@@ -22,9 +23,9 @@ public class BKtree
 		this.word = word;
 	}
 
-	public boolean insert(final LevenshteinDistance lev, final CharSequence word)
+	public boolean insert(final CharSequence word)
 	{
-		final byte distance = (byte) (int) lev.apply(this.word, word);
+		final byte distance = (byte) (int) LEVENSHTEIN.apply(this.word, word);
 		if(distance == 0)
 			return false;
 		if(children == null)
@@ -36,8 +37,13 @@ public class BKtree
 		else
 		{
 			final BKtree child = children.get(distance);
-			return child.insert(lev, word);
+			return child.insert(word);
 		}
+	}
+	
+	public Collection<CharSequence> find(final Collection<CharSequence> values, final CharSequence misspelledWord)
+	{
+		return find(LEVENSHTEIN, values, misspelledWord);
 	}
 
 	public Collection<CharSequence> find(LevenshteinDistance lev, final Collection<CharSequence> values, final CharSequence misspelledWord)
@@ -62,12 +68,6 @@ public class BKtree
 				final BKtree subtree = children.get(childKey);
 				subtree.find(lev, values, misspelledWord);
 			}
-//			final int wordDistance = lev.apply(word, misspelledWord);
-//			if(wordDistance == -1)
-//				continue;
-//			if(wordDistance < childKey)
-//				return word;
-//			return children.get(childKey).find(lev, misspelledWord);
 		}
 		
 		return values;
