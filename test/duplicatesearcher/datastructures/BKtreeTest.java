@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.SortedMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,24 +39,24 @@ public class BKtreeTest
 	@Test
 	public void testFindSameWord()
 	{
-		Collection<CharSequence> foundWords = tree.find("test", 1);
-		assertTrue(foundWords.contains("test"));
+		SortedMap<Integer, List<CharSequence>> foundWords = tree.find("test", 1);
+		assertTrue(foundWords.get(foundWords.firstKey()).contains("test"));
 		
 		foundWords = tree.find("abc", 1);
-		assertTrue(foundWords.toString(), foundWords.contains("abc"));
+		assertTrue(foundWords.toString(), foundWords.get(foundWords.firstKey()).contains(("abc")));
 	}
 	
 	@Test
 	public void testFindWordWithDistanceTwo()
 	{
-		Collection<CharSequence> foundWords = tree.find("test", 2);
-		assertTrue(foundWords.contains("test"));
+		SortedMap<Integer, List<CharSequence>> foundWords = tree.find("test", 2);
+		assertTrue(foundWords.get(foundWords.firstKey()).contains("test"));
 		assertEquals(1, foundWords.size());
 		
 		foundWords = tree.find("ab", 2);
-		assertTrue(foundWords.contains("a"));
-		assertTrue(foundWords.contains("ab"));
-		assertTrue(foundWords.contains("abc"));
-		assertEquals(3, foundWords.size());
+		assertTrue(foundWords.get(1).contains("a"));
+		assertTrue(foundWords.get(0).contains("ab"));
+		assertTrue(foundWords.get(1).contains("abc"));
+		assertEquals(2, foundWords.size());
 	}
 }
