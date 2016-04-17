@@ -13,6 +13,7 @@ import org.eclipse.egit.github.core.Label;
 
 import duplicatesearcher.analysis.frequency.FrequencyCounter;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.processing.CodeExtractor;
 
 /**
  * StrippedIssue is a simplified version of {@link Issue}, containing only the
@@ -30,7 +31,7 @@ public class StrippedIssue implements Serializable
 	private final int number, userId;
 	private final Date dateCreated, dateUpdated;
 	private final Set<Label> labels;
-	private TermFrequencyCounter all, title, body, comments;
+	private TermFrequencyCounter all, title, body, comments, code;
 	private final boolean closed;
 	private final String state;
 	private boolean flaggedBad = false;
@@ -45,6 +46,11 @@ public class StrippedIssue implements Serializable
 		
 		this.closed = issue.getClosedAt() != null;
 		this.state = issue.getState();
+		
+		CodeExtractor ce = new CodeExtractor(issue, comments);
+		Set<String> foundCode = ce.extractCode();
+		this.code = new TermFrequencyCounter();
+		this.code.addAll(foundCode);
 
 		this.title = new TermFrequencyCounter();
 		title.add(issue.getTitle());
@@ -54,7 +60,7 @@ public class StrippedIssue implements Serializable
 		
 		this.comments = mapStrings(comments);
 	}
-	
+
 	public StrippedIssue(final Issue issue)
 	{
 		this.number = issue.getNumber();
