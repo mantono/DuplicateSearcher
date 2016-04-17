@@ -6,9 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -22,6 +24,7 @@ import duplicatesearcher.processing.Tokenizer;
 public class SpellCorrector implements TokenProcessor {
 	private final HashSet<Token> dictionary;
 	private final BKtree tree;
+	private final Map<Token, Token> corrections = new HashMap<Token, Token>();
 	
 	public SpellCorrector(final File dictionaryFile) throws IOException {
 		this.dictionary = new HashSet<Token>();
@@ -62,6 +65,7 @@ public class SpellCorrector implements TokenProcessor {
 			{
 				tokens.change(token, tokenSpellCorrected);
 				spellCorrections++;
+				corrections.put(token, tokenSpellCorrected);
 			}
 		}
 		
@@ -99,6 +103,11 @@ public class SpellCorrector implements TokenProcessor {
 		List<CharSequence> listOfBestWords = foundWords.get(foundWords.firstKey());
 		final Token correctToken = new Token(listOfBestWords.get(0));
 		return correctToken;
+	}
+	
+	public Map<Token, Token> getCorrections()
+	{
+		return corrections;
 	}
 
 }
