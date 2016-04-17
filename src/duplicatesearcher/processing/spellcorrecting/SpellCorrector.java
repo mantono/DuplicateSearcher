@@ -81,7 +81,8 @@ public class SpellCorrector implements TokenProcessor {
 	}
 	
 	public Token correctWord(CharSequence textSubject){
-		SortedMap<Integer, List<CharSequence>> foundWords = tree.find(textSubject, 1);
+		final int threshold = (int) Math.round(Math.log(textSubject.length()-0.2)); 
+		SortedMap<Integer, List<CharSequence>> foundWords = tree.find(textSubject, threshold);
 		return tokenFrom(foundWords, textSubject);
 	}
 	
