@@ -1,5 +1,6 @@
 package duplicatesearcher.datastructures;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,9 +42,9 @@ public class BKtree
 		}
 	}
 	
-	public Collection<CharSequence> find(final Collection<CharSequence> values, final CharSequence misspelledWord)
+	public Collection<CharSequence> find(final CharSequence misspelledWord, final int maxDistance)
 	{
-		return find(LEVENSHTEIN, values, misspelledWord);
+		return find(new LevenshteinDistance(maxDistance), new ArrayList<CharSequence>(), misspelledWord);
 	}
 
 	public Collection<CharSequence> find(LevenshteinDistance lev, final Collection<CharSequence> values, final CharSequence misspelledWord)
