@@ -37,6 +37,10 @@ public class IssueProcessor
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
 		this.spell = new SpellCorrector(new File("dictionary/dict.txt"));
+		spell.addDictionary(new File("dictionary/dict_extra1.txt"));
+		spell.addDictionary(new File("dictionary/dict_extra2.txt"));
+		spell.addDictionary(new File("stoplists/github/github.txt"));
+		spell.addDictionary(new File("stoplists/long/ReqSimile.txt"));
 	}
 
 	public IssueProcessor(final ProcessingFlags... flags) throws IOException
