@@ -36,7 +36,7 @@ public class IssueProcessor
 		this.flags = flags;
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
-		this.spell = new SpellCorrector(new File("dictionary/dict.txt"), 2);
+		this.spell = new SpellCorrector(new File("dictionary/dict.txt"));
 	}
 
 	public IssueProcessor(final ProcessingFlags... flags) throws IOException
