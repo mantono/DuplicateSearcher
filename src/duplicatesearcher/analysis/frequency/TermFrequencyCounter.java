@@ -1,7 +1,7 @@
 package duplicatesearcher.analysis.frequency;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,9 +87,14 @@ public class TermFrequencyCounter implements FrequencyCounter
 		}
 	}
 
-	public int add(final String input)
+	public int add(final CharSequence input)
 	{
-		return addString(input);
+		return addString(input.toString());
+	}
+	
+	public boolean add(final Token token)
+	{
+		return increment(token) > 0;
 	}
 
 	public int add(final TermFrequencyCounter counter)
@@ -112,6 +117,12 @@ public class TermFrequencyCounter implements FrequencyCounter
 		}
 		
 		return increase;
+	}
+	
+	public void addAll(Collection<String> input)
+	{
+		for(String chars : input)
+			add(chars);
 	}
 
 	@Override
