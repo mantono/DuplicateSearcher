@@ -13,11 +13,11 @@ public class Token implements Serializable, Comparable<Token>, CharSequence
 {
 	private final String token;
 
-	public Token(final String input)
+	public Token(final CharSequence input)
 	{
 		if(!Tokenizer.isToken(input))
 			throw new IllegalArgumentException(input + " is not a valid token.");
-		this.token = input;
+		this.token = input.toString();
 	}
 
 	@Override

@@ -4,11 +4,10 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,19 +17,19 @@ import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 
 public class SpellCorrectorTest
 {
-	private SpellCorrector sc;
+	private SpellCorrector testDict;
 
 	@Before
 	public void setUp() throws IOException
 	{
-		sc = new SpellCorrector(new File("dictionary/test.txt"), 2);
+		testDict = new SpellCorrector(new File("dictionary/test.txt"));
 	}
 
 	@Test
 	public void correctSimpleWordTest()
 	{
 		Token test = new Token("hejs");
-		test = sc.correctWord(test);
+		test = testDict.correctWord(test);
 		assertEquals(new Token("hej"), test);
 	}
 
@@ -38,7 +37,7 @@ public class SpellCorrectorTest
 	public void correctAboveThresholdWordTest()
 	{
 		Token test = new Token("hejsanhejsan");
-		test = sc.correctWord(test);
+		test = testDict.correctWord(test);
 		assertEquals(new Token("hejsanhejsan"), test);
 	}
 
@@ -55,7 +54,7 @@ public class SpellCorrectorTest
 		tokens.add("regeringen");// oförändrad
 		tokens.add("issueprocessor");// oförändrad
 
-		final int changed = sc.process(tokens);
+		final int changed = testDict.process(tokens);
 		
 		assertEquals(3, changed);
 
@@ -73,18 +72,42 @@ public class SpellCorrectorTest
 	@Test
 	public void isMisspelledTest()
 	{
-		assertTrue(sc.isMisspelled(new Token("bla")));
-		assertTrue(sc.isMisspelled(new Token("felfelfel")));
-		assertTrue(sc.isMisspelled(new Token("")));
-		assertFalse(sc.isMisspelled(new Token("apelsin")));
-		assertFalse(sc.isMisspelled(new Token("gurka")));
-		assertFalse(sc.isMisspelled(new Token("slank")));
+		assertTrue(testDict.isMisspelled(new Token("bla")));
+		assertTrue(testDict.isMisspelled(new Token("felfelfel")));
+		assertTrue(testDict.isMisspelled(new Token("")));
+		assertFalse(testDict.isMisspelled(new Token("apelsin")));
+		assertFalse(testDict.isMisspelled(new Token("gurka")));
+		assertFalse(testDict.isMisspelled(new Token("slank")));
 	}
 
 	@Test
 	public void tokenTest()
 	{
 		assertEquals(new Token("a"), new Token("a"));
+	}
+	
+	@Test
+	public void performanceTest() throws IOException
+	{
+		final SpellCorrector largeDict = new SpellCorrector(new File("/usr/share/dict/words"));
+		
+		LocalDateTime startTime = LocalDateTime.now();
+		
+		Token token1 = largeDict.correctWord("ambigous", 2); //ambiguous
+		Token token2 = largeDict.correctWord("kingdoom", 3); //kingdom
+		Token token3 = largeDict.correctWord("heelp", 1); //help
+		
+		LocalDateTime endTime = LocalDateTime.now();
+		Duration elpasedTime = Duration.between(startTime, endTime);
+		
+		// Check correctness
+		assertEquals(new Token("ambiguous"), token1);
+		assertEquals(new Token("kingdom"), token2);
+		assertEquals(new Token("help"), token3);
+		
+		// Test performance
+		assertTrue(elpasedTime.getSeconds() < 2);
+		System.out.println(elpasedTime);
 	}
 
 }

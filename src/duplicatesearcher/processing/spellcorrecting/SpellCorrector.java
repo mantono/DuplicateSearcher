@@ -6,23 +6,26 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.datastructures.BKtree;
 import duplicatesearcher.processing.TokenProcessor;
 import duplicatesearcher.processing.Tokenizer;
 
 
 public class SpellCorrector implements TokenProcessor {
-	private final LevenshteinDistance lev;
 	private final HashSet<Token> dictionary;
+	private final BKtree tree;
 	
-	public SpellCorrector(final File dictionaryFile, int threshold) throws IOException {
-		this.lev = new LevenshteinDistance(threshold);
+	public SpellCorrector(final File dictionaryFile) throws IOException {
 		this.dictionary = new HashSet<Token>();
+		this.tree = new BKtree(new Token("word"));
 		
 		if(!dictionaryFile.exists())
 			throw new NoSuchFileException("File " + dictionaryFile.getCanonicalPath() + " could not be found.");
@@ -39,6 +42,7 @@ public class SpellCorrector implements TokenProcessor {
 			final Tokenizer tokenizer = new Tokenizer(line);
 			for(Token token : tokenizer.getTokens())
 				dictionary.add(token);
+			tree.insert(line);
 		}
 	}
 	
@@ -74,24 +78,24 @@ public class SpellCorrector implements TokenProcessor {
 		return !dictionary.contains(token);
 	}
 	
-	public Token correctWord(Token textSubject){
-		Token tmp = textSubject;
-		int newDistance;
-		int closestDistance = Integer.MAX_VALUE;
-		
-		for(Token word : dictionary){
-			newDistance = lev.apply(textSubject, word);
-			
-			if(newDistance == -1)
-				continue;
-			else if(newDistance == 0)
-				return textSubject;
-			else if(newDistance<closestDistance){
-				tmp = word;
-				closestDistance = newDistance;
-			}
-		}
-		
-		return tmp;
-	}	
+	public Token correctWord(CharSequence textSubject){
+		SortedMap<Integer, List<CharSequence>> foundWords = tree.find(textSubject, 1);
+		return tokenFrom(foundWords, textSubject);
+	}
+	
+	public Token correctWord(CharSequence textSubject, final int threshold){
+		SortedMap<Integer, List<CharSequence>>foundWords = tree.find(textSubject, threshold);
+		return tokenFrom(foundWords, textSubject);
+	}
+
+
+	private Token tokenFrom(SortedMap<Integer, List<CharSequence>> foundWords, CharSequence textSubject)
+	{
+		if(foundWords.isEmpty())
+			return new Token(textSubject);
+		List<CharSequence> listOfBestWords = foundWords.get(foundWords.firstKey());
+		final Token correctToken = new Token(listOfBestWords.get(0));
+		return correctToken;
+	}
+
 }

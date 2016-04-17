@@ -79,7 +79,7 @@ public class Tokenizer
 		return input.trim().split("[\\s]+");
 	}
 	
-	public static boolean isToken(final String input)
+	public static boolean isToken(final CharSequence input)
 	{
 		if(input == null)
 			return false;
