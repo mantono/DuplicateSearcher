@@ -2,26 +2,24 @@ package duplicatesearcher.datastructures;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import duplicatesearcher.processing.spellcorrecting.LevenshteinDistance;
 
-public class BKtree implements Comparable<BKtree>
+public class BKtree
 {
 	private final CharSequence word;
-	private SortedMap<Byte, BKtree> children;
-	private final byte distance;
+	private Map<Byte, BKtree> children;
 
 	public BKtree(final CharSequence word)
 	{
 		this.word = word;
-		this.distance = -1;
 	}
 
 	public BKtree(final CharSequence word, final int distance)
 	{
 		this.word = word;
-		this.distance = (byte) distance;
 	}
 
 	public boolean insert(final LevenshteinDistance lev, final CharSequence word)
@@ -85,12 +83,6 @@ public class BKtree implements Comparable<BKtree>
 	@Override
 	public int hashCode()
 	{
-		return distance;
-	}
-
-	@Override
-	public int compareTo(BKtree other)
-	{
-		return this.distance - other.distance;
+		return word.hashCode();
 	}
 }
