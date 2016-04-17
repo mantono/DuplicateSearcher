@@ -29,21 +29,23 @@ public class SpellCorrector implements TokenProcessor {
 		
 		if(!dictionaryFile.exists())
 			throw new NoSuchFileException("File " + dictionaryFile.getCanonicalPath() + " could not be found.");
-		readFileContent(dictionaryFile);
+		addDictionary(dictionaryFile);
 	}
 	
 
-	private void readFileContent(File dictionaryFile) throws IOException
+	public int addDictionary(File dictionaryFile) throws IOException
 	{
 		final Path path = Paths.get(dictionaryFile.toURI());
 		List<String> listLines = Files.readAllLines(path);
+		int addedWords = 0;
 		for(String line : listLines)
 		{
 			final Tokenizer tokenizer = new Tokenizer(line);
 			for(Token token : tokenizer.getTokens())
-				dictionary.add(token);
-			tree.insert(line);
+				if(dictionary.add(token) && tree.insert(line))
+					addedWords++;
 		}
+		return addedWords;
 	}
 	
 	@Override
