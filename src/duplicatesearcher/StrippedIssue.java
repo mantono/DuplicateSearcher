@@ -90,9 +90,7 @@ public class StrippedIssue implements Serializable
 	 */
 	public boolean isViable()
 	{
-		if(title.size() + body.size() < 8)
-			System.out.println("Possible low quality/non-viable issue: " + number);
-		return !flaggedBad;
+		return (title.size() + body.size()) < 8;
 	}
 
 	/**
