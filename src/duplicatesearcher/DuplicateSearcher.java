@@ -26,7 +26,7 @@ public class DuplicateSearcher
 	private final Set<StrippedIssue> processedIssues;
 	private final IssueProcessor processor;
 	private Analyzer analyzer;
-	private SortedSet<Duplicate> duplicates;
+	private Set<Duplicate> duplicates;
 
 	public DuplicateSearcher(final RepositoryId repo, final IssueProcessor processor) throws ClassNotFoundException, IOException
 	{
@@ -42,7 +42,10 @@ public class DuplicateSearcher
 	{
 		processedIssues.clear();
 		Iterator<Entry<Issue, List<Comment>>> iter = issueData.entrySet().iterator();
-
+		
+		final double finished = issueData.entrySet().size();
+		int processedIssueCount = 0;
+		
 		while(iter.hasNext())
 		{
 			final Entry<Issue, List<Comment>> entry = iter.next();
@@ -51,10 +54,23 @@ public class DuplicateSearcher
 
 			if(createdIssue.isViable())
 				processedIssues.add(createdIssue);
-
+			
+			printProgress(++processedIssueCount, finished);
 		}
 
 		return processedIssues.size();
+	}
+
+	private void printProgress(final int i, final double finished)
+	{
+		System.out.print(".");
+		if(i % 10 == 0)
+			System.out.print(" ");
+		if(i % 100 == 0)
+		{
+			final double completed = (i/finished)*100;
+			System.out.println(" ["+completed+"%]");
+		}
 	}
 
 	public int analyzeIssues(final double threshold)
@@ -64,7 +80,7 @@ public class DuplicateSearcher
 		return duplicates.size();
 	}
 
-	public SortedSet<Duplicate> getDuplicates()
+	public Set<Duplicate> getDuplicates()
 	{
 		return duplicates;
 	}
@@ -86,7 +102,8 @@ public class DuplicateSearcher
 		searcher.analyzeIssues(0.4);
 
 		final LocalDateTime end = LocalDateTime.now();
-		System.out.println(searcher.getDuplicates());
+		for(Duplicate d : searcher.getDuplicates())
+			System.out.println(d);
 		final Duration elpasedTime = Duration.between(start, end);
 		System.out.println("Execution time:" + elpasedTime);
 		System.out.println("Found duplicates: " + searcher.getDuplicates().size());

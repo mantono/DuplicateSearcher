@@ -40,6 +40,32 @@ public class Duplicate implements Comparable<Duplicate>
 	{
 		return cosineSimilarity;
 	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(obj == null)
+			return false;
+		if(!(obj instanceof Duplicate))
+			return false;
+		Duplicate other = (Duplicate) obj;
+		
+		final boolean sameMaster = this.master.getNumber() == other.getMaster().getNumber();
+		final boolean sameDuplicate = this.duplicate.getNumber() == other.getDuplicate().getNumber();
+		
+		return sameMaster && sameDuplicate;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		int hashCode = 11;
+		hashCode += master.getNumber();
+		hashCode *= 11;
+		hashCode += duplicate.getNumber();
+		
+		return hashCode;
+	}
 
 	@Override
 	public String toString()
@@ -50,6 +76,9 @@ public class Duplicate implements Comparable<Duplicate>
 	@Override
 	public int compareTo(Duplicate other)
 	{
-		return (int) Math.round((other.cosineSimilarity - this.cosineSimilarity) * 1000);
+		final int cosineDiffernce = (int) Math.round((other.cosineSimilarity - this.cosineSimilarity) * 10_000_000);
+		if(cosineDiffernce != 0)
+			return cosineDiffernce;
+		return this.master.getNumber() - other.master.getNumber();
 	}
 }

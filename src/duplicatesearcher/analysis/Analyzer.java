@@ -17,6 +17,8 @@ public class Analyzer
 {
 	private final Collection<StrippedIssue> issues;
 	private final InverseDocumentFrequencyCounter idfCounter;
+	private int analyzedIssueCount = 0;
+	private double finished;
 
 	public Analyzer(final Collection<StrippedIssue> issues)
 	{
@@ -41,29 +43,33 @@ public class Analyzer
 		return issues.add(issue);
 	}
 
-	public SortedSet<Duplicate> findDuplicates(final double threshold)
+	public Set<Duplicate> findDuplicates(final double threshold)
 	{
 		if(threshold > 1)
 			throw new IllegalArgumentException("Threshold cannot be greater than 1.0");
 		if(threshold < 0)
 			throw new IllegalArgumentException("Threshold cannot be negative");
 
-		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
+		finished = issues.size()*issues.size();
+		
+		final Set<Duplicate> duplicates = new HashSet<Duplicate>();
 		for(StrippedIssue issue : issues)
 			duplicates.addAll(findDuplicates(issue, threshold));
 
 		return duplicates;
 	}
 
-	public SortedSet<Duplicate> findDuplicates(final StrippedIssue issue, final double threshold)
+	public Set<Duplicate> findDuplicates(final StrippedIssue issue, final double threshold)
 	{
-		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
+		final Set<Duplicate> duplicates = new HashSet<Duplicate>();
 
 		final Map<Token, Double> query = weightMap(issue.getAll());
 		Map<Token, Double> queryNormalized = new Normalizer(query).normalizeVector();
 
 		for(StrippedIssue issueInCollection : issues)
 		{
+			printProgress();
+			
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
 			
