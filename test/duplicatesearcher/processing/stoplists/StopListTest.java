@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import duplicatesearcher.Token;
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 
 public class StopListTest
 {
@@ -33,7 +34,7 @@ public class StopListTest
 	@Test
 	public void testRemoveStopWordsAllWordsOnOneLine()
 	{
-		Set<Token> tokens = new HashSet<Token>();
+		TermFrequencyCounter tokens = new TermFrequencyCounter();
 		tokens.add(new Token("hello"));
 		tokens.add(new Token("test"));
 		tokens.add(new Token("and"));
@@ -42,7 +43,7 @@ public class StopListTest
 		tokens.add(new Token("yes"));
 		
 		assertEquals(6, tokens.size());
-		final int removedWords = list1.removeStopWords(tokens);
+		final int removedWords = list1.process(tokens);
 		assertEquals(4, removedWords);
 		assertEquals(2, tokens.size());
 	}
@@ -50,7 +51,7 @@ public class StopListTest
 	@Test
 	public void testRemoveStopWordsEachWordOnSeparateLine()
 	{
-		Set<Token> tokens = new HashSet<Token>();
+		TermFrequencyCounter tokens = new TermFrequencyCounter();
 		tokens.add(new Token("hello"));
 		tokens.add(new Token("by"));
 		tokens.add(new Token("and"));
@@ -59,7 +60,7 @@ public class StopListTest
 		tokens.add(new Token("yes"));
 		
 		assertEquals(6, tokens.size());
-		final int removedWords = list2.removeStopWords(tokens);
+		final int removedWords = list2.process(tokens);
 		assertEquals(2, removedWords);
 		assertEquals(4, tokens.size());
 	}
@@ -67,7 +68,7 @@ public class StopListTest
 	@Test
 	public void testGetStopWords()
 	{
-		Set<Token> tokens = new HashSet<Token>();
+		TermFrequencyCounter tokens = new TermFrequencyCounter();
 		tokens.add(new Token("and"));
 		tokens.add(new Token("if"));
 		tokens.add(new Token("but"));
