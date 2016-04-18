@@ -164,4 +164,33 @@ public class TokenizerTest
 		final String output = tokenizer.removeEmojis(input);
 		assertEquals(expected, output);
 	}
+	
+	@Test
+	public void testRemoveNumbers()
+	{
+		Tokenizer tokenizer = new Tokenizer("");
+		final String regularIntegers = "1 2 3";
+		String result = tokenizer.removeNumbers(regularIntegers);
+		assertEquals("  ", result);
+		
+		final String decimals = "2.0 3.11";
+		result = tokenizer.removeNumbers(decimals);
+		assertEquals(" ", result);
+		
+		final String commaDecimals = "2,0 3,11";
+		result = tokenizer.removeNumbers(commaDecimals);
+		assertEquals(" ", result);
+		
+		final String commaDelimiteer = "2,300,000 4,111";
+		result = tokenizer.removeNumbers(commaDecimals);
+		assertEquals(" ", result);
+		
+		final String dotDelimiteer = "2.300.000 4.111";
+		result = tokenizer.removeNumbers(commaDecimals);
+		assertEquals(" ", result);
+		
+		final String variables = "v14 token2";
+		result = tokenizer.removeNumbers(variables);
+		assertEquals("v14 token2", result);
+	}
 }
