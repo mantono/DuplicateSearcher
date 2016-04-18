@@ -4,16 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 
-import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.Stemmer;
+import duplicatesearcher.processing.TokenProcessor;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
 
@@ -47,6 +43,11 @@ public class IssueProcessor
 	{
 		this(EnumSet.copyOf(Arrays.asList(flags)));
 	}
+	
+	public boolean hasFlag(ProcessingFlags flag)
+	{
+		return flags.contains(flag);
+	}
 
 	public StrippedIssue process(final Issue issue, final List<Comment> comments) throws IOException
 	{
@@ -60,66 +61,33 @@ public class IssueProcessor
 
 	public StrippedIssue process(final StrippedIssue issue) throws IOException
 	{
-		if(!run(ProcessingFlags.PARSE_COMMENTS))
-			issue.removeComments();
-		if(run(ProcessingFlags.SPELL_CORRECTION))
-			spellCorrection(issue);
-		if(run(ProcessingFlags.STOP_LIST_COMMON))
-			removeStopWords(stopListCommon, issue);
-		if(run(ProcessingFlags.STOP_LIST_GITHUB))
-			removeStopWords(stopListGitHub, issue);
-		if(run(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
-			System.out.println(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC);
-		if(run(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC))
-			System.out.println(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC);
-		if(run(ProcessingFlags.SYNONYMS))
-			System.out.println(ProcessingFlags.SYNONYMS);
-		if(run(ProcessingFlags.STEMMING))
-			stem(issue);
-		if(run(ProcessingFlags.FILTER_BAD))
-			System.out.println(ProcessingFlags.FILTER_BAD);
+		for(ProcessingFlags flag : flags)
+			applyProcess(issue, flag);
 
 		return issue;
 	}
 
-	private void spellCorrection(StrippedIssue issue)
+	private void applyProcess(StrippedIssue issue, ProcessingFlags flag) throws IOException
 	{
-		spell.process(issue.getTitle());
-		spell.process(issue.getBody());
-		spell.process(issue.getComments());
-	}
-
-	private void stem(StrippedIssue issue)
-	{
-		stem(issue.getTitle());
-		stem(issue.getBody());
-		stem(issue.getComments());
-	}
-
-	private void stem(TermFrequencyCounter counter)
-	{
-		Set<Token> issueTokensCopy = new HashSet<Token>(counter.getTokens());
-		Iterator<Token> tokens = issueTokensCopy.iterator();
-		while(tokens.hasNext())
+		switch(flag)
 		{
-			final Token token = tokens.next();
-			stemmer.setCurrentToken(token);
-			stemmer.stem();
-			final Token stemmedToken = stemmer.getCurrentToken();
-			if(!token.equals(stemmedToken))
-				counter.change(token, stemmedToken);
+			case PARSE_COMMENTS: issue.removeComments(); break;
+			case SPELL_CORRECTION: apply(issue, spell); break;
+			case STOP_LIST_COMMON: apply(issue, stopListCommon); break;
+			case STOP_LIST_GITHUB: apply(issue, stopListGitHub); break;
+			case STOP_LIST_TEMPLATE_DYNAMIC: System.out.println("Not implemented"); break;
+			case STOP_LIST_TEMPLATE_STATIC: System.out.println("Not implemented"); break;
+			case SYNONYMS: System.out.println("Not implemented"); break;
+			case STEMMING: apply(issue, stemmer); break;
+			case FILTER_BAD: System.out.println("Not implemented"); break;
 		}
 	}
-
-	private void removeStopWords(StopList stopList, StrippedIssue issue) throws IOException
+	
+	private void apply(StrippedIssue issue, TokenProcessor processor)
 	{
-		stopList.removeStopWords(issue.getTitle().getTokens());
-		stopList.removeStopWords(issue.getBody().getTokens());
-		stopList.removeStopWords(issue.getComments().getTokens());
+		processor.process(issue.getTitle());
+		processor.process(issue.getBody());
+		processor.process(issue.getComments());
 	}
 
-	private boolean run(ProcessingFlags flag)
-	{
-		return flags.contains(flag);
-	}
 }

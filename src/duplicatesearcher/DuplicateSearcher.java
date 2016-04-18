@@ -52,7 +52,7 @@ public class DuplicateSearcher
 
 			StrippedIssue createdIssue = processor.process(entry.getKey(), entry.getValue());
 
-			if(createdIssue.isViable())
+			if(createdIssue.isViable() || !processor.hasFlag(ProcessingFlags.FILTER_BAD))
 				processedIssues.add(createdIssue);
 			
 			printProgress(++processedIssueCount, finished);
