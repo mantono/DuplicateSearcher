@@ -92,7 +92,8 @@ public class DuplicateSearcher
 				ProcessingFlags.SPELL_CORRECTION,
 				ProcessingFlags.STOP_LIST_COMMON,
 				ProcessingFlags.STOP_LIST_GITHUB,
-				ProcessingFlags.STEMMING
+				ProcessingFlags.STEMMING,
+				ProcessingFlags.FILTER_BAD
 				);
 		DuplicateSearcher searcher = new DuplicateSearcher(repo, processor);
 		searcher.processIssues();

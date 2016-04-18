@@ -80,7 +80,7 @@ public class IssueProcessor
 			case STOP_LIST_TEMPLATE_STATIC: System.out.println("Not implemented"); break;
 			case SYNONYMS: System.out.println("Not implemented"); break;
 			case STEMMING: apply(issue, stemmer); break;
-			case FILTER_BAD: System.out.println("Not implemented"); break;
+			case FILTER_BAD: issue.checkQuality(); break;
 		}
 	}
 	

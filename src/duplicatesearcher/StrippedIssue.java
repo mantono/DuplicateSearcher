@@ -90,7 +90,7 @@ public class StrippedIssue implements Serializable
 	 */
 	public boolean isViable()
 	{
-		return (title.size() + body.size()) < 8;
+		return !flaggedBad;
 	}
 
 	/**
@@ -179,5 +179,10 @@ public class StrippedIssue implements Serializable
 	public String toString()
 	{
 		return "" + number;
+	}
+
+	public void checkQuality()
+	{
+		flaggedBad = (title.size() + body.size()) < 6;
 	}
 }
