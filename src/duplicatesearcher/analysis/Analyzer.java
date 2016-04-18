@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import duplicatesearcher.Progress;
 import duplicatesearcher.StrippedIssue;
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.FrequencyCounter;
@@ -19,6 +20,7 @@ public class Analyzer
 	private final InverseDocumentFrequencyCounter idfCounter;
 	private int analyzedIssueCount = 0;
 	private double finished;
+	private Progress progress;
 
 	public Analyzer(final Collection<StrippedIssue> issues)
 	{
@@ -50,7 +52,10 @@ public class Analyzer
 		if(threshold < 0)
 			throw new IllegalArgumentException("Threshold cannot be negative");
 
-		finished = issues.size()*issues.size();
+		final int finished = issues.size()*issues.size();
+		progress = new Progress(finished, 1000);
+		
+		System.out.println("\nSEARCHING FOR DUPLICATES");
 		
 		final Set<Duplicate> duplicates = new HashSet<Duplicate>();
 		for(StrippedIssue issue : issues)
@@ -68,7 +73,8 @@ public class Analyzer
 
 		for(StrippedIssue issueInCollection : issues)
 		{
-			printProgress();
+			progress.increment();
+			progress.print();
 			
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
@@ -83,23 +89,6 @@ public class Analyzer
 		}
 
 		return duplicates;
-	}
-
-	private void printProgress()
-	{
-		analyzedIssueCount++;
-		
-		if(analyzedIssueCount % 1000 == 0)
-			System.out.print(".");
-		else
-			return;
-		if(analyzedIssueCount % 10_000 == 0)
-			System.out.print(" ");
-		if(analyzedIssueCount % 100_000 == 0)
-		{
-			final double completed = (analyzedIssueCount/finished)*100;
-			System.out.println(" ["+completed+"%]");
-		}
 	}
 
 	private double vectorMultiplication(Map<Token, Double> vector1, Map<Token, Double> vector2)

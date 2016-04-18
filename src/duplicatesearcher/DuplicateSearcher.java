@@ -1,6 +1,7 @@
 package duplicatesearcher;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -46,32 +47,28 @@ public class DuplicateSearcher
 		final double finished = issueData.entrySet().size();
 		int processedIssueCount = 0;
 		
+		System.out.println("\nPROCESSING ISSUES");
+		Progress progress = new Progress(finished);
+		
 		while(iter.hasNext())
 		{
 			final Entry<Issue, List<Comment>> entry = iter.next();
 
 			StrippedIssue createdIssue = processor.process(entry.getKey(), entry.getValue());
 
-			if(createdIssue.isViable() || !processor.hasFlag(ProcessingFlags.FILTER_BAD))
+			if(createdIssue.isViable())
 				processedIssues.add(createdIssue);
 			
-			printProgress(++processedIssueCount, finished);
+			progress.increment();
+			progress.print();
 		}
+		
+		System.out.print("\n");
 
 		return processedIssues.size();
 	}
 
-	private void printProgress(final int i, final double finished)
-	{
-		System.out.print(".");
-		if(i % 10 == 0)
-			System.out.print(" ");
-		if(i % 100 == 0)
-		{
-			final double completed = (i/finished)*100;
-			System.out.println(" ["+completed+"%]");
-		}
-	}
+
 
 	public int analyzeIssues(final double threshold)
 	{
@@ -102,6 +99,8 @@ public class DuplicateSearcher
 		searcher.analyzeIssues(0.4);
 
 		final LocalDateTime end = LocalDateTime.now();
+		
+		System.out.println("\n");
 		for(Duplicate d : searcher.getDuplicates())
 			System.out.println(d);
 		final Duration elpasedTime = Duration.between(start, end);
