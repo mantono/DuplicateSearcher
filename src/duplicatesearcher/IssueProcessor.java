@@ -44,7 +44,7 @@ public class IssueProcessor
 		this(EnumSet.copyOf(Arrays.asList(flags)));
 	}
 
-	public StrippedIssue process(final Issue issue, final List<Comment> comments) throws IOException
+	public StrippedIssue process(final Issue issue, final List<Comment> comments)
 	{
 		final String pullRequestError = "Pull requests should no longer exist in any data set. Remove this data set and download a new one.";
 		assert issue.getPullRequest().getHtmlUrl() == null: pullRequestError;
@@ -54,7 +54,7 @@ public class IssueProcessor
 		return strippedIssue;
 	}
 
-	public StrippedIssue process(final StrippedIssue issue) throws IOException
+	public StrippedIssue process(final StrippedIssue issue)
 	{
 		for(ProcessingFlags flag : flags)
 			applyProcess(issue, flag);
@@ -62,7 +62,7 @@ public class IssueProcessor
 		return issue;
 	}
 
-	private void applyProcess(StrippedIssue issue, ProcessingFlags flag) throws IOException
+	private void applyProcess(StrippedIssue issue, ProcessingFlags flag)
 	{
 		switch(flag)
 		{
