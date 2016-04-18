@@ -26,13 +26,17 @@ public class TokenizerTest
 	@Test
 	public void testGetProcessedDataComplex()
 	{
-		final String input = "* * * Well then, 'THIS' could \n certainly \t @prove__ to be a-challenge...\0";
+		final String input = "* * * Well then, 'THIS' could \n certainly \t @prove-- to be a-challenge...\0";
 		Tokenizer tokenizer = new Tokenizer(input);
 
 		final Token[] output = tokenizer.getTokens();
 		final Token[] expected = new Token[]{new Token("well"), new Token("then"), new Token("this"),
 				new Token("could"), new Token("certainly"), new Token("prove"), new Token("to"), new Token("be"),
 				new Token("a"), new Token("challenge")};
+		
+		for(Token t : output)
+			System.out.println(t);
+		
 		assertArrayEquals(expected, output);
 	}
 
@@ -192,5 +196,19 @@ public class TokenizerTest
 		final String variables = "v14 token2";
 		result = tokenizer.removeNumbers(variables);
 		assertEquals("v14 token2", result);
+	}
+	
+	@Test
+	public void testRemoveUsername()
+	{
+		Tokenizer tokenizer = new Tokenizer("");
+		
+		final String userMentions = "@a-asdas-asd-asd @eu1289 @s-s @mantono";
+		String result = tokenizer.removeUsernames(userMentions);
+		assertEquals("   ", result);
+		
+		final String notUsernames = "my.email@adress.com @-notValidUsername @notvalid- ";
+		result = tokenizer.removeUsernames(notUsernames);
+		assertEquals("my.email@adress.com @-notValidUsername @notvalid- ", result);
 	}
 }
