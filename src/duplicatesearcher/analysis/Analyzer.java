@@ -106,10 +106,9 @@ public class Analyzer
 	{
 		double similarity = 0;
 		
-		Set<Token> union = new HashSet<Token>(vector1.keySet());
-		union.addAll(vector2.keySet());
-		
-		for(Token token : union)
+		Set<Token> intersection = new HashSet<Token>(vector1.keySet());
+		intersection.retainAll(vector2.keySet());		
+		for(Token token : intersection)
 		{
 			double weight1, weight2;
 			weight1 = weight2 = 0;
