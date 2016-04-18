@@ -85,6 +85,23 @@ public class Analyzer
 		return duplicates;
 	}
 
+	private void printProgress()
+	{
+		analyzedIssueCount++;
+		
+		if(analyzedIssueCount % 1000 == 0)
+			System.out.print(".");
+		else
+			return;
+		if(analyzedIssueCount % 10_000 == 0)
+			System.out.print(" ");
+		if(analyzedIssueCount % 100_000 == 0)
+		{
+			final double completed = (analyzedIssueCount/finished)*100;
+			System.out.println(" ["+completed+"%]");
+		}
+	}
+
 	private double vectorMultiplication(Map<Token, Double> vector1, Map<Token, Double> vector2)
 	{
 		double similarity = 0;
