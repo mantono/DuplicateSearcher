@@ -24,7 +24,6 @@ import duplicatesearcher.processing.Tokenizer;
 public class SpellCorrector implements TokenProcessor {
 	private final HashSet<Token> dictionary;
 	private final BKtree tree;
-	private final Map<Token, Token> corrections = new HashMap<Token, Token>();
 	
 	public SpellCorrector(final File dictionaryFile) throws IOException {
 		this.dictionary = new HashSet<Token>();
@@ -52,24 +51,10 @@ public class SpellCorrector implements TokenProcessor {
 	}
 	
 	@Override
-	public int process(final TermFrequencyCounter tokens){
-		Set<Token> issueTokensCopy = new HashSet<Token>(tokens.getTokens());
-		int spellCorrections = 0;
-		
-		for(Token token : issueTokensCopy)
-		{
-			if(!isMisspelled(token))
-				continue;
-			Token tokenSpellCorrected = correctWord(token);
-			if(!token.equals(tokenSpellCorrected))
-			{
-				tokens.change(token, tokenSpellCorrected);
-				spellCorrections++;
-				corrections.put(token, tokenSpellCorrected);
-			}
-		}
-		
-		return spellCorrections;
+	public Token process(final Token token){
+		if(!isMisspelled(token))
+			return token;
+		return correctWord(token);
 	}
 	
 	/**
@@ -85,7 +70,7 @@ public class SpellCorrector implements TokenProcessor {
 	}
 	
 	public Token correctWord(CharSequence textSubject){
-		final int threshold = (int) Math.round(Math.log(textSubject.length()-0.2)); 
+		final int threshold = (int) Math.round(Math.log(textSubject.length()-0.6)); 
 		SortedMap<Integer, List<CharSequence>> foundWords = tree.find(textSubject, threshold);
 		return tokenFrom(foundWords, textSubject);
 	}
@@ -94,7 +79,6 @@ public class SpellCorrector implements TokenProcessor {
 		SortedMap<Integer, List<CharSequence>>foundWords = tree.find(textSubject, threshold);
 		return tokenFrom(foundWords, textSubject);
 	}
-
 
 	private Token tokenFrom(SortedMap<Integer, List<CharSequence>> foundWords, CharSequence textSubject)
 	{
@@ -105,10 +89,4 @@ public class SpellCorrector implements TokenProcessor {
 		
 		return new Token(textSubject);
 	}
-	
-	public Map<Token, Token> getCorrections()
-	{
-		return corrections;
-	}
-
 }
