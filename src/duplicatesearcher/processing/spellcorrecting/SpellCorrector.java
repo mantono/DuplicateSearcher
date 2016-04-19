@@ -70,7 +70,10 @@ public class SpellCorrector implements TokenProcessor {
 	}
 	
 	public Token correctWord(CharSequence textSubject){
-		final int threshold = (int) Math.round(Math.log(textSubject.length()-0.6)); 
+		final int threshold = textSubject.length()/5;
+		if(threshold == 0)
+			return new Token(textSubject);
+		
 		SortedMap<Integer, List<CharSequence>> foundWords = tree.find(textSubject, threshold);
 		return tokenFrom(foundWords, textSubject);
 	}
