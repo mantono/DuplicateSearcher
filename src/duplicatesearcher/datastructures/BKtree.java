@@ -55,6 +55,9 @@ public class BKtree
 				values.put(distanceToRoot, new LinkedList<CharSequence>());
 			List<CharSequence> list = values.get(distanceToRoot);
 			list.add(word);
+			
+			if(distanceToRoot == 1)
+				return values;
 		}
 		
 		if(children.isEmpty())
