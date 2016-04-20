@@ -34,48 +34,69 @@ public class StopListTest
 	@Test
 	public void testRemoveStopWordsAllWordsOnOneLine()
 	{
-		TermFrequencyCounter tokens = new TermFrequencyCounter();
-		tokens.add(new Token("hello"));
-		tokens.add(new Token("test"));
-		tokens.add(new Token("and"));
-		tokens.add(new Token("if"));
-		tokens.add(new Token("but"));
-		tokens.add(new Token("yes"));
-		
-		assertEquals(6, tokens.size());
-		final int removedWords = list1.process(tokens);
-		assertEquals(4, removedWords);
-		assertEquals(2, tokens.size());
+		Token output, input;
+
+		input = new Token("hello");
+		output = list1.process(input);
+		assertEquals(input, output);
+
+		input = new Token("test");
+		output = list1.process(input);
+		assertEquals(input, output);
+
+		input = new Token("and");
+		output = list1.process(input);
+		assertEquals(null, output);
+
+		input = new Token("if");
+		output = list1.process(input);
+		assertEquals(null, output);
+
+		input = new Token("but");
+		output = list1.process(input);
+		assertEquals(null, output);
+
+		input = new Token("yes");
+		output = list1.process(input);
+		assertEquals(null, output);
 	}
 	
 	@Test
 	public void testRemoveStopWordsEachWordOnSeparateLine()
 	{
-		TermFrequencyCounter tokens = new TermFrequencyCounter();
-		tokens.add(new Token("hello"));
-		tokens.add(new Token("by"));
-		tokens.add(new Token("and"));
-		tokens.add(new Token("if"));
-		tokens.add(new Token("but"));
-		tokens.add(new Token("yes"));
-		
-		assertEquals(6, tokens.size());
-		final int removedWords = list2.process(tokens);
-		assertEquals(2, removedWords);
-		assertEquals(4, tokens.size());
+		Token output, input;
+
+		input = new Token("hello");
+		output = list2.process(input);
+		assertEquals(input, output);
+
+		input = new Token("by");
+		output = list2.process(input);
+		assertEquals(null, output);
+
+		input = new Token("if");
+		output = list2.process(input);
+		assertEquals(input, output);
+
+		input = new Token("but");
+		output = list2.process(input);
+		assertEquals(input, output);
+
+		input = new Token("yes");
+		output = list2.process(input);
+		assertEquals(input, output);
 	}
 
 	@Test
 	public void testGetStopWords()
 	{
-		TermFrequencyCounter tokens = new TermFrequencyCounter();
+		Set<Token> tokens = new HashSet<Token>();
 		tokens.add(new Token("and"));
 		tokens.add(new Token("if"));
 		tokens.add(new Token("but"));
 		tokens.add(new Token("yes"));
 		tokens.add(new Token("no"));
-		
+
 		assertEquals(tokens, list1.getStopWords());
 	}
-
 }
