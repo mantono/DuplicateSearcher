@@ -45,6 +45,9 @@ public class StrippedIssue implements Serializable
 		this.closed = issue.getClosedAt() != null;
 		this.state = issue.getState();
 		
+		if(issue.getBody() == null)
+			issue.setBody("");
+		
 		CodeExtractor ce = new CodeExtractor(issue, comments);
 		Set<String> foundCode = ce.extractCode();
 		this.code = new TermFrequencyCounter();
