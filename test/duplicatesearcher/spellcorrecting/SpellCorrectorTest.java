@@ -6,13 +6,11 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import duplicatesearcher.Token;
-import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 
 public class SpellCorrectorTest
@@ -28,9 +26,9 @@ public class SpellCorrectorTest
 	@Test
 	public void correctSimpleWordTest()
 	{
-		Token test = new Token("hejs");
+		Token test = new Token("apelsiin");
 		test = testDict.correctWord(test);
-		assertEquals(new Token("hej"), test);
+		assertEquals(new Token("apelsin"), test);
 	}
 
 	@Test
@@ -44,29 +42,18 @@ public class SpellCorrectorTest
 	@Test
 	public void correctWordListTest()
 	{
-		TermFrequencyCounter tokens = new TermFrequencyCounter();
-		Set<Token> expected = new HashSet<Token>();
-
-		tokens.add("hejs"); // hej
-		tokens.add("slanka"); // slank
-		tokens.add("gurkansa"); // oförändrad
-		tokens.add("gurkan"); // gurka
-		tokens.add("regeringen");// oförändrad
-		tokens.add("issueprocessor");// oförändrad
-
-		final int changed = testDict.process(tokens);
-		
-		assertEquals(3, changed);
-
-		expected.add(new Token("hej"));
-		expected.add(new Token("slank"));
-		expected.add(new Token("gurkansa"));
-		expected.add(new Token("gurka"));
-		expected.add(new Token("regeringen"));
-		expected.add(new Token("issueprocessor"));
-
-		assertEquals(expected, tokens.getTokens());
-
+		assertSpell("hejs", "hejs"); // |"hejs"| < 5, so no spell correction
+		assertSpell("slank", "slanka");
+		assertSpell("gurkansa", "gurkansa");
+		assertSpell("gurka", "gurkan");
+		assertSpell("regeringen", "regeringen");
+		assertSpell("issueprocessor", "issueprocessor");
+	}
+	
+	private void assertSpell(final String expected, final String input)
+	{
+		final Token output = testDict.correctWord(input);
+		assertEquals(expected, output.toString());
 	}
 	
 	@Test
@@ -86,6 +73,7 @@ public class SpellCorrectorTest
 		assertEquals(new Token("a"), new Token("a"));
 	}
 	
+	@Ignore
 	@Test
 	public void performanceTest() throws IOException
 	{
