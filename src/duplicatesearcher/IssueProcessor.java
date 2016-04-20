@@ -33,7 +33,7 @@ public class IssueProcessor
 	private final StopList stopListGitHub;
 	private final Stemmer stemmer = new Stemmer();
 	private final SpellCorrector spell;
-	private final Map<Token, Token> processedTokens = new HashMap<Token, Token>(2000);
+	private final Map<Token, Token> processedTokens = new HashMap<Token, Token>(120_000);
 
 	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException
 	{
