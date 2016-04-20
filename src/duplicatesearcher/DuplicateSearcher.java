@@ -48,7 +48,7 @@ public class DuplicateSearcher
 		int processedIssueCount = 0;
 		
 		System.out.println("\nPROCESSING ISSUES");
-		Progress progress = new Progress(finished);
+		Progress progress = new Progress(finished, 5);
 		
 		while(iter.hasNext())
 		{
