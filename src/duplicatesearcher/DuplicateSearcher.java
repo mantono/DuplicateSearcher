@@ -48,7 +48,7 @@ public class DuplicateSearcher
 		int processedIssueCount = 0;
 		
 		System.out.println("\nPROCESSING ISSUES");
-		Progress progress = new Progress(finished);
+		Progress progress = new Progress(finished, 5);
 		
 		while(iter.hasNext())
 		{
@@ -84,7 +84,6 @@ public class DuplicateSearcher
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException
 	{
-		final LocalDateTime start = LocalDateTime.now();
 
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
 		final IssueProcessor processor = new IssueProcessor(
@@ -96,15 +95,23 @@ public class DuplicateSearcher
 				ProcessingFlags.FILTER_BAD
 				);
 		DuplicateSearcher searcher = new DuplicateSearcher(repo, processor);
+		
+		final LocalDateTime startProcessing = LocalDateTime.now();
 		searcher.processIssues();
+		final LocalDateTime endProcessing = LocalDateTime.now();
+		final Duration elpasedTimeProcessing = Duration.between(startProcessing, endProcessing);
+		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
+		
+		final LocalDateTime startAnalysis = endProcessing;
 		searcher.analyzeIssues(0.4);
-
-		final LocalDateTime end = LocalDateTime.now();
+		final LocalDateTime endAnalysis = LocalDateTime.now();
+		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
+		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
 		
 		System.out.println("\n");
 		for(Duplicate d : searcher.getDuplicates())
 			System.out.println(d);
-		final Duration elpasedTime = Duration.between(start, end);
+		final Duration elpasedTime = Duration.between(startProcessing, endAnalysis);
 		System.out.println("Execution time:" + elpasedTime);
 		System.out.println("Found duplicates: " + searcher.getDuplicates().size());
 	}

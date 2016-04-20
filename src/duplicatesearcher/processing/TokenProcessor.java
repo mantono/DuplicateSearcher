@@ -11,10 +11,9 @@ import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 public interface TokenProcessor
 {
 	/**
-	 * 
-	 * @param tokens a {@link TermFrequencyCounter} containing instances of
-	 * {@link Token} which will be modified.
-	 * @return the number of elements that were modified.
+	 * Process a {@link Token}.
+	 * @param token input that will be processed.
+	 * @return a processed version of the original Token that was given as input.
 	 */
-	int process(final TermFrequencyCounter tokens);
+	Token process(final Token token);
 }

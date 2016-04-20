@@ -52,8 +52,8 @@ public class Analyzer
 		if(threshold < 0)
 			throw new IllegalArgumentException("Threshold cannot be negative");
 
-		final int finished = issues.size()*issues.size();
-		progress = new Progress(finished, 1000);
+		final int finished = (issues.size()*issues.size())/2;
+		progress = new Progress(finished, 5000);
 		
 		System.out.println("\nSEARCHING FOR DUPLICATES");
 		
@@ -72,10 +72,7 @@ public class Analyzer
 		Map<Token, Double> queryNormalized = new Normalizer(query).normalizeVector();
 
 		for(StrippedIssue issueInCollection : issues)
-		{
-			progress.increment();
-			progress.print();
-			
+		{			
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
 			
@@ -86,6 +83,9 @@ public class Analyzer
 
 			if(similarity >= threshold)
 				createDuplicate(issue, issueInCollection, similarity, duplicates);
+			
+			progress.increment();
+			progress.print();
 		}
 
 		return duplicates;

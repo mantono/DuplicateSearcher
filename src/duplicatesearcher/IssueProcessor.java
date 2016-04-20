@@ -4,12 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.naming.CommunicationException;
+
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.Stemmer;
-import duplicatesearcher.processing.TokenProcessor;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
 
@@ -26,6 +33,7 @@ public class IssueProcessor
 	private final StopList stopListGitHub;
 	private final Stemmer stemmer = new Stemmer();
 	private final SpellCorrector spell;
+	private final Map<Token, Token> processedTokens = new HashMap<Token, Token>(120_000);
 
 	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException
 	{
@@ -54,41 +62,74 @@ public class IssueProcessor
 		final String pullRequestError = "Pull requests should no longer exist in any data set. Remove this data set and download a new one.";
 		assert issue.getPullRequest().getHtmlUrl() == null: pullRequestError;
 		StrippedIssue strippedIssue = new StrippedIssue(issue, comments); 
-		strippedIssue = process(strippedIssue);
+		strippedIssue = processIssue(strippedIssue);
 		strippedIssue.createFrequencyCounterForAll();
 		return strippedIssue;
 	}
 
-	public StrippedIssue process(final StrippedIssue issue)
+	private StrippedIssue processIssue(StrippedIssue strippedIssue)
+	{
+		processFrequencyCounter(strippedIssue.getTitle());
+		processFrequencyCounter(strippedIssue.getBody());
+		processFrequencyCounter(strippedIssue.getComments());
+		processFrequencyCounter(strippedIssue.getLabels());
+		return strippedIssue;
+	}
+
+	private void processFrequencyCounter(TermFrequencyCounter counter)
+	{
+		Set<Token> iterationSet = new HashSet<Token>(counter.getTokens());
+		for(Token input : iterationSet)
+		{
+			if(input == null)
+				continue;
+			Token output;
+			
+			if(processedTokens.containsKey(input))
+			{
+				output = processedTokens.get(input);
+			}
+			else
+			{
+				output = process(input);
+				processedTokens.put(input, output);
+			}
+			
+			if(output == null)
+				counter.remove(input);
+			else if(!input.equals(output))
+				counter.change(input, output);
+		}
+	}
+
+	public Token process(Token token)
 	{
 		for(ProcessingFlags flag : flags)
-			applyProcess(issue, flag);
+		{
+			token = applyProcess(token, flag);
+			if(token == null)
+				return null;
+		}
 
-		return issue;
+		return token;
 	}
 
 
-	private void applyProcess(StrippedIssue issue, ProcessingFlags flag)
+	private Token applyProcess(Token token, ProcessingFlags flag)
 	{
 		switch(flag)
 		{
-			case PARSE_COMMENTS: issue.removeComments(); break;
-			case SPELL_CORRECTION: apply(issue, spell); break;
-			case STOP_LIST_COMMON: apply(issue, stopListCommon); break;
-			case STOP_LIST_GITHUB: apply(issue, stopListGitHub); break;
+			//case PARSE_COMMENTS: issue.removeComments(); break;
+			case SPELL_CORRECTION: return spell.process(token);
+			case STOP_LIST_COMMON: return stopListCommon.process(token);
+			case STOP_LIST_GITHUB: return stopListGitHub.process(token);
 			case STOP_LIST_TEMPLATE_DYNAMIC: System.out.println("Not implemented"); break;
 			case STOP_LIST_TEMPLATE_STATIC: System.out.println("Not implemented"); break;
 			case SYNONYMS: System.out.println("Not implemented"); break;
-			case STEMMING: apply(issue, stemmer); break;
-			case FILTER_BAD: issue.checkQuality(); break;
+			case STEMMING: return stemmer.process(token);
+			//case FILTER_BAD: issue.checkQuality(); break;
 		}
-	}
-	
-	private void apply(StrippedIssue issue, TokenProcessor processor)
-	{
-		processor.process(issue.getTitle());
-		processor.process(issue.getBody());
-		processor.process(issue.getComments());
+		return token;
 	}
 
 }
