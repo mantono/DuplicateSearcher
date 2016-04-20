@@ -6,16 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedMap;
 
 import duplicatesearcher.Token;
-import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.datastructures.BKtree;
 import duplicatesearcher.processing.TokenProcessor;
 import duplicatesearcher.processing.Tokenizer;
