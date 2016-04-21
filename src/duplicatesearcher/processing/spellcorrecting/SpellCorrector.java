@@ -40,7 +40,7 @@ public class SpellCorrector implements TokenProcessor {
 		{
 			final Tokenizer tokenizer = new Tokenizer(line);
 			for(Token token : tokenizer.getTokens())
-				if(dictionary.add(token) && tree.insert(line))
+				if(dictionary.add(token) && tree.insert(token))
 					addedWords++;
 		}
 		return addedWords;
