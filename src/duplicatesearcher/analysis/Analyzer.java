@@ -62,17 +62,17 @@ public class Analyzer
 		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
 
 		final Map<Token, Double> query = weightMap(issue.getAll());
-		Map<Token, Double> queryNormalized = new Normalizer(query).normalizeVector();
+		Map<Token, Double> queryNormalized = Normalizer.normalizeVector(query);
 
 		for(StrippedIssue issueInCollection : issues)
 		{
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
 			
-			Map<Token, Double> issueWeight = weightMap(issueInCollection.getAll());
-			issueWeight = new Normalizer(issueWeight).normalizeVector();
+			final Map<Token, Double> document = weightMap(issueInCollection.getAll());
+			final Map<Token, Double> documentNormalized = Normalizer.normalizeVector(documentNormalized);
 
-			final double similarity = vectorMultiplication(issueWeight, queryNormalized);
+			final double similarity = vectorMultiplication(documentNormalized, queryNormalized);
 
 			if(similarity >= threshold)
 				createDuplicate(issue, issueInCollection, similarity, duplicates);
