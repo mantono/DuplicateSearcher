@@ -82,7 +82,7 @@ public class DuplicateSearcher
 		return duplicates;
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, IOException
+	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException
 	{
 
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
@@ -91,6 +91,7 @@ public class DuplicateSearcher
 				ProcessingFlags.SPELL_CORRECTION,
 				ProcessingFlags.STOP_LIST_COMMON,
 				ProcessingFlags.STOP_LIST_GITHUB,
+				ProcessingFlags.SYNONYMS,
 				ProcessingFlags.STEMMING,
 				ProcessingFlags.FILTER_BAD
 				);
