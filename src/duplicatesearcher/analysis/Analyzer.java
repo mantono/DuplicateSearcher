@@ -1,6 +1,7 @@
 package duplicatesearcher.analysis;
 
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,8 +39,8 @@ public class Analyzer
 
 	private void addTokenData(StrippedIssue issue)
 	{
-		idfCounter.add(issue.getNumber(), issue.getAll().getTokens());
-		labelIdfCounter.add(issue.getNumber(), issue.getLabels().getTokens());
+		idfCounter.add(issue.getNumber(), issue.getComponent(IssueComponent.ALL).getTokens());
+		labelIdfCounter.add(issue.getNumber(), issue.getComponent(IssueComponent.LABELS).getTokens());
 	}
 
 	public boolean add(final StrippedIssue issue)
@@ -69,40 +70,18 @@ public class Analyzer
 	public Set<Duplicate> findDuplicates(final StrippedIssue issue, final double threshold)
 	{
 		final Set<Duplicate> duplicates = new HashSet<Duplicate>();
-
-		final Map<Token, Double> queryAll = weightMap(issue.getAll());
-		Map<Token, Double> queryAllNormalized = Normalizer.normalizeVector(queryAll);
 		
-		final Map<Token, Double> queryBody = weightMap(issue.getBody());
-		Map<Token, Double> queryBodyNormalized = Normalizer.normalizeVector(queryBody);
-		
-		final Map<Token, Double> queryTitle = weightMap(issue.getTitle());
-		Map<Token, Double> queryTitleNormalized = Normalizer.normalizeVector(queryTitle);
-		
-		final Map<Token, Double> queryComments = weightMap(issue.getComments());
-		Map<Token, Double> queryCommentsNormalized = Normalizer.normalizeVector(queryComments);
-		
-		final Map<Token, Double> queryLabels = weightMap(issue.getLabels());
-		Map<Token, Double> queryLabelsNormalized = Normalizer.normalizeVector(queryLabels);
-		
-		final Map<Token, Double> queryCode = weightMap(issue.getCode());
-		Map<Token, Double> queryCodeNormalized = Normalizer.normalizeVector(queryCode);
+		final Map<IssueComponent, Map<Token, Double>> queryNormalized = createQueryMap(issue);
 
 		for(StrippedIssue issueInCollection : issues)
 		{			
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
-			double similarityAll, similarityBody, similarityComments, similarityTitle, similarityLabel, similarityCode;
-			similarityAll = similarityBody = similarityComments = similarityTitle = similarityLabel = similarityCode = 0;
 			
-			similarityAll = calculateSimilarity(weights.all(), issueInCollection.getAll(), queryAllNormalized);
-			similarityBody = calculateSimilarity(weights.body(), issueInCollection.getBody(), queryBodyNormalized);
-			similarityTitle = calculateSimilarity(weights.title(), issueInCollection.getTitle(), queryTitleNormalized);
-			similarityComments = calculateSimilarity(weights.comments(), issueInCollection.getComments(), queryCommentsNormalized);
-			similarityLabel = calculateSimilarity(weights.labels(), issueInCollection.getLabels(), queryLabelsNormalized);
-			similarityCode = calculateSimilarity(weights.code(), issueInCollection.getCode(), queryCodeNormalized);
+			double similarity = 0;
 			
-			final double similarity = similarityAll + similarityBody + similarityTitle + similarityComments + similarityLabel + similarityCode;
+			for(IssueComponent comp : IssueComponent.values())
+				similarity += calculateSimilarity(weights.getWeight(comp), issueInCollection.getComponent(comp), queryNormalized.get(comp));
 			
 			if(similarity >= threshold)
 				createDuplicate(issue, issueInCollection, similarity, duplicates);
@@ -113,7 +92,21 @@ public class Analyzer
 
 		return duplicates;
 	}
-	
+
+	private Map<IssueComponent, Map<Token, Double>> createQueryMap(final StrippedIssue issue)
+	{
+		final Map<IssueComponent, Map<Token, Double>> map = new EnumMap<IssueComponent, Map<Token, Double>>(IssueComponent.class);
+
+		for(IssueComponent comp : IssueComponent.values())
+		{
+			final Map<Token, Double> query = weightMap(issue.getComponent(comp));
+			Map<Token, Double> normalized = Normalizer.normalizeVector(query);
+			map.put(comp, normalized);
+		}
+		
+		return map;
+	}
+
 	private double calculateSimilarity(final double weight, final TermFrequencyCounter issue, Map<Token, Double> queryMap)
 	{
 		if(weight == 0)

@@ -3,14 +3,17 @@ package duplicatesearcher;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 
+import duplicatesearcher.analysis.IssueComponent;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.CodeExtractor;
 
@@ -29,7 +32,7 @@ public class StrippedIssue implements Serializable
 	private static final long serialVersionUID = -5824632540290288567L;
 	private final int number, userId;
 	private final Date dateCreated, dateUpdated;
-	private TermFrequencyCounter all, title, body, comments, code, labels;
+	private final Map<IssueComponent, TermFrequencyCounter> componentCounters;
 	private final boolean closed;
 	private final String state;
 	private boolean flaggedBad = false;
@@ -40,33 +43,51 @@ public class StrippedIssue implements Serializable
 		this.dateCreated = issue.getCreatedAt();
 		this.dateUpdated = issue.getUpdatedAt();
 		this.userId = issue.getUser().getId();
-		this.labels = parseLabels(issue.getLabels());
 		
 		this.closed = issue.getClosedAt() != null;
 		this.state = issue.getState();
 		
+		this.componentCounters = new EnumMap<IssueComponent, TermFrequencyCounter>(IssueComponent.class);
+		
 		if(issue.getBody() == null)
 			issue.setBody("");
 		
-		CodeExtractor ce = new CodeExtractor(issue, comments);
-		Set<String> foundCode = ce.extractCode();
-		this.code = new TermFrequencyCounter();
-		this.code.addAll(foundCode);
-
-		this.title = new TermFrequencyCounter();
-		title.add(issue.getTitle());
-		
-		this.body = new TermFrequencyCounter();
-		body.add(issue.getBody());
-		
-		this.comments = mapStrings(comments);
+		createTermCounters(issue, comments);
 	}
 
 	public StrippedIssue(final Issue issue)
 	{
 		this(issue, new LinkedList<Comment>());
 	}
-	
+
+	private void createTermCounters(Issue issue, List<Comment> comments)
+	{
+		CodeExtractor ce = new CodeExtractor(issue, comments);
+		Set<String> foundCode = ce.extractCode();
+		final TermFrequencyCounter codeCounter = new TermFrequencyCounter();
+		codeCounter.addAll(foundCode);
+		this.componentCounters.put(IssueComponent.CODE, codeCounter);
+		
+		final TermFrequencyCounter titleCounter = new TermFrequencyCounter();
+		titleCounter.add(issue.getTitle());
+		this.componentCounters.put(IssueComponent.TITLE, titleCounter);
+		
+		final TermFrequencyCounter bodyCounter = new TermFrequencyCounter();
+		bodyCounter.add(issue.getBody());
+		this.componentCounters.put(IssueComponent.BODY, bodyCounter);
+		
+		final TermFrequencyCounter commentCounter = mapStrings(comments);	
+		this.componentCounters.put(IssueComponent.COMMENTS, commentCounter);
+		
+		this.componentCounters.put(IssueComponent.LABELS, parseLabels(issue.getLabels()));
+		
+		final TermFrequencyCounter allCounter = new TermFrequencyCounter();
+		allCounter.add(componentCounters.get(IssueComponent.TITLE));
+		allCounter.add(componentCounters.get(IssueComponent.BODY));
+		allCounter.add(componentCounters.get(IssueComponent.COMMENTS));
+		this.componentCounters.put(IssueComponent.ALL, allCounter);
+	}
+
 	private TermFrequencyCounter mapStrings(Collection<Comment> commentData)
 	{
 		final TermFrequencyCounter freq = new TermFrequencyCounter();
@@ -104,58 +125,9 @@ public class StrippedIssue implements Serializable
 		return number;
 	}
 	
-	public double getWeight(final Token token)
+	public TermFrequencyCounter getComponent(IssueComponent component)
 	{
-		return all.getWeight(token);
-	}
-	
-	public TermFrequencyCounter getAll()
-	{
-		return all;
-	}
-	
-	public TermFrequencyCounter getTitle()
-	{
-		return title;
-	}
-	
-	public TermFrequencyCounter getBody()
-	{
-		return body;
-	}
-	
-	public TermFrequencyCounter getComments()
-	{
-		return comments;
-	}
-	
-	public TermFrequencyCounter getLabels()
-	{
-		return labels;
-	}
-	
-	public TermFrequencyCounter getCode()
-	{
-		return code;
-	}
-	
-	public void removeComments()
-	{
-		comments = new TermFrequencyCounter();
-		if(all != null && all.size() > 0)
-		{
-			all = new TermFrequencyCounter();
-			all.add(title);
-			all.add(body);
-		}
-	}
-	
-	public void createFrequencyCounterForAll()
-	{
-		all = new TermFrequencyCounter();
-		all.add(title);
-		all.add(body);
-		all.add(this.comments);
+		return componentCounters.get(component);
 	}
 
 	public int getUserId()
@@ -191,6 +163,8 @@ public class StrippedIssue implements Serializable
 
 	public void checkQuality()
 	{
-		flaggedBad = (title.size() + body.size()) < 6;
+		final int titleSize = componentCounters.get(IssueComponent.TITLE).size();
+		final int bodySize = componentCounters.get(IssueComponent.BODY).size();
+		flaggedBad = titleSize + bodySize < 6;
 	}
 }

@@ -13,6 +13,7 @@ import java.util.Set;
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 
+import duplicatesearcher.analysis.IssueComponent;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.Stemmer;
 import duplicatesearcher.processing.SynonymFinder;
@@ -20,14 +21,14 @@ import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
 
 /**
- * IssueProcessor controls and interacts with all other major components used for
- * parsing and manipulating issues.
- *
+ * IssueProcessor controls and interacts with all other major components used
+ * for parsing and manipulating issues.
+ * 
  */
 public class IssueProcessor
 {
 	private final EnumSet<ProcessingFlags> flags;
-	
+
 	private final StopList stopListCommon;
 	private final StopList stopListGitHub;
 	private final Stemmer stemmer = new Stemmer();
@@ -67,16 +68,14 @@ public class IssueProcessor
 		assert issue.getPullRequest().getHtmlUrl() == null: pullRequestError;
 		StrippedIssue strippedIssue = new StrippedIssue(issue, comments); 
 		strippedIssue = processIssue(strippedIssue);
-		strippedIssue.createFrequencyCounterForAll();
 		return strippedIssue;
 	}
 
 	private StrippedIssue processIssue(StrippedIssue strippedIssue)
 	{
-		processFrequencyCounter(strippedIssue.getTitle());
-		processFrequencyCounter(strippedIssue.getBody());
-		processFrequencyCounter(strippedIssue.getComments());
-		processFrequencyCounter(strippedIssue.getLabels());
+		for(IssueComponent component : IssueComponent.values())
+			processFrequencyCounter(strippedIssue.getComponent(component));
+		
 		return strippedIssue;
 	}
 
@@ -88,7 +87,7 @@ public class IssueProcessor
 			if(input == null)
 				continue;
 			Token output;
-			
+
 			if(processedTokens.containsKey(input))
 			{
 				output = processedTokens.get(input);
@@ -98,7 +97,7 @@ public class IssueProcessor
 				output = process(input);
 				processedTokens.put(input, output);
 			}
-			
+
 			if(output == null)
 				counter.remove(input);
 			else if(!input.equals(output))

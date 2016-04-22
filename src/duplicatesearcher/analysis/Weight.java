@@ -1,8 +1,11 @@
 package duplicatesearcher.analysis;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public class Weight
 {
-	private final double title, body, comments, all, labels, code;
+	private final Map<IssueComponent, Double> values = new EnumMap<IssueComponent, Double>(IssueComponent.class);
 	
 	public Weight(final double title, final double body, final double comments, final double labels, final double code)
 	{
@@ -15,42 +18,17 @@ public class Weight
 			throw new IllegalArgumentException("Negative weights are not allowed");
 		
 		double sumDivider = title + body + comments + all + labels + code;
-		this.title = title/sumDivider;
-		this.body = body/sumDivider;
-		this.comments = comments/sumDivider;
-		this.all = all/sumDivider;
-		this.labels = labels/sumDivider;
-		this.code = code/sumDivider;
-	}
-
-	
-	public double title()
-	{
-		return title;
-	}
-
-	public double body()
-	{
-		return body;
-	}
-
-	public double comments()
-	{
-		return comments;
-	}
-
-	public double all()
-	{
-		return all;
-	}
-
-	public double labels()
-	{
-		return labels;
+			
+		values.put(IssueComponent.TITLE, title/sumDivider);
+		values.put(IssueComponent.BODY, body/sumDivider);
+		values.put(IssueComponent.COMMENTS, comments/sumDivider);
+		values.put(IssueComponent.ALL, all/sumDivider);
+		values.put(IssueComponent.LABELS, labels/sumDivider);
+		values.put(IssueComponent.CODE, code/sumDivider);
 	}
 	
-	public double code()
+	public double getWeight(final IssueComponent component)
 	{
-		return code;
+		return values.get(component);
 	}
 }
