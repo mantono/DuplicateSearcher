@@ -14,6 +14,7 @@ import duplicatesearcher.StrippedIssue;
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.FrequencyCounter;
 import duplicatesearcher.analysis.frequency.InverseDocumentFrequencyCounter;
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 
 public class Analyzer
 {
@@ -80,51 +81,42 @@ public class Analyzer
 		
 		final Map<Token, Double> queryLabels = weightMap(issue.getLabels());
 		Map<Token, Double> queryLabelsNormalized = Normalizer.normalizeVector(queryLabels);
+		
+		final Map<Token, Double> queryCode = weightMap(issue.getCode());
+		Map<Token, Double> queryCodeNormalized = Normalizer.normalizeVector(queryCode);
 
 		for(StrippedIssue issueInCollection : issues)
 		{
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
-			double similarityAll, similarityBody, similarityComments, similarityTitle, similarityLabel;
-			similarityAll = similarityBody = similarityComments = similarityTitle = similarityLabel = 0;
+			double similarityAll, similarityBody, similarityComments, similarityTitle, similarityLabel, similarityCode;
+			similarityAll = similarityBody = similarityComments = similarityTitle = similarityLabel = similarityCode = 0;
 			
-			if(weights.all()!=0){
-				final Map<Token, Double> documentAll = weightMap(issueInCollection.getAll());
-				final Map<Token, Double> documentAllNormalized = Normalizer.normalizeVector(documentAll);
-				similarityAll = weights.all()*(vectorMultiplication(documentAllNormalized, queryAllNormalized));
-			}
+			similarityAll = calculateSimilarity(weights.all(), issueInCollection.getAll(), queryAllNormalized);
+			similarityBody = calculateSimilarity(weights.body(), issueInCollection.getBody(), queryBodyNormalized);
+			similarityTitle = calculateSimilarity(weights.title(), issueInCollection.getTitle(), queryTitleNormalized);
+			similarityComments = calculateSimilarity(weights.comments(), issueInCollection.getComments(), queryCommentsNormalized);
+			similarityLabel = calculateSimilarity(weights.labels(), issueInCollection.getLabels(), queryLabelsNormalized);
+			similarityCode = calculateSimilarity(weights.code(), issueInCollection.getCode(), queryCodeNormalized);
 			
-			if(weights.body()!=0){
-				final Map<Token, Double> documentBody = weightMap(issueInCollection.getBody());
-				final Map<Token, Double> documentBodyNormalized = Normalizer.normalizeVector(documentBody);
-				similarityBody = weights.body()*(vectorMultiplication(documentBodyNormalized, queryBodyNormalized));
-			}
-			
-			if(weights.title()!=0){
-				final Map<Token, Double> documentTitle = weightMap(issueInCollection.getTitle());
-				final Map<Token, Double> documentTitleNormalized = Normalizer.normalizeVector(documentTitle);
-				similarityTitle = weights.title()*(vectorMultiplication(documentTitleNormalized, queryTitleNormalized));
-			}
-			
-			if(weights.comments()!=0){
-				final Map<Token, Double> documentComments = weightMap(issueInCollection.getAll());
-				final Map<Token, Double> documentCommentsNormalized = Normalizer.normalizeVector(documentComments);
-				similarityComments = weights.comments()*(vectorMultiplication(documentCommentsNormalized, queryCommentsNormalized));
-			}
-			
-			if(weights.labels()!=0){
-				final Map<Token, Double> documentLabels = weightMap(issueInCollection.getLabels());
-				final Map<Token, Double> documentLabelsNormalized = Normalizer.normalizeVector(documentLabels);
-				similarityLabel = weights.labels()*(vectorMultiplication(documentLabelsNormalized, queryLabelsNormalized));
-			}
-			
-			final double similarity = similarityAll + similarityBody + similarityTitle + similarityComments + similarityLabel;
+			final double similarity = similarityAll + similarityBody + similarityTitle + similarityComments + similarityLabel + similarityCode;
 			
 			if(similarity >= threshold)
 				createDuplicate(issue, issueInCollection, similarity, duplicates);
 		}
 
 		return duplicates;
+	}
+	
+	private double calculateSimilarity(final double weight, final TermFrequencyCounter issue, Map<Token, Double> queryMap)
+	{
+		if(weight == 0)
+			return 0;
+		
+		final Map<Token, Double> document = weightMap(issue);
+		final Map<Token, Double> documentNormalized = Normalizer.normalizeVector(document);
+		final double cosineSimilarity = weight*(vectorMultiplication(documentNormalized, queryMap));
+		return cosineSimilarity;
 	}
 
 	private double vectorMultiplication(Map<Token, Double> vector1, Map<Token, Double> vector2)

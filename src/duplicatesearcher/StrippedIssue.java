@@ -182,6 +182,11 @@ public class StrippedIssue implements Serializable
 	{
 		return labels;
 	}
+	
+	public TermFrequencyCounter getCode()
+	{
+		return code;
+	}
 
 	public int getUserId()
 	{
