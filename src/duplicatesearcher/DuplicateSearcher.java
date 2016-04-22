@@ -84,7 +84,7 @@ public class DuplicateSearcher
 				);
 		DuplicateSearcher searcher = new DuplicateSearcher(repo, processor);
 		searcher.processIssues();
-		searcher.analyzeIssues(0.4, new Weight(0.5,0.1,0.0,0.0,0.4));
+		searcher.analyzeIssues(0.4, new Weight(500,250,0,0,300));
 
 		final LocalDateTime end = LocalDateTime.now();
 		System.out.println(searcher.getDuplicates());

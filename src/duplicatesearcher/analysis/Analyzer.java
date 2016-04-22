@@ -85,27 +85,38 @@ public class Analyzer
 		{
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
+			double similarityAll, similarityBody, similarityComments, similarityTitle, similarityLabel;
+			similarityAll = similarityBody = similarityComments = similarityTitle = similarityLabel = 0;
 			
-			final Map<Token, Double> documentAll = weightMap(issueInCollection.getAll());
-			final Map<Token, Double> documentAllNormalized = Normalizer.normalizeVector(documentAll);
-		
-			final Map<Token, Double> documentBody = weightMap(issueInCollection.getBody());
-			final Map<Token, Double> documentBodyNormalized = Normalizer.normalizeVector(documentBody);
+			if(weights.all()!=0){
+				final Map<Token, Double> documentAll = weightMap(issueInCollection.getAll());
+				final Map<Token, Double> documentAllNormalized = Normalizer.normalizeVector(documentAll);
+				similarityAll = weights.all()*(vectorMultiplication(documentAllNormalized, queryAllNormalized));
+			}
 			
-			final Map<Token, Double> documentTitle = weightMap(issueInCollection.getTitle());
-			final Map<Token, Double> documentTitleNormalized = Normalizer.normalizeVector(documentTitle);
+			if(weights.body()!=0){
+				final Map<Token, Double> documentBody = weightMap(issueInCollection.getBody());
+				final Map<Token, Double> documentBodyNormalized = Normalizer.normalizeVector(documentBody);
+				similarityBody = weights.body()*(vectorMultiplication(documentBodyNormalized, queryBodyNormalized));
+			}
 			
-			final Map<Token, Double> documentComments = weightMap(issueInCollection.getAll());
-			final Map<Token, Double> documentCommentsNormalized = Normalizer.normalizeVector(documentComments);
+			if(weights.title()!=0){
+				final Map<Token, Double> documentTitle = weightMap(issueInCollection.getTitle());
+				final Map<Token, Double> documentTitleNormalized = Normalizer.normalizeVector(documentTitle);
+				similarityTitle = weights.title()*(vectorMultiplication(documentTitleNormalized, queryTitleNormalized));
+			}
 			
-			final Map<Token, Double> documentLabels = weightMap(issueInCollection.getLabels());
-			final Map<Token, Double> documentLabelsNormalized = Normalizer.normalizeVector(documentLabels);
-
-			final double similarityAll = weights.all()*(vectorMultiplication(documentAllNormalized, queryAllNormalized));
-			final double similarityBody = weights.body()*(vectorMultiplication(documentBodyNormalized, queryBodyNormalized));
-			final double similarityTitle = weights.title()*(vectorMultiplication(documentTitleNormalized, queryTitleNormalized));
-			final double similarityComments = weights.comments()*(vectorMultiplication(documentCommentsNormalized, queryCommentsNormalized));
-			final double similarityLabel = weights.labels()*(vectorMultiplication(documentLabelsNormalized, queryLabelsNormalized));
+			if(weights.comments()!=0){
+				final Map<Token, Double> documentComments = weightMap(issueInCollection.getAll());
+				final Map<Token, Double> documentCommentsNormalized = Normalizer.normalizeVector(documentComments);
+				similarityComments = weights.comments()*(vectorMultiplication(documentCommentsNormalized, queryCommentsNormalized));
+			}
+			
+			if(weights.labels()!=0){
+				final Map<Token, Double> documentLabels = weightMap(issueInCollection.getLabels());
+				final Map<Token, Double> documentLabelsNormalized = Normalizer.normalizeVector(documentLabels);
+				similarityLabel = weights.labels()*(vectorMultiplication(documentLabelsNormalized, queryLabelsNormalized));
+			}
 			
 			final double similarity = similarityAll + similarityBody + similarityTitle + similarityComments + similarityLabel;
 			

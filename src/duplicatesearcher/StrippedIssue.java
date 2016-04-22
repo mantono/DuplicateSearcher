@@ -30,7 +30,6 @@ public class StrippedIssue implements Serializable
 	private static final long serialVersionUID = -5824632540290288567L;
 	private final int number, userId;
 	private final Date dateCreated, dateUpdated;
-	//private final Set<Label> labels;
 	private TermFrequencyCounter all, title, body, comments, code, labels;
 	private final boolean closed;
 	private final String state;
