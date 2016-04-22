@@ -10,9 +10,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import duplicatesearcher.Token;
+import duplicatesearcher.processing.TokenProcessor;
 import duplicatesearcher.processing.Tokenizer;
 
-public class StopList
+public class StopList implements TokenProcessor
 {
 	private final Set<Token> stopWords = new HashSet<Token>();
 
@@ -35,25 +36,21 @@ public class StopList
 		}
 	}
 
-	/**
-	 * Removes all tokens that are present in the stop word list from the given input set.
-	 * @param input the {@link Set} from which stop words will be removed.
-	 * @return the amount of words that were removed.
-	 */
-	public int removeStopWords(Set<Token> input)
+	@Override
+	public Token process(Token token)
 	{
-		final int sizeBefore = input.size();
-		input.removeAll(stopWords);
-		return sizeBefore - input.size();
+		if(!stopWords.contains(token))
+			return token;
+		return null;
 	}
-	
+
 	/**
 	 * Retrieves the content of this stop list.
+	 * 
 	 * @return a set of tokens which consists of the current stop list.
 	 */
 	public Set<Token> getStopWords()
 	{
 		return stopWords;
 	}
-
 }

@@ -15,6 +15,9 @@ public class Tokenizer
 	private final static String APOSTROPHE = "'";
 	private final static String URL = "http[s]?://[\\w+\\.]+\\w{2,}[/\\w]*";
 	private final static String DOMAIN = "\\b[\\w+.]*\\w+\\.\\w{2,}[/\\w]*";
+	private final static String NUMBER = "\\b(\\d+[.|,]?)";
+	private final static String USERNAME ="@\\w[\\w-]*\\b(?![-.])";
+
 	private final String data;
 	
 	public Tokenizer(final String input)
@@ -32,6 +35,8 @@ public class Tokenizer
 	public String[] tokenize(String input)
 	{
 		input = input.toLowerCase();
+		input = removeUsernames(input);
+		input = removeNumbers(input);
 		input = removeURLs(input);
 		input = removeApostrophes(input);
 		input = removeEmojis(input);
@@ -77,6 +82,16 @@ public class Tokenizer
 	public String[] split(String input)
 	{
 		return input.trim().split("[\\s]+");
+	}
+	
+	public String removeNumbers(String input)
+	{
+		return input.replaceAll(NUMBER, "");
+	}
+	
+	public String removeUsernames(String input)
+	{
+		return input.replaceAll(USERNAME, "");
 	}
 	
 	public static boolean isToken(final CharSequence input)

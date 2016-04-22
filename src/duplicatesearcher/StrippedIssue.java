@@ -3,7 +3,7 @@ package duplicatesearcher;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -11,7 +11,6 @@ import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 
-import duplicatesearcher.analysis.frequency.FrequencyCounter;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.CodeExtractor;
 
@@ -41,11 +40,13 @@ public class StrippedIssue implements Serializable
 		this.dateCreated = issue.getCreatedAt();
 		this.dateUpdated = issue.getUpdatedAt();
 		this.userId = issue.getUser().getId();
-		this.labels = new TermFrequencyCounter();
-		labels.addLabels(issue.getLabels());
+		this.labels = parseLabels(issue.getLabels());
 		
 		this.closed = issue.getClosedAt() != null;
 		this.state = issue.getState();
+		
+		if(issue.getBody() == null)
+			issue.setBody("");
 		
 		CodeExtractor ce = new CodeExtractor(issue, comments);
 		Set<String> foundCode = ce.extractCode();
@@ -63,47 +64,9 @@ public class StrippedIssue implements Serializable
 
 	public StrippedIssue(final Issue issue)
 	{
-		this.number = issue.getNumber();
-		this.dateCreated = issue.getCreatedAt();
-		this.dateUpdated = issue.getUpdatedAt();
-		this.userId = issue.getUser().getId();
-		this.labels = new TermFrequencyCounter();
-		labels.addLabels(issue.getLabels());
-		
-		this.closed = issue.getClosedAt() != null;
-		this.state = issue.getState();
-		
-		this.title = new TermFrequencyCounter();
-		title.add(issue.getTitle());
-		
-		this.body = new TermFrequencyCounter();
-		body.add(issue.getBody());
-		
-		this.comments = new TermFrequencyCounter();
+		this(issue, new LinkedList<Comment>());
 	}
 	
-	public StrippedIssue(int number, int userId, Date created, Date updated, Set<Label> labelSet, String title, String body, Collection<Comment> comments, boolean closed, String state)
-	{
-		this.number = number;
-		this.userId = userId;
-		
-		this.dateCreated = created;
-		this.dateUpdated = updated;
-		
-		this.labels = new TermFrequencyCounter();
-		labels.addLabels(labelSet);
-		
-		this.title = new TermFrequencyCounter();
-		this.title.add(title);
-		
-		this.body = new TermFrequencyCounter();
-		this.body.add(body);
-		this.comments = mapStrings(comments);
-		
-		this.closed = closed;
-		this.state = state;
-	}
-
 	private TermFrequencyCounter mapStrings(Collection<Comment> commentData)
 	{
 		final TermFrequencyCounter freq = new TermFrequencyCounter();
@@ -111,6 +74,15 @@ public class StrippedIssue implements Serializable
 			freq.add(comment.getBody());
 		
 		return freq;
+	}
+
+	private TermFrequencyCounter parseLabels(List<Label> labelsInList)
+	{
+		final TermFrequencyCounter labelCounter = new TermFrequencyCounter();
+		for(Label label : labelsInList)
+			labelCounter.add(label.getName().toLowerCase().replaceAll("\\s", ""));
+		
+		return labelCounter;
 	}
 
 	/**
@@ -121,8 +93,6 @@ public class StrippedIssue implements Serializable
 	 */
 	public boolean isViable()
 	{
-		if(title.size() + body.size() < 8)
-			System.out.println("Possible low quality/non-viable issue: " + number);
 		return !flaggedBad;
 	}
 
@@ -159,6 +129,16 @@ public class StrippedIssue implements Serializable
 		return comments;
 	}
 	
+	public TermFrequencyCounter getLabels()
+	{
+		return labels;
+	}
+	
+	public TermFrequencyCounter getCode()
+	{
+		return code;
+	}
+	
 	public void removeComments()
 	{
 		comments = new TermFrequencyCounter();
@@ -176,16 +156,6 @@ public class StrippedIssue implements Serializable
 		all.add(title);
 		all.add(body);
 		all.add(this.comments);
-	}
-
-	public TermFrequencyCounter getLabels()
-	{
-		return labels;
-	}
-	
-	public TermFrequencyCounter getCode()
-	{
-		return code;
 	}
 
 	public int getUserId()
@@ -217,5 +187,10 @@ public class StrippedIssue implements Serializable
 	public String toString()
 	{
 		return "" + number;
+	}
+
+	public void checkQuality()
+	{
+		flaggedBad = (title.size() + body.size()) < 6;
 	}
 }

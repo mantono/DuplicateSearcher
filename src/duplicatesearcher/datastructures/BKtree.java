@@ -6,22 +6,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import duplicatesearcher.Token;
 import duplicatesearcher.processing.spellcorrecting.LevenshteinDistance;
 
 public class BKtree
 {
 	private final static LevenshteinDistance LEVENSHTEIN = new LevenshteinDistance();
-	private final CharSequence word;
-	private final Map<Byte, BKtree> children = new TreeMap<Byte, BKtree>();
+	private final Token word;
+	private final Map<Integer, BKtree> children = new TreeMap<Integer, BKtree>();
 
-	public BKtree(final CharSequence word)
+	public BKtree(final Token word)
 	{
 		this.word = word;
 	}
 
-	public boolean insert(final CharSequence word)
+	public boolean insert(final Token word)
 	{
-		final byte distance = (byte) (int) LEVENSHTEIN.apply(this.word, word);
+		final int distance = LEVENSHTEIN.apply(this.word, word);
 		
 		if(distance == 0)
 			return false;
@@ -55,16 +57,19 @@ public class BKtree
 				values.put(distanceToRoot, new LinkedList<CharSequence>());
 			List<CharSequence> list = values.get(distanceToRoot);
 			list.add(word);
+			
+			if(distanceToRoot == 1)
+				return values;
 		}
 		
 		if(children.isEmpty())
 			return values;
 		
-		Iterator<Byte> iter = children.keySet().iterator();	
+		Iterator<Integer> iter = children.keySet().iterator();	
 		
 		while(iter.hasNext())
 		{
-			final byte childKey = iter.next();
+			final int childKey = iter.next();
 			if(withinBounds(lowerBound, upperBound, childKey))
 			{
 				final BKtree subtree = children.get(childKey);
@@ -75,7 +80,7 @@ public class BKtree
 		return values;
 	}
 
-	private boolean withinBounds(int lowerBound, int upperBound, byte childKey)
+	private boolean withinBounds(int lowerBound, int upperBound, int childKey)
 	{
 		final boolean passLowerBound = childKey >= lowerBound && childKey > 0;
 		final boolean passUpperBound = childKey <= upperBound;

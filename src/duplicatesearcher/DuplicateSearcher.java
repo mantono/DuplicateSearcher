@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedSet;
-
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
@@ -27,7 +25,7 @@ public class DuplicateSearcher
 	private final Set<StrippedIssue> processedIssues;
 	private final IssueProcessor processor;
 	private Analyzer analyzer;
-	private SortedSet<Duplicate> duplicates;
+	private Set<Duplicate> duplicates;
 
 	public DuplicateSearcher(final RepositoryId repo, final IssueProcessor processor) throws ClassNotFoundException, IOException
 	{
@@ -43,7 +41,12 @@ public class DuplicateSearcher
 	{
 		processedIssues.clear();
 		Iterator<Entry<Issue, List<Comment>>> iter = issueData.entrySet().iterator();
-
+		
+		final double finished = issueData.entrySet().size();
+		
+		System.out.println("\nPROCESSING ISSUES");
+		Progress progress = new Progress(finished, 5);
+		
 		while(iter.hasNext())
 		{
 			final Entry<Issue, List<Comment>> entry = iter.next();
@@ -52,8 +55,12 @@ public class DuplicateSearcher
 
 			if(createdIssue.isViable())
 				processedIssues.add(createdIssue);
-
+			
+			progress.increment();
+			progress.print();
 		}
+		
+		System.out.print("\n");
 
 		return processedIssues.size();
 	}
@@ -65,14 +72,13 @@ public class DuplicateSearcher
 		return duplicates.size();
 	}
 
-	public SortedSet<Duplicate> getDuplicates()
+	public Set<Duplicate> getDuplicates()
 	{
 		return duplicates;
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, IOException
+	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException
 	{
-		final LocalDateTime start = LocalDateTime.now();
 
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
 		final IssueProcessor processor = new IssueProcessor(
@@ -80,15 +86,30 @@ public class DuplicateSearcher
 				ProcessingFlags.SPELL_CORRECTION,
 				ProcessingFlags.STOP_LIST_COMMON,
 				ProcessingFlags.STOP_LIST_GITHUB,
-				ProcessingFlags.STEMMING
+				ProcessingFlags.SYNONYMS,
+				ProcessingFlags.STEMMING,
+				ProcessingFlags.FILTER_BAD
 				);
 		DuplicateSearcher searcher = new DuplicateSearcher(repo, processor);
+		
+		final LocalDateTime startProcessing = LocalDateTime.now();
 		searcher.processIssues();
-		searcher.analyzeIssues(0.4, new Weight(500,250,0,400,30));
 
-		final LocalDateTime end = LocalDateTime.now();
-		System.out.println(searcher.getDuplicates());
-		final Duration elpasedTime = Duration.between(start, end);
+		final LocalDateTime endProcessing = LocalDateTime.now();
+		final Duration elpasedTimeProcessing = Duration.between(startProcessing, endProcessing);
+		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
+		
+		final LocalDateTime startAnalysis = endProcessing;
+		searcher.analyzeIssues(0.6, new Weight(500,250,100,25,50));
+		final LocalDateTime endAnalysis = LocalDateTime.now();
+		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
+		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
+		
+		System.out.println("\n");
+		for(Duplicate d : searcher.getDuplicates())
+			System.out.println(d);
+		final Duration elpasedTime = Duration.between(startProcessing, endAnalysis);
+		
 		System.out.println("Execution time:" + elpasedTime);
 		System.out.println("Found duplicates: " + searcher.getDuplicates().size());
 	}

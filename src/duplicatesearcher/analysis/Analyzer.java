@@ -5,11 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
-import org.eclipse.egit.github.core.Label;
-
+import duplicatesearcher.Progress;
 import duplicatesearcher.StrippedIssue;
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.FrequencyCounter;
@@ -20,8 +17,9 @@ public class Analyzer
 {
 	private final Weight weights;
 	private final Collection<StrippedIssue> issues;
+
 	private final InverseDocumentFrequencyCounter idfCounter, labelIdfCounter;
-	
+	private Progress progress;
 
 	public Analyzer(final Collection<StrippedIssue> issues, final Weight weights)
 	{
@@ -49,23 +47,28 @@ public class Analyzer
 		return issues.add(issue);
 	}
 
-	public SortedSet<Duplicate> findDuplicates(final double threshold)
+	public Set<Duplicate> findDuplicates(final double threshold)
 	{
 		if(threshold > 1)
 			throw new IllegalArgumentException("Threshold cannot be greater than 1.0");
 		if(threshold < 0)
 			throw new IllegalArgumentException("Threshold cannot be negative");
 
-		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
+		final int finished = (issues.size()*issues.size())/2;
+		progress = new Progress(finished, 5000);
+		
+		System.out.println("\nSEARCHING FOR DUPLICATES");
+		
+		final Set<Duplicate> duplicates = new HashSet<Duplicate>();
 		for(StrippedIssue issue : issues)
 			duplicates.addAll(findDuplicates(issue, threshold));
 
 		return duplicates;
 	}
 
-	public SortedSet<Duplicate> findDuplicates(final StrippedIssue issue, final double threshold)
+	public Set<Duplicate> findDuplicates(final StrippedIssue issue, final double threshold)
 	{
-		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
+		final Set<Duplicate> duplicates = new HashSet<Duplicate>();
 
 		final Map<Token, Double> queryAll = weightMap(issue.getAll());
 		Map<Token, Double> queryAllNormalized = Normalizer.normalizeVector(queryAll);
@@ -86,7 +89,7 @@ public class Analyzer
 		Map<Token, Double> queryCodeNormalized = Normalizer.normalizeVector(queryCode);
 
 		for(StrippedIssue issueInCollection : issues)
-		{
+		{			
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
 			double similarityAll, similarityBody, similarityComments, similarityTitle, similarityLabel, similarityCode;
@@ -103,6 +106,9 @@ public class Analyzer
 			
 			if(similarity >= threshold)
 				createDuplicate(issue, issueInCollection, similarity, duplicates);
+			
+			progress.increment();
+			progress.print();
 		}
 
 		return duplicates;
@@ -123,10 +129,9 @@ public class Analyzer
 	{
 		double similarity = 0;
 		
-		Set<Token> union = new HashSet<Token>(vector1.keySet());
-		union.addAll(vector2.keySet());
-		
-		for(Token token : union)
+		Set<Token> intersection = new HashSet<Token>(vector1.keySet());
+		intersection.retainAll(vector2.keySet());		
+		for(Token token : intersection)
 		{
 			double weight1, weight2;
 			weight1 = weight2 = 0;
