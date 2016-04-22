@@ -9,6 +9,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import duplicatesearcher.Token;
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import edu.mit.jwi.IRAMDictionary;
 import edu.mit.jwi.RAMDictionary;
 import edu.mit.jwi.data.ILoadPolicy;
@@ -21,11 +22,14 @@ import edu.mit.jwi.item.POS;
 public class SynonymFinder implements TokenProcessor
 {
 	private final IRAMDictionary dict;
+	private final TermFrequencyCounter termFreq;
 
-	public SynonymFinder() throws IOException, InterruptedException
+	public SynonymFinder() throws IOException, InterruptedException, ClassNotFoundException
 	{
+		ObjectSerializer<CollectionCounter> objSer = new ObjectSerializer<CollectionCounter>(CollectionWordFrequency.FILE);
+		this.termFreq = objSer.load();
 		// TODO fix relative path
-		this.dict = new RAMDictionary(new File("/a/oberon-home1/h13/anos3557/workspace/DuplicateSearcher/lib/WordNet-3.0/dict"), ILoadPolicy.NO_LOAD);
+		this.dict = new RAMDictionary(new File("lib/WordNet-3.0/dict"), ILoadPolicy.NO_LOAD);
 		dict.open();
 		dict.load(true);
 	}
@@ -84,7 +88,20 @@ public class SynonymFinder implements TokenProcessor
 
 	private Token mostCommonWord(SortedSet<String> synonyms)
 	{
-		return new Token(synonyms.first());
+		Token mostCommon = null;
+		int occurencesMostCommon = 0;
+		for(String synonym : synonyms)
+		{
+			final Token token = new Token(synonym);
+			final int frequency = termFreq.getTokenFrequency(token);
+			if(frequency > occurencesMostCommon)
+			{
+				mostCommon = token;
+				occurencesMostCommon = frequency;
+			}
+		}
+		
+		return mostCommon;
 	}
 
 }

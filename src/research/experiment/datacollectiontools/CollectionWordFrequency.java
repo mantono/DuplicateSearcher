@@ -21,7 +21,7 @@ import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 
 public class CollectionWordFrequency
 {
-	private final static File FILE = new File("dictionary/word_frequency");
+	public final static File FILE = new File("dictionary/word_frequency");
 	private final ObjectSerializer<CollectionCounter> objSer;
 	private final CollectionCounter counter;
 

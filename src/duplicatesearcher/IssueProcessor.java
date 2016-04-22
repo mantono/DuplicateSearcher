@@ -37,7 +37,7 @@ public class IssueProcessor
 	private final SynonymFinder synonyms;
 	private final Map<Token, Token> processedTokens = new HashMap<Token, Token>(120_000);
 
-	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException, InterruptedException
+	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException, InterruptedException, ClassNotFoundException
 	{
 		this.flags = flags;
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
@@ -52,7 +52,7 @@ public class IssueProcessor
 		this.synonyms = new SynonymFinder();
 	}
 
-	public IssueProcessor(final ProcessingFlags... flags) throws IOException, InterruptedException
+	public IssueProcessor(final ProcessingFlags... flags) throws IOException, InterruptedException, ClassNotFoundException
 	{
 		this(EnumSet.copyOf(Arrays.asList(flags)));
 	}
