@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import research.experiment.datacollectiontools.CollectionCounter;
+import research.experiment.datacollectiontools.CollectionWordFrequency;
+import research.experiment.datacollectiontools.ObjectSerializer;
+
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import edu.mit.jwi.IRAMDictionary;
