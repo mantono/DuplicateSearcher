@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.eclipse.egit.github.core.Label;
+
 import duplicatesearcher.StrippedIssue;
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.FrequencyCounter;
@@ -17,13 +19,15 @@ public class Analyzer
 {
 	private final Weight weights;
 	private final Collection<StrippedIssue> issues;
-	private final InverseDocumentFrequencyCounter idfCounter;
+	private final InverseDocumentFrequencyCounter idfCounter, labelIdfCounter;
+	
 
 	public Analyzer(final Collection<StrippedIssue> issues, final Weight weights)
 	{
 		this.issues = issues;
 		this.weights = weights;
 		this.idfCounter = new InverseDocumentFrequencyCounter();
+		this.labelIdfCounter = new InverseDocumentFrequencyCounter();
 		analyzeData(issues);
 	}
 
@@ -36,6 +40,7 @@ public class Analyzer
 	private void addTokenData(StrippedIssue issue)
 	{
 		idfCounter.add(issue.getNumber(), issue.getAll().getTokens());
+		labelIdfCounter.add(issue.getNumber(), issue.getLabels().getTokens());
 	}
 
 	public boolean add(final StrippedIssue issue)
@@ -61,19 +66,49 @@ public class Analyzer
 	{
 		final SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
 
-		final Map<Token, Double> query = weightMap(issue.getAll());
-		Map<Token, Double> queryNormalized = Normalizer.normalizeVector(query);
+		final Map<Token, Double> queryAll = weightMap(issue.getAll());
+		Map<Token, Double> queryAllNormalized = Normalizer.normalizeVector(queryAll);
+		
+		final Map<Token, Double> queryBody = weightMap(issue.getBody());
+		Map<Token, Double> queryBodyNormalized = Normalizer.normalizeVector(queryBody);
+		
+		final Map<Token, Double> queryTitle = weightMap(issue.getTitle());
+		Map<Token, Double> queryTitleNormalized = Normalizer.normalizeVector(queryTitle);
+		
+		final Map<Token, Double> queryComments = weightMap(issue.getComments());
+		Map<Token, Double> queryCommentsNormalized = Normalizer.normalizeVector(queryComments);
+		
+		final Map<Token, Double> queryLabels = weightMap(issue.getLabels());
+		Map<Token, Double> queryLabelsNormalized = Normalizer.normalizeVector(queryLabels);
 
 		for(StrippedIssue issueInCollection : issues)
 		{
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
 			
-			final Map<Token, Double> document = weightMap(issueInCollection.getAll());
-			final Map<Token, Double> documentNormalized = Normalizer.normalizeVector(documentNormalized);
+			final Map<Token, Double> documentAll = weightMap(issueInCollection.getAll());
+			final Map<Token, Double> documentAllNormalized = Normalizer.normalizeVector(documentAll);
+		
+			final Map<Token, Double> documentBody = weightMap(issueInCollection.getBody());
+			final Map<Token, Double> documentBodyNormalized = Normalizer.normalizeVector(documentBody);
+			
+			final Map<Token, Double> documentTitle = weightMap(issueInCollection.getTitle());
+			final Map<Token, Double> documentTitleNormalized = Normalizer.normalizeVector(documentTitle);
+			
+			final Map<Token, Double> documentComments = weightMap(issueInCollection.getAll());
+			final Map<Token, Double> documentCommentsNormalized = Normalizer.normalizeVector(documentComments);
+			
+			final Map<Token, Double> documentLabels = weightMap(issueInCollection.getLabels());
+			final Map<Token, Double> documentLabelsNormalized = Normalizer.normalizeVector(documentLabels);
 
-			final double similarity = vectorMultiplication(documentNormalized, queryNormalized);
-
+			final double similarityAll = weights.all()*(vectorMultiplication(documentAllNormalized, queryAllNormalized));
+			final double similarityBody = weights.body()*(vectorMultiplication(documentBodyNormalized, queryBodyNormalized));
+			final double similarityTitle = weights.title()*(vectorMultiplication(documentTitleNormalized, queryTitleNormalized));
+			final double similarityComments = weights.comments()*(vectorMultiplication(documentCommentsNormalized, queryCommentsNormalized));
+			final double similarityLabel = weights.labels()*(vectorMultiplication(documentLabelsNormalized, queryLabelsNormalized));
+			
+			final double similarity = similarityAll + similarityBody + similarityTitle + similarityComments + similarityLabel;
+			
 			if(similarity >= threshold)
 				createDuplicate(issue, issueInCollection, similarity, duplicates);
 		}

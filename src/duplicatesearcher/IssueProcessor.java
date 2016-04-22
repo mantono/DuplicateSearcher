@@ -36,9 +36,11 @@ public class IssueProcessor
 		this.flags = flags;
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
-		this.spell = new SpellCorrector(new File("dictionary/dict.txt"));
-		spell.addDictionary(new File("dictionary/dict_extra1.txt"));
-		spell.addDictionary(new File("dictionary/dict_extra2.txt"));
+		this.spell = new SpellCorrector(new File("dictionary/index.noun"));
+		spell.addDictionary(new File("dictionary/index.verb"));
+		spell.addDictionary(new File("dictionary/index.sense"));
+		spell.addDictionary(new File("dictionary/index.adj"));
+		spell.addDictionary(new File("dictionary/index.adv"));
 		spell.addDictionary(new File("stoplists/github/github.txt"));
 		spell.addDictionary(new File("stoplists/long/ReqSimile.txt"));
 	}

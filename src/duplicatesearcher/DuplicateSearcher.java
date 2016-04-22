@@ -17,6 +17,7 @@ import org.eclipse.egit.github.core.RepositoryId;
 
 import duplicatesearcher.analysis.Analyzer;
 import duplicatesearcher.analysis.Duplicate;
+import duplicatesearcher.analysis.Weight;
 import research.experiment.datacollectiontools.DatasetFileManager;
 
 public class DuplicateSearcher
@@ -57,9 +58,9 @@ public class DuplicateSearcher
 		return processedIssues.size();
 	}
 
-	public int analyzeIssues(final double threshold)
+	public int analyzeIssues(final double threshold, Weight weight)
 	{
-		analyzer = new Analyzer(processedIssues);
+		analyzer = new Analyzer(processedIssues, weight);
 		duplicates = analyzer.findDuplicates(threshold);
 		return duplicates.size();
 	}
@@ -83,7 +84,7 @@ public class DuplicateSearcher
 				);
 		DuplicateSearcher searcher = new DuplicateSearcher(repo, processor);
 		searcher.processIssues();
-		searcher.analyzeIssues(0.4);
+		searcher.analyzeIssues(0.4, new Weight(0.5,0.1,0.0,0.0,0.4));
 
 		final LocalDateTime end = LocalDateTime.now();
 		System.out.println(searcher.getDuplicates());

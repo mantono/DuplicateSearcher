@@ -30,8 +30,8 @@ public class StrippedIssue implements Serializable
 	private static final long serialVersionUID = -5824632540290288567L;
 	private final int number, userId;
 	private final Date dateCreated, dateUpdated;
-	private final Set<Label> labels;
-	private TermFrequencyCounter all, title, body, comments, code;
+	//private final Set<Label> labels;
+	private TermFrequencyCounter all, title, body, comments, code, labels;
 	private final boolean closed;
 	private final String state;
 	private boolean flaggedBad = false;
@@ -42,7 +42,8 @@ public class StrippedIssue implements Serializable
 		this.dateCreated = issue.getCreatedAt();
 		this.dateUpdated = issue.getUpdatedAt();
 		this.userId = issue.getUser().getId();
-		this.labels = new HashSet<Label>(issue.getLabels());
+		this.labels = new TermFrequencyCounter();
+		labels.addLabels(issue.getLabels());
 		
 		this.closed = issue.getClosedAt() != null;
 		this.state = issue.getState();
@@ -67,7 +68,8 @@ public class StrippedIssue implements Serializable
 		this.dateCreated = issue.getCreatedAt();
 		this.dateUpdated = issue.getUpdatedAt();
 		this.userId = issue.getUser().getId();
-		this.labels = new HashSet<Label>(issue.getLabels());
+		this.labels = new TermFrequencyCounter();
+		labels.addLabels(issue.getLabels());
 		
 		this.closed = issue.getClosedAt() != null;
 		this.state = issue.getState();
@@ -81,7 +83,7 @@ public class StrippedIssue implements Serializable
 		this.comments = new TermFrequencyCounter();
 	}
 	
-	public StrippedIssue(int number, int userId, Date created, Date updated, Set<Label> labels, String title, String body, Collection<Comment> comments, boolean closed, String state)
+	public StrippedIssue(int number, int userId, Date created, Date updated, Set<Label> labelSet, String title, String body, Collection<Comment> comments, boolean closed, String state)
 	{
 		this.number = number;
 		this.userId = userId;
@@ -89,7 +91,8 @@ public class StrippedIssue implements Serializable
 		this.dateCreated = created;
 		this.dateUpdated = updated;
 		
-		this.labels = labels;
+		this.labels = new TermFrequencyCounter();
+		labels.addLabels(labelSet);
 		
 		this.title = new TermFrequencyCounter();
 		this.title.add(title);
@@ -176,7 +179,7 @@ public class StrippedIssue implements Serializable
 		all.add(this.comments);
 	}
 
-	public Set<Label> getLabels()
+	public TermFrequencyCounter getLabels()
 	{
 		return labels;
 	}

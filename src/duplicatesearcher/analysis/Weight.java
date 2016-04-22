@@ -2,14 +2,14 @@ package duplicatesearcher.analysis;
 
 public class Weight
 {
-	private final double title, body, comments, code, labels;
+	private final double title, body, comments, all, labels;
 	
-	public Weight(final double title, final double body, final double comments, final double code, final double labels)
+	public Weight(final double title, final double body, final double comments, final double all, final double labels)
 	{
 		this.title = title;
 		this.body = body;
 		this.comments = comments;
-		this.code = code;
+		this.all = all;
 		this.labels = labels;
 	}
 
@@ -28,9 +28,9 @@ public class Weight
 		return comments;
 	}
 
-	public double code()
+	public double all()
 	{
-		return code;
+		return all;
 	}
 
 	public double labels()
