@@ -2,8 +2,11 @@ package duplicatesearcher.analysis.frequency;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.egit.github.core.Label;
 
 import duplicatesearcher.Token;
 import duplicatesearcher.processing.Tokenizer;
@@ -133,5 +136,11 @@ public class TermFrequencyCounter implements FrequencyCounter
 		if(tokenLog < 0)
 			return 0;
 		return 1 + tokenLog;
+	}
+
+	public void addLabels(Collection<Label> labelCollection) {
+		for(Label label : labelCollection)
+			add(new Token(label.toString().toLowerCase().replaceAll("\\s", "")));
+			
 	}
 }

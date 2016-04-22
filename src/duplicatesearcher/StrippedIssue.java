@@ -80,7 +80,7 @@ public class StrippedIssue implements Serializable
 	{
 		final TermFrequencyCounter labelCounter = new TermFrequencyCounter();
 		for(Label label : labelsInList)
-			labelCounter.add(label.getName());
+			labelCounter.add(label.getName().toLowerCase().replaceAll("\\s", ""));
 		
 		return labelCounter;
 	}
@@ -132,6 +132,11 @@ public class StrippedIssue implements Serializable
 	public TermFrequencyCounter getLabels()
 	{
 		return labels;
+	}
+	
+	public TermFrequencyCounter getCode()
+	{
+		return code;
 	}
 	
 	public void removeComments()

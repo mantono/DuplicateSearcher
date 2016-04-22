@@ -15,6 +15,7 @@ import org.eclipse.egit.github.core.RepositoryId;
 
 import duplicatesearcher.analysis.Analyzer;
 import duplicatesearcher.analysis.Duplicate;
+import duplicatesearcher.analysis.Weight;
 import research.experiment.datacollectiontools.DatasetFileManager;
 
 public class DuplicateSearcher
@@ -42,7 +43,6 @@ public class DuplicateSearcher
 		Iterator<Entry<Issue, List<Comment>>> iter = issueData.entrySet().iterator();
 		
 		final double finished = issueData.entrySet().size();
-		int processedIssueCount = 0;
 		
 		System.out.println("\nPROCESSING ISSUES");
 		Progress progress = new Progress(finished, 5);
@@ -65,11 +65,9 @@ public class DuplicateSearcher
 		return processedIssues.size();
 	}
 
-
-
-	public int analyzeIssues(final double threshold)
+	public int analyzeIssues(final double threshold, Weight weight)
 	{
-		analyzer = new Analyzer(processedIssues);
+		analyzer = new Analyzer(processedIssues, weight);
 		duplicates = analyzer.findDuplicates(threshold);
 		return duplicates.size();
 	}
@@ -96,12 +94,13 @@ public class DuplicateSearcher
 		
 		final LocalDateTime startProcessing = LocalDateTime.now();
 		searcher.processIssues();
+
 		final LocalDateTime endProcessing = LocalDateTime.now();
 		final Duration elpasedTimeProcessing = Duration.between(startProcessing, endProcessing);
 		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
 		
 		final LocalDateTime startAnalysis = endProcessing;
-		searcher.analyzeIssues(0.4);
+		searcher.analyzeIssues(0.6, new Weight(500,250,100,25,50));
 		final LocalDateTime endAnalysis = LocalDateTime.now();
 		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
 		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
@@ -110,6 +109,7 @@ public class DuplicateSearcher
 		for(Duplicate d : searcher.getDuplicates())
 			System.out.println(d);
 		final Duration elpasedTime = Duration.between(startProcessing, endAnalysis);
+		
 		System.out.println("Execution time:" + elpasedTime);
 		System.out.println("Found duplicates: " + searcher.getDuplicates().size());
 	}

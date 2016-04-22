@@ -7,15 +7,8 @@ import java.util.Map.Entry;
 import duplicatesearcher.Token;
 
 public class Normalizer
-{
-	private final Map<Token, Double> weights;
-	
-	public Normalizer(Map<Token, Double> weightedMap)
-	{
-		this.weights = weightedMap;
-	}
-	
-	private double getRootOfSum()
+{	
+	private static double getRootOfSum(Map<Token, Double> weights)
 	{
 		double sum = 0;
 		for(Entry<Token, Double> pair : weights.entrySet())
@@ -27,9 +20,9 @@ public class Normalizer
 		return Math.sqrt(sum);
 	}
 
-	public Map<Token, Double> normalizeVector()
+	public static Map<Token, Double> normalizeVector(Map<Token, Double> weights)
 	{
-		final double divider = getRootOfSum();
+		final double divider = getRootOfSum(weights);
 		Map<Token, Double> normalizedWeights = new HashMap<Token, Double>(weights);
 
 		

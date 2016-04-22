@@ -40,6 +40,7 @@ public class IssueProcessor
 		this.flags = flags;
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
+
 		this.spell = new SpellCorrector(new File("dictionary/noun.txt"));
 		spell.addDictionary(new File("dictionary/sense.txt"));
 		spell.addDictionary(new File("dictionary/verb.txt"));
