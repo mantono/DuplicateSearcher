@@ -1,7 +1,6 @@
 package duplicatesearcher;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -10,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedSet;
-
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
@@ -82,7 +79,7 @@ public class DuplicateSearcher
 		return duplicates;
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, IOException
+	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException
 	{
 
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
@@ -91,6 +88,7 @@ public class DuplicateSearcher
 				ProcessingFlags.SPELL_CORRECTION,
 				ProcessingFlags.STOP_LIST_COMMON,
 				ProcessingFlags.STOP_LIST_GITHUB,
+				ProcessingFlags.SYNONYMS,
 				ProcessingFlags.STEMMING,
 				ProcessingFlags.FILTER_BAD
 				);

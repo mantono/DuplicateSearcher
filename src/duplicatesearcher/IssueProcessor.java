@@ -10,13 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.CommunicationException;
-
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.Stemmer;
+import duplicatesearcher.processing.SynonymFinder;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
 
@@ -33,9 +32,10 @@ public class IssueProcessor
 	private final StopList stopListGitHub;
 	private final Stemmer stemmer = new Stemmer();
 	private final SpellCorrector spell;
+	private final SynonymFinder synonyms;
 	private final Map<Token, Token> processedTokens = new HashMap<Token, Token>(120_000);
 
-	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException
+	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException, InterruptedException, ClassNotFoundException
 	{
 		this.flags = flags;
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
@@ -47,9 +47,10 @@ public class IssueProcessor
 		spell.addDictionary(new File("dictionary/adv.txt"));
 		spell.addDictionary(new File("stoplists/github/github.txt"));
 		spell.addDictionary(new File("stoplists/long/ReqSimile.txt"));
+		this.synonyms = new SynonymFinder();
 	}
 
-	public IssueProcessor(final ProcessingFlags... flags) throws IOException
+	public IssueProcessor(final ProcessingFlags... flags) throws IOException, InterruptedException, ClassNotFoundException
 	{
 		this(EnumSet.copyOf(Arrays.asList(flags)));
 	}
@@ -127,7 +128,7 @@ public class IssueProcessor
 			case STOP_LIST_GITHUB: return stopListGitHub.process(token);
 			case STOP_LIST_TEMPLATE_DYNAMIC: System.out.println("Not implemented"); break;
 			case STOP_LIST_TEMPLATE_STATIC: System.out.println("Not implemented"); break;
-			case SYNONYMS: System.out.println("Not implemented"); break;
+			case SYNONYMS: return synonyms.process(token);
 			case STEMMING: return stemmer.process(token);
 			//case FILTER_BAD: issue.checkQuality(); break;
 		}
