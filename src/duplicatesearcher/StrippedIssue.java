@@ -53,6 +53,16 @@ public class StrippedIssue implements Serializable
 			issue.setBody("");
 		
 		createTermCounters(issue, comments);
+		removeLabelDuplicate();
+	}
+
+	private void removeLabelDuplicate()
+	{
+		TermFrequencyCounter labels = componentCounters.get(IssueComponent.LABELS);
+		if(labels.getTokenFrequency(new Token("duplicate")) > 0)
+			labels.remove("duplicate");
+		else if(labels.getTokenFrequency(new Token("dupe")) > 0)
+			labels.remove("dupe");
 	}
 
 	public StrippedIssue(final Issue issue)
