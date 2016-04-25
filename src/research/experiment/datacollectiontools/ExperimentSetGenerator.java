@@ -157,6 +157,8 @@ public class ExperimentSetGenerator
 			final Issue master = getMasterForIssue(issue);
 			if(master == null)
 				continue;
+			if(master.getNumber() == issue.getNumber())
+				continue;
 			StrippedIssue masterStripped = new StrippedIssue(master, allIssues.get(master));
 			StrippedIssue duplicateStripped = new StrippedIssue(issue, allIssues.get(issue));
 			final Duplicate duplicate = new Duplicate(duplicateStripped, masterStripped, 1);
