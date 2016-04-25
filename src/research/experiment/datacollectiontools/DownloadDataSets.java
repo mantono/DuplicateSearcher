@@ -11,7 +11,7 @@ import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
 
 import duplicatesearcher.StrippedIssue;
-import duplicatesearcher.retrieval.GitHubTestClient;
+import duplicatesearcher.retrieval.ApiClient;
 import duplicatesearcher.retrieval.IssueRetriever;
 
 public class DownloadDataSets
@@ -19,7 +19,7 @@ public class DownloadDataSets
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException
 	{
-		final GitHubClient client = new GitHubTestClient();
+		final GitHubClient client = new ApiClient();
 		final RepositoryId repoInfo = new RepositoryId(args[0], args[1]);
 		
 		IssueRetriever retriever = new IssueRetriever(client, repoInfo);

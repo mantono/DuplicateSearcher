@@ -1,4 +1,4 @@
-package duplicatesearcher.analysis.IssueComponent;
+package duplicatesearcher.analysis;
 
 public enum IssueComponent
 {

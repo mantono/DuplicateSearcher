@@ -155,6 +155,8 @@ public class ExperimentSetGenerator
 		for(Issue issue : duplicates)
 		{
 			final Issue master = getMasterForIssue(issue);
+			if(master == null)
+				continue;
 			StrippedIssue masterStripped = new StrippedIssue(master, allIssues.get(master));
 			StrippedIssue duplicateStripped = new StrippedIssue(issue, allIssues.get(issue));
 			final Duplicate duplicate = new Duplicate(duplicateStripped, masterStripped, 1);
@@ -175,9 +177,12 @@ public class ExperimentSetGenerator
 		return false;
 	}
 
-	public Set<Issue> getGeneratedCorpus()
+	public Map<Issue, List<Comment>> getGeneratedCorpus()
 	{
-		return generatedCorpus;
+		Map<Issue, List<Comment>> corpus = new HashMap<Issue, List<Comment>>();
+		for(Issue issue : generatedCorpus)
+			corpus.put(issue, allIssues.get(issue));
+		return corpus;
 	}
 	
 	public void printCorpusData()

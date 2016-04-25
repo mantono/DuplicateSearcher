@@ -1,5 +1,6 @@
 package research.experiment;
 
+import java.util.HashSet;
 import java.util.Set;
 import duplicatesearcher.analysis.*;
 
@@ -13,14 +14,17 @@ public class ExperimentEvaluator {
 		this.foundDuplicates = foundDuplicates;
 		this.oracleDuplicates = oracleDuplicates;
 		
+		this.truePositives = new HashSet<Duplicate>(oracleDuplicates.size());
 		//true positive = intersect(oracleDupes, foundDupes)
 		this.truePositives.addAll(oracleDuplicates);
 		this.truePositives.retainAll(foundDuplicates);
 		
+		this.falsePositives = new HashSet<Duplicate>(oracleDuplicates.size());
 		//falsePositive = alla element i foundDupes minus alla element i oracleDupes
 		this.falsePositives.addAll(foundDuplicates);
 		this.falsePositives.removeAll(oracleDuplicates);
 		
+		this.falseNegatives = new HashSet<Duplicate>(oracleDuplicates.size());
 		//falseNegatives = alla element i oracleDupes minus alla element i foundDupes
 		this.falseNegatives.addAll(oracleDuplicates);
 		this.falseNegatives.removeAll(foundDuplicates);
@@ -46,6 +50,8 @@ public class ExperimentEvaluator {
 	{
 		double precision = calculatePrecision();
 		double recall = calculateRecall();
+		if(precision == 0 && recall == 0)
+			throw new IllegalStateException("You suck!");
 		
 		return (2)*(precision*recall)/(precision+recall);
 	}
