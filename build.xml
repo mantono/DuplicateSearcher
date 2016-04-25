@@ -43,7 +43,7 @@
 	</get>
 </target>
 
-<target name="test" description="Run JUnit tests" depends="compile">
+<target name="test" description="Run JUnit tests" depends="compile,compileTests">
 	<junit showoutput="true" printsummary="yes" haltonfailure="yes">
 		<formatter type="brief" usefile="false"/>
 		<classpath refid="project.class.path" />
@@ -54,8 +54,14 @@
 	</junit>
 </target>
 
-<target name="compile" description="Compile code" depends="clean,init,libs">
-	<javac includeantruntime="true" srcdir="${src}:${test}" destdir="${build}">
+<target name="compile" description="Compile code" depends="init">
+	<javac includeantruntime="true" srcdir="${src}" destdir="${build}">
+		<classpath refid="project.class.path" />
+	</javac>
+</target>
+
+<target name="compileTests" description="Compile test classes" depends="init">
+	<javac includeantruntime="true" srcdir="${test}" destdir="${build}">
 		<classpath refid="project.class.path" />
 	</javac>
 </target>
