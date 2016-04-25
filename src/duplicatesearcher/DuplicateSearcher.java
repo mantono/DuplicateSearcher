@@ -117,7 +117,14 @@ public class DuplicateSearcher
 		System.out.println("Found duplicates: " + searcher.getDuplicates().size());
 		
 		ExperimentEvaluator eval = new ExperimentEvaluator(searcher.getDuplicates(), exGen.getDuplicates());
-		System.out.print(eval.calculateF1Score());
+		
+		final int actualDuplicates = eval.getFalseNegatives().size() + eval.getTruePositives().size();
+		System.out.println("Corpus total size: " + exGen.getGeneratedCorpus().size());
+		System.out.println("Duplicates in corpus: " + actualDuplicates);
+		
+		System.out.println("Precision: " + eval.calculatePrecision());
+		System.out.println("Recall: " + eval.calculateRecall());
+		System.out.println("F1-score: " + eval.calculateF1Score());
 	}
 
 }
