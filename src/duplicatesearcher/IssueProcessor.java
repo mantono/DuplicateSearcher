@@ -75,6 +75,8 @@ public class IssueProcessor
 	{
 		for(IssueComponent component : IssueComponent.values())
 			processFrequencyCounter(strippedIssue.getComponent(component));
+		if(hasFlag(ProcessingFlags.FILTER_BAD))
+			strippedIssue.checkQuality();
 		
 		return strippedIssue;
 	}
@@ -130,7 +132,6 @@ public class IssueProcessor
 			case STOP_LIST_TEMPLATE_STATIC: System.out.println("Not implemented"); break;
 			case SYNONYMS: return synonyms.process(token);
 			case STEMMING: return stemmer.process(token);
-			//case FILTER_BAD: issue.checkQuality(); break;
 		}
 		return token;
 	}
