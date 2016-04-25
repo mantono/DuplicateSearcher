@@ -17,6 +17,9 @@ import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 import org.eclipse.egit.github.core.RepositoryId;
 
+import duplicatesearcher.StrippedIssue;
+import duplicatesearcher.analysis.Duplicate;
+
 /**
  * Create a set on which our experiments can be conducted.
  */
@@ -85,6 +88,12 @@ public class ExperimentSetGenerator
 		
 		return masterIssues;
 	}
+	
+	private Issue getMasterForIssue(Issue issue)
+	{
+		final int masterId = findMaster(allIssues.get(issue));
+		return idIssueMap.get(masterId);
+	}
 
 	private int findMaster(List<Comment> commentsForIssue)
 	{
@@ -136,6 +145,21 @@ public class ExperimentSetGenerator
 				duplicates.add(issue);
 		}
 		return duplicates;
+	}
+	
+	public Set<Duplicate> getDuplicates()
+	{
+		Set<Duplicate> dupes = new HashSet<Duplicate>(duplicates.size());
+		for(Issue issue : duplicates)
+		{
+			final Issue master = getMasterForIssue(issue);
+			StrippedIssue masterStripped = new StrippedIssue(master, allIssues.get(master));
+			StrippedIssue duplicateStripped = new StrippedIssue(issue, allIssues.get(issue));
+			final Duplicate duplicate = new Duplicate(duplicateStripped, masterStripped, 1);
+			dupes.add(duplicate);
+		}
+		
+		return dupes;
 	}
 
 	private boolean isLabeledAsDuplicates(Issue issue)
