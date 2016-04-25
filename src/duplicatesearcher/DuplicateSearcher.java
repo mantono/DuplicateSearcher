@@ -1,6 +1,7 @@
 package duplicatesearcher;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -77,11 +78,11 @@ public class DuplicateSearcher
 		return duplicates;
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException
+	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
 	{
 
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
-		final IssueProcessor processor = new IssueProcessor(
+		final IssueProcessor processor = new IssueProcessor(repo,
 				ProcessingFlags.PARSE_COMMENTS,
 				ProcessingFlags.SPELL_CORRECTION,
 				ProcessingFlags.STOP_LIST_COMMON,
