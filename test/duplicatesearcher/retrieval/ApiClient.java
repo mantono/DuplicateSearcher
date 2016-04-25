@@ -6,11 +6,11 @@ import java.io.IOException;
 
 import org.eclipse.egit.github.core.client.GitHubClient;
 
-public class GitHubTestClient extends GitHubClient
+public class ApiClient extends GitHubClient
 {
 	private final String token = readTokenFromFile();
 
-	public GitHubTestClient()
+	public ApiClient()
 	{
 		super.setOAuth2Token(token);
 	}
