@@ -15,14 +15,19 @@ public class Duplicate implements Comparable<Duplicate>
 			throw new IllegalArgumentException("Similarity cannot be greater than 1.0");
 		if (similarity < 0)
 			throw new IllegalArgumentException("Similarity cannot be negative");
-		if (duplicate.getNumber() < master.getNumber())
-			throw new IllegalArgumentException(
-					"Master issue must be created before the duplicate issue");
 		if (duplicate.getNumber() == master.getNumber())
 			throw new IllegalArgumentException("Go home, you're drunk...");
 
-		this.duplicate = duplicate;
-		this.master = master;
+		if (duplicate.getNumber() < master.getNumber())
+		{
+			this.duplicate = duplicate;
+			this.master = master;
+		}
+		else
+		{
+			this.duplicate = master;
+			this.master = duplicate;
+		}
 		this.cosineSimilarity = similarity;
 	}
 

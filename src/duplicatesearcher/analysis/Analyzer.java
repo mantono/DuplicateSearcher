@@ -140,26 +140,14 @@ public class Analyzer
 
 	private void createDuplicate(StrippedIssue issue1, StrippedIssue issue2, double similarity, Set<Duplicate> duplicates)
 	{
-		StrippedIssue master, duplicate;
-		if(issue1.getNumber() < issue2.getNumber())
-		{
-			master = issue1;
-			duplicate = issue2;
-		}
-		else
-		{
-			master = issue2;
-			duplicate = issue1;
-		}
-		
 		try
 		{
-			duplicates.add(new Duplicate(duplicate, master, similarity));
+			duplicates.add(new Duplicate(issue1, issue2, similarity));
 		}
 		catch(IllegalArgumentException exception)
 		{
 			System.err.println("\n" + exception.getMessage());
-			System.err.println("\t" + duplicate.getNumber() + " --> " + master.getNumber());
+			System.err.println("\t" + issue1.getNumber() + " --> " + issue2.getNumber());
 			System.err.println("\tSimilarity: " + similarity);
 		}
 	}
