@@ -40,11 +40,6 @@
 	<!-- See https://github.com/mantono/DuplicateSearcher/wiki/Frameworks for links to projects and APIs -->
 	<ivy:retrieve />
 	<get dest="${libs}" verbose="true" usetimestamp="true">
-
-		<!-- Apache Commons (sandbox) - Levenshtein Distance -->
-		<url url="https://github.com/apache/commons-text/blob/master/src/main/java/org/apache/commons/text/similarity/LevenshteinDistance.java" />
-		<url url="https://github.com/apache/commons-text/blob/master/NOTICE.txt" />
-		<url url="https://github.com/apache/commons-text/blob/master/LICENSE.txt" />
 	</get>
 </target>
 
