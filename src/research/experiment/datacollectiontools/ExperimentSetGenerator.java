@@ -122,6 +122,8 @@ public class ExperimentSetGenerator
 			throw new IllegalArgumentException("Given set is empty.");
 		List<Issue> listFromSet = new ArrayList<Issue>(set);
 		Collections.shuffle(listFromSet);
+		if(amount > listFromSet.size())
+			amount = listFromSet.size();
 		return listFromSet.subList(0, amount);
 	}
 
