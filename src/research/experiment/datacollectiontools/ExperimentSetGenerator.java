@@ -75,6 +75,10 @@ public class ExperimentSetGenerator
 		for(final Issue issue : generatedCorpus)
 		{
 			final Issue master = getMasterForIssue(issue);
+			if(master == null)
+				continue;
+			if(master.getNumber() == issue.getNumber())
+				continue;
 			final Duplicate dupe = new Duplicate(new StrippedIssue(issue), new StrippedIssue(master), 1.0);
 			duplicatesInGeneratedCorpus.add(dupe);
 		}
@@ -97,7 +101,12 @@ public class ExperimentSetGenerator
 			List<Comment> commentsForIssue = allIssues.get(issue);
 			final int master = findMaster(commentsForIssue);
 			if(master != -1)
-				masterIssues.add(idIssueMap.get(master));
+			{
+				final Issue masterIssue = idIssueMap.get(master);
+				if(masterIssue == null)
+					continue;
+				masterIssues.add(masterIssue);
+			}
 		}
 		
 		return masterIssues;
