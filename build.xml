@@ -10,8 +10,6 @@
 <property name="dist"  location="dist"/>
 <property name="libs" location="lib"/>
 <property name="doc" location="doc"/>
-<property name="extdoc" location="${doc}/ext"/>
-<property name="libsdownload" location="${libs}/doc"/>
 
 <path id="project.class.path">
 	<pathelement path="${build}" />
@@ -24,16 +22,12 @@
 	<mkdir dir="${dist}"/>
 	<mkdir dir="${libs}"/>
 	<mkdir dir="${doc}"/>
-	<mkdir dir="${extdoc}"/>
-	<mkdir dir="${libsdownload}"/>
 </target>
 
 <target name="clean" description="Delete previous jar and class files">
 	<delete dir="${build}"/>
 	<delete dir="${dist}"/>
-	<delete dir="${extdoc}"/>
 	<delete dir="${doc}"/>
-	<delete dir="${libsdownload}"/>
 </target>
 
 <target name="libs" description="Download and/or compile dependency libraries">
