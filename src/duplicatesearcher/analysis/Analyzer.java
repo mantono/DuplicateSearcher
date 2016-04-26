@@ -78,6 +78,14 @@ public class Analyzer
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
 			
+			progress.increment();
+			progress.print();
+			
+			final int diffOnId = Math.abs(issue.getNumber() - issueInCollection.getNumber());
+			
+			if(issue.getUserId() == issueInCollection.getUserId() && diffOnId != 1)
+				continue;
+			
 			double similarity = 0;
 			
 			for(IssueComponent comp : IssueComponent.values())
@@ -85,9 +93,6 @@ public class Analyzer
 			
 			if(similarity >= threshold)
 				createDuplicate(issue, issueInCollection, similarity, duplicates);
-			
-			progress.increment();
-			progress.print();
 		}
 
 		return duplicates;
