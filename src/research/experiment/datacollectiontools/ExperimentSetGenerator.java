@@ -31,6 +31,7 @@ public class ExperimentSetGenerator
 	private final Map<Integer, Issue> idIssueMap;
 	private final RepositoryId repo;
 	private Set<Issue> closedIssues, openIssues, nonDuplicates, duplicates, generatedCorpus;
+	private Set<Duplicate> duplicatesInGeneratedCorpus;
 
 	public ExperimentSetGenerator(final RepositoryId repo, final Map<Issue, List<Comment>> issuesWithcomments)
 	{
@@ -64,9 +65,22 @@ public class ExperimentSetGenerator
 
 		generatedCorpus.addAll(getRandomElements(duplicates, duplicateAmount/2));
 		generatedCorpus.addAll(getMasterIssues(generatedCorpus));
+		duplicatesInGeneratedCorpus = createDuplicateSet(generatedCorpus);
 		generatedCorpus.addAll(getRandomElements(nonDuplicates, size - generatedCorpus.size()));
 	}
-	
+
+	private Set<Duplicate> createDuplicateSet(Set<Issue> dupes)
+	{
+		duplicatesInGeneratedCorpus = new HashSet<Duplicate>();
+		for(final Issue issue : generatedCorpus)
+		{
+			final Issue master = getMasterForIssue(issue);
+			final Duplicate dupe = new Duplicate(new StrippedIssue(issue), new StrippedIssue(master), 1.0);
+			duplicatesInGeneratedCorpus.add(dupe);
+		}
+		return duplicatesInGeneratedCorpus;
+	}
+
 	public void generateRandomIntervalSet(final int size, final float minDuplicateRatio, final float maxDuplicateRatio)
 	{
 		float ratio = 0;
@@ -166,6 +180,11 @@ public class ExperimentSetGenerator
 		}
 		
 		return dupes;
+	}
+
+	public Set<Duplicate> getCorpusDuplicates()
+	{
+		return duplicatesInGeneratedCorpus;
 	}
 
 	private boolean isLabeledAsDuplicates(Issue issue)

@@ -116,7 +116,7 @@ public class DuplicateSearcher
 		System.out.println("Execution time:" + elpasedTime);
 		System.out.println("Found duplicates: " + searcher.getDuplicates().size());
 		
-		ExperimentEvaluator eval = new ExperimentEvaluator(searcher.getDuplicates(), exGen.getDuplicates());
+		ExperimentEvaluator eval = new ExperimentEvaluator(searcher.getDuplicates(), exGen.getCorpusDuplicates());
 		
 		final int actualDuplicates = eval.getFalseNegatives().size() + eval.getTruePositives().size();
 		System.out.println("Corpus total size: " + exGen.getGeneratedCorpus().size());
