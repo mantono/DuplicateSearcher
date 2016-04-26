@@ -34,7 +34,10 @@
 	<!-- See https://github.com/mantono/DuplicateSearcher/wiki/Frameworks for links to projects and APIs -->
 	<ivy:retrieve />
 	<get dest="${libs}" verbose="true" usetimestamp="true">
+		<url url="http://wordnetcode.princeton.edu/3.0/WordNet-3.0.tar.gz" />
 	</get>
+	<gunzip src="${libs}/WordNet-3.0.tar.gz" />
+	<untar src="${libs}/WordNet-3.0.tar" dest="${libs}" />
 </target>
 
 <target name="test" description="Run JUnit tests" depends="compile,compileTests">
