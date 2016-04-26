@@ -125,6 +125,10 @@ public class DuplicateSearcher
 		System.out.println("Precision: " + eval.calculatePrecision());
 		System.out.println("Recall: " + eval.calculateRecall());
 		System.out.println("F1-score: " + eval.calculateF1Score());
+		
+		System.out.println("True positives: " + eval.getTruePositives().size());
+		System.out.println("False negatives: " + eval.getFalseNegatives().size());
+		System.out.println("False positives: " + eval.getFalsePositives().size());
 	}
 
 }
