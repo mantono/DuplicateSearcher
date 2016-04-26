@@ -157,7 +157,7 @@ public class ExperimentSetGenerator
 			final Entry<Issue, List<Comment>> entry = iter.next();
 			final Issue issue = entry.getKey();
 			final List<Comment> issueComments = entry.getValue();
-			if (duplicateParser.isTaggedAsDuplicate(issueComments) || isLabeledAsDuplicates(issue))
+			if(duplicateParser.isTaggedAsDuplicate(issueComments))
 				duplicates.add(issue);
 		}
 		return duplicates;
