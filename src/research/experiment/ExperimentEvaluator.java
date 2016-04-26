@@ -50,7 +50,7 @@ public class ExperimentEvaluator {
 	{
 		double precision = calculatePrecision();
 		double recall = calculateRecall();
-		if(precision == 0 && recall == 0)
+		if(precision == 0 && recall == 0 || Double.isNaN(precision))
 			throw new IllegalStateException("You suck!");
 		
 		return (2)*(precision*recall)/(precision+recall);
