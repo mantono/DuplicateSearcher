@@ -76,7 +76,7 @@
 </target>
 
 <target name="datasets" description="Download and expand experiment data sets from GitHub repositories">
-	<get src="http://81.228.195.178/datasets.tar.gz" dest="./" verbose="true" usetimestamp="true" />
+	<get src="http://mantono.com/datasets.tar.gz" dest="./" verbose="true" usetimestamp="true" />
 	<gunzip src="datasets.tar.gz" />
 	<untar src="datasets.tar" dest="./" />
 </target>
