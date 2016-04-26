@@ -6,7 +6,7 @@ import duplicatesearcher.analysis.*;
 
 public class ExperimentEvaluator {
 	
-	Set<Duplicate> foundDuplicates, oracleDuplicates, truePositives, falsePositives, falseNegatives;
+	private final Set<Duplicate> foundDuplicates, oracleDuplicates, truePositives, falsePositives, falseNegatives;
 
 	
 	public ExperimentEvaluator(Set<Duplicate> foundDuplicates, Set<Duplicate> oracleDuplicates)
