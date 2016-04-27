@@ -5,11 +5,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
 import org.eclipse.egit.github.core.RepositoryId;
@@ -34,7 +40,7 @@ public class FileDownloader
 	public String getFilePath(final String fileName) throws IOException
 	{
 		URL url = new URL(
-				"https://api.github.com/search/code?q=ISSUE_TEMPLATE+in:path+repo:mantono/DuplicateSearcher");
+				"https://api.github.com/search/code?q=ISSUE_TEMPLATE+in:path+repo:"+repo.getOwner()+"/"+repo.getName());
 		String path = null;
 
 		try(BufferedReader reader = new BufferedReader(
@@ -62,7 +68,7 @@ public class FileDownloader
 
 	public String[] getShaHashes(String filePath) throws UnsupportedEncodingException, IOException
 	{
-		URL url = new URL("https://api.github.com/repos/mantono/DuplicateSearcher/commits?path=" + filePath);
+		URL url = new URL("https://api.github.com/repos/"+repo.getOwner()+"/"+repo.getName()+"/commits?path=" + filePath);
 		
 		
 		try(BufferedReader reader = new BufferedReader(
@@ -90,7 +96,7 @@ public class FileDownloader
 		
 		for(int i = 0; i < commits.length; i++)
 		{
-			URL url = new URL("https://api.github.com/repos/mantono/DuplicateSearcher/contents/" + filePath + "?ref=" + commits[i]);
+			URL url = new URL("https://api.github.com/repos/"+repo.getOwner()+"/"+repo.getName()+"/contents/" + filePath + "?ref=" + commits[i]);
 			
 			try(BufferedReader reader = new BufferedReader(
 					new InputStreamReader(url.openStream(), "UTF-8")))
@@ -100,7 +106,8 @@ public class FileDownloader
 				JsonElement e = jp.parse(line);
 				JsonObject jo = e.getAsJsonObject();
 				final String downloadUrl = jo.get("download_url").toString();
-				filesToDownload[i] = new URL(downloadUrl);
+				final String urlCleaned = downloadUrl.replaceAll("\"", "");
+				filesToDownload[i] = new URL(urlCleaned);
 			}
 		}
 		return filesToDownload;
@@ -111,11 +118,14 @@ public class FileDownloader
 		int i = 0;
 		for(URL url : urls)
 		{
-			ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-			final String fileName = "issue_template/" + repo.getOwner() + File.pathSeparator + repo.getName() +  File.pathSeparator + LocalDateTime.now();
-			FileOutputStream fos = new FileOutputStream(fileName);
-			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-			i++;
+			final File file = new File("issue_template/" + repo.getOwner() + "/" + repo.getName() +  "/" + LocalDateTime.now());
+			file.mkdirs();
+			final Path fileName = file.toPath();
+			try(InputStream in = url.openStream())
+			{
+			    Files.copy(in, fileName, StandardCopyOption.REPLACE_EXISTING);
+			    i++;
+			}
 		}
 		return i;
 	}
