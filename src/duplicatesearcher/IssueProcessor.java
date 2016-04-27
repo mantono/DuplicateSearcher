@@ -32,8 +32,8 @@ import duplicatesearcher.processing.Stemmer;
 import duplicatesearcher.processing.SynonymFinder;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
-import duplicatesearcher.retrieval.ApiClient;
 import duplicatesearcher.retrieval.FileDownloader;
+import research.experiment.datacollectiontools.ApiClient;
 
 /**
  * IssueProcessor controls and interacts with all other major components used
@@ -81,7 +81,7 @@ public class IssueProcessor
 		final Path templatePath = Paths.get(new URI("issue_templates" + File.pathSeparator + repoPath));
 		if(Files.exists(templatePath))
 			return loadFiles(templatePath);
-		FileDownloader downloader = new FileDownloader(repo); 
+		FileDownloader downloader = new FileDownloader(repo);
 		//return downloader.retrieve("ISSUE_TEMPLATE");
 		return new TreeMap<LocalDateTime, StopList>();
 	}

@@ -1,4 +1,4 @@
-package duplicatesearcher.retrieval;
+package research.experiment.datacollectiontools;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -17,9 +17,8 @@ public class ApiClient extends GitHubClient
 
 	private String readTokenFromFile()
 	{
-		try
+		try(final FileReader fileReader = new FileReader(".token"))
 		{
-			final FileReader fileReader = new FileReader(".token");
 			final BufferedReader bfReader = new BufferedReader(fileReader);
 			return bfReader.readLine();
 		}
@@ -30,4 +29,10 @@ public class ApiClient extends GitHubClient
 		}
 		return "BadToken";
 	}
+	
+	public String getToken()
+	{
+		return token;
+	}
+	
 }

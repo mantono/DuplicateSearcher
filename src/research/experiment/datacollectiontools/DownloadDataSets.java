@@ -11,7 +11,6 @@ import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
 
 import duplicatesearcher.StrippedIssue;
-import duplicatesearcher.retrieval.ApiClient;
 import duplicatesearcher.retrieval.IssueRetriever;
 
 public class DownloadDataSets
