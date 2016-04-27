@@ -30,7 +30,8 @@ public class ExperimentSetGenerator
 	private final Map<Issue, List<Comment>> allIssues;
 	private final Map<Integer, Issue> idIssueMap;
 	private final RepositoryId repo;
-	private Set<Issue> closedIssues, openIssues, nonDuplicates, duplicates, generatedCorpus;
+	private Set<Issue> closedNonDuplicates, nonDuplicates, duplicates, generatedCorpus;
+	private Set<Duplicate> duplicatesInGeneratedCorpus;
 
 	public ExperimentSetGenerator(final RepositoryId repo, final Map<Issue, List<Comment>> issuesWithcomments)
 	{
@@ -55,6 +56,8 @@ public class ExperimentSetGenerator
 		duplicates = findKnownDuplicates();
 		nonDuplicates = findNonDuplicates();
 		assert duplicates.size() + nonDuplicates.size() == allIssues.size() : "Size doesn't add upp";
+		
+		closedNonDuplicates = filterOpenIssues(nonDuplicates);
 
 		generatedCorpus = new HashSet<Issue>((int) (size * 1.1));
 		final int duplicateAmount = (int) (size * duplicateRatio);
@@ -64,9 +67,41 @@ public class ExperimentSetGenerator
 
 		generatedCorpus.addAll(getRandomElements(duplicates, duplicateAmount/2));
 		generatedCorpus.addAll(getMasterIssues(generatedCorpus));
-		generatedCorpus.addAll(getRandomElements(nonDuplicates, size - generatedCorpus.size()));
+		duplicatesInGeneratedCorpus = createDuplicateSet(generatedCorpus);
+		generatedCorpus.addAll(getRandomElements(closedNonDuplicates, size - generatedCorpus.size()));
 	}
-	
+
+	private Set<Issue> filterOpenIssues(Set<Issue> issues)
+	{
+		final Set<Issue> closedIssues = new HashSet<Issue>(issues);
+		final Iterator<Issue> iter = closedIssues.iterator();
+		while(iter.hasNext())
+		{
+			final Issue issue = iter.next();
+			final boolean open = issue.getState().equals("open");
+			if(open)
+				iter.remove();
+		}
+		
+		return closedIssues;
+	}
+
+	private Set<Duplicate> createDuplicateSet(Set<Issue> dupes)
+	{
+		duplicatesInGeneratedCorpus = new HashSet<Duplicate>();
+		for(final Issue issue : generatedCorpus)
+		{
+			final Issue master = getMasterForIssue(issue);
+			if(master == null)
+				continue;
+			if(master.getNumber() == issue.getNumber())
+				continue;
+			final Duplicate dupe = new Duplicate(new StrippedIssue(issue), new StrippedIssue(master), 1.0);
+			duplicatesInGeneratedCorpus.add(dupe);
+		}
+		return duplicatesInGeneratedCorpus;
+	}
+
 	public void generateRandomIntervalSet(final int size, final float minDuplicateRatio, final float maxDuplicateRatio)
 	{
 		float ratio = 0;
@@ -83,7 +118,12 @@ public class ExperimentSetGenerator
 			List<Comment> commentsForIssue = allIssues.get(issue);
 			final int master = findMaster(commentsForIssue);
 			if(master != -1)
-				masterIssues.add(idIssueMap.get(master));
+			{
+				final Issue masterIssue = idIssueMap.get(master);
+				if(masterIssue == null)
+					continue;
+				masterIssues.add(masterIssue);
+			}
 		}
 		
 		return masterIssues;
@@ -143,7 +183,7 @@ public class ExperimentSetGenerator
 			final Entry<Issue, List<Comment>> entry = iter.next();
 			final Issue issue = entry.getKey();
 			final List<Comment> issueComments = entry.getValue();
-			if (duplicateParser.isTaggedAsDuplicate(issueComments) || isLabeledAsDuplicates(issue))
+			if(duplicateParser.isTaggedAsDuplicate(issueComments))
 				duplicates.add(issue);
 		}
 		return duplicates;
@@ -166,6 +206,11 @@ public class ExperimentSetGenerator
 		}
 		
 		return dupes;
+	}
+
+	public Set<Duplicate> getCorpusDuplicates()
+	{
+		return duplicatesInGeneratedCorpus;
 	}
 
 	private boolean isLabeledAsDuplicates(Issue issue)

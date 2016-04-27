@@ -10,8 +10,6 @@
 <property name="dist"  location="dist"/>
 <property name="libs" location="lib"/>
 <property name="doc" location="doc"/>
-<property name="extdoc" location="${doc}/ext"/>
-<property name="libsdownload" location="${libs}/doc"/>
 
 <path id="project.class.path">
 	<pathelement path="${build}" />
@@ -24,31 +22,25 @@
 	<mkdir dir="${dist}"/>
 	<mkdir dir="${libs}"/>
 	<mkdir dir="${doc}"/>
-	<mkdir dir="${extdoc}"/>
-	<mkdir dir="${libsdownload}"/>
 </target>
 
 <target name="clean" description="Delete previous jar and class files">
 	<delete dir="${build}"/>
 	<delete dir="${dist}"/>
-	<delete dir="${extdoc}"/>
 	<delete dir="${doc}"/>
-	<delete dir="${libsdownload}"/>
 </target>
 
 <target name="libs" description="Download and/or compile dependency libraries">
 	<!-- See https://github.com/mantono/DuplicateSearcher/wiki/Frameworks for links to projects and APIs -->
 	<ivy:retrieve />
 	<get dest="${libs}" verbose="true" usetimestamp="true">
-
-		<!-- Apache Commons (sandbox) - Levenshtein Distance -->
-		<url url="https://github.com/apache/commons-text/blob/master/src/main/java/org/apache/commons/text/similarity/LevenshteinDistance.java" />
-		<url url="https://github.com/apache/commons-text/blob/master/NOTICE.txt" />
-		<url url="https://github.com/apache/commons-text/blob/master/LICENSE.txt" />
+		<url url="http://wordnetcode.princeton.edu/3.0/WordNet-3.0.tar.gz" />
 	</get>
+	<gunzip src="${libs}/WordNet-3.0.tar.gz" />
+	<untar src="${libs}/WordNet-3.0.tar" dest="${libs}" />
 </target>
 
-<target name="test" description="Run JUnit tests" depends="compile">
+<target name="test" description="Run JUnit tests" depends="compile,compileTests">
 	<junit showoutput="true" printsummary="yes" haltonfailure="yes">
 		<formatter type="brief" usefile="false"/>
 		<classpath refid="project.class.path" />
@@ -59,8 +51,14 @@
 	</junit>
 </target>
 
-<target name="compile" description="Compile code" depends="clean,init,libs">
-	<javac includeantruntime="true" srcdir="${src}:${test}" destdir="${build}">
+<target name="compile" description="Compile code" depends="init">
+	<javac includeantruntime="true" srcdir="${src}" destdir="${build}">
+		<classpath refid="project.class.path" />
+	</javac>
+</target>
+
+<target name="compileTests" description="Compile test classes" depends="init">
+	<javac includeantruntime="true" srcdir="${test}" destdir="${build}">
 		<classpath refid="project.class.path" />
 	</javac>
 </target>
@@ -78,7 +76,7 @@
 </target>
 
 <target name="datasets" description="Download and expand experiment data sets from GitHub repositories">
-	<get src="http://81.228.195.178/datasets.tar.gz" dest="./" verbose="true" usetimestamp="true" />
+	<get src="http://mantono.com/datasets.tar.gz" dest="./" verbose="true" usetimestamp="true" />
 	<gunzip src="datasets.tar.gz" />
 	<untar src="datasets.tar" dest="./" />
 </target>
