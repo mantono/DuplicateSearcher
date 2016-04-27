@@ -4,8 +4,8 @@ public enum IssueComponent
 {
 	TITLE,
 	BODY,
-	COMMENTS,
 	LABELS,
 	CODE,
+	COMMENTS,
 	ALL;
 }

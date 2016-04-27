@@ -82,7 +82,8 @@ public class IssueProcessor
 		if(Files.exists(templatePath))
 			return loadFiles(templatePath);
 		FileDownloader downloader = new FileDownloader(repo); 
-		return downloader.retrieve("ISSUE_TEMPLATE");
+		//return downloader.retrieve("ISSUE_TEMPLATE");
+		return new TreeMap<LocalDateTime, StopList>();
 	}
 
 	private SortedMap<LocalDateTime, StopList> downloadTemplates() throws IOException
@@ -129,6 +130,8 @@ public class IssueProcessor
 	{
 		for(IssueComponent component : IssueComponent.values())
 			processFrequencyCounter(strippedIssue.getComponent(component));
+		if(hasFlag(ProcessingFlags.FILTER_BAD))
+			strippedIssue.checkQuality();
 		
 		return strippedIssue;
 	}
@@ -175,24 +178,14 @@ public class IssueProcessor
 	{
 		switch (flag)
 		{
-		// case PARSE_COMMENTS: issue.removeComments(); break;
-		case SPELL_CORRECTION:
-			return spell.process(token);
-		case STOP_LIST_COMMON:
-			return stopListCommon.process(token);
-		case STOP_LIST_GITHUB:
-			return stopListGitHub.process(token);
-		case STOP_LIST_TEMPLATE_DYNAMIC:
-			System.out.println("Not implemented");
-			break;
-		case STOP_LIST_TEMPLATE_STATIC:
-			System.out.println("Not implemented");
-			break;
-		case SYNONYMS:
-			return synonyms.process(token);
-		case STEMMING:
-			return stemmer.process(token);
-			// case FILTER_BAD: issue.checkQuality(); break;
+			//case PARSE_COMMENTS: issue.removeComments(); break;
+			case SPELL_CORRECTION: return spell.process(token);
+			case STOP_LIST_COMMON: return stopListCommon.process(token);
+			case STOP_LIST_GITHUB: return stopListGitHub.process(token);
+			case STOP_LIST_TEMPLATE_DYNAMIC: System.out.println("Not implemented"); break;
+			case STOP_LIST_TEMPLATE_STATIC: System.out.println("Not implemented"); break;
+			case SYNONYMS: return synonyms.process(token);
+			case STEMMING: return stemmer.process(token);
 		}
 		return token;
 	}

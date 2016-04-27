@@ -17,24 +17,22 @@ import org.eclipse.egit.github.core.RepositoryId;
 import duplicatesearcher.analysis.Analyzer;
 import duplicatesearcher.analysis.Duplicate;
 import duplicatesearcher.analysis.Weight;
+import research.experiment.ExperimentEvaluator;
 import research.experiment.datacollectiontools.DatasetFileManager;
+import research.experiment.datacollectiontools.ExperimentSetGenerator;
 
 public class DuplicateSearcher
 {
-	private final RepositoryId repo;
 	private final Map<Issue, List<Comment>> issueData;
 	private final Set<StrippedIssue> processedIssues;
 	private final IssueProcessor processor;
 	private Analyzer analyzer;
 	private Set<Duplicate> duplicates;
 
-	public DuplicateSearcher(final RepositoryId repo, final IssueProcessor processor) throws ClassNotFoundException, IOException
+	public DuplicateSearcher(final Map<Issue, List<Comment>> corpus, final IssueProcessor processor) throws ClassNotFoundException, IOException
 	{
-		this.repo = repo;
 		this.processor = processor;
-		DatasetFileManager fileManager = new DatasetFileManager(repo);
-		fileManager.load();
-		this.issueData = fileManager.getDataset();
+		this.issueData = corpus;
 		this.processedIssues = new HashSet<StrippedIssue>(issueData.size());
 	}
 
@@ -82,6 +80,10 @@ public class DuplicateSearcher
 	{
 
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
+		DatasetFileManager data = new DatasetFileManager(repo);
+		data.load();
+		ExperimentSetGenerator exGen = new ExperimentSetGenerator(repo, data.getDataset());
+		
 		final IssueProcessor processor = new IssueProcessor(repo,
 				ProcessingFlags.PARSE_COMMENTS,
 				ProcessingFlags.SPELL_CORRECTION,
@@ -91,7 +93,8 @@ public class DuplicateSearcher
 				ProcessingFlags.STEMMING,
 				ProcessingFlags.FILTER_BAD
 				);
-		DuplicateSearcher searcher = new DuplicateSearcher(repo, processor);
+		exGen.generateRandomIntervalSet(500, 0.3f, 0.6f);
+		DuplicateSearcher searcher = new DuplicateSearcher(exGen.getGeneratedCorpus(), processor);
 		
 		final LocalDateTime startProcessing = LocalDateTime.now();
 		searcher.processIssues();
@@ -113,6 +116,20 @@ public class DuplicateSearcher
 		
 		System.out.println("Execution time:" + elpasedTime);
 		System.out.println("Found duplicates: " + searcher.getDuplicates().size());
+		
+		ExperimentEvaluator eval = new ExperimentEvaluator(searcher.getDuplicates(), exGen.getCorpusDuplicates());
+		
+		final int actualDuplicates = eval.getFalseNegatives().size() + eval.getTruePositives().size();
+		System.out.println("Corpus total size: " + exGen.getGeneratedCorpus().size());
+		System.out.println("Duplicates in corpus: " + actualDuplicates);
+		
+		System.out.println("Precision: " + eval.calculatePrecision());
+		System.out.println("Recall: " + eval.calculateRecall());
+		System.out.println("F1-score: " + eval.calculateF1Score());
+		
+		System.out.println("True positives: " + eval.getTruePositives().size());
+		System.out.println("False negatives: " + eval.getFalseNegatives().size());
+		System.out.println("False positives: " + eval.getFalsePositives().size());
 	}
 
 }

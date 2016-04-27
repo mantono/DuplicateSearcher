@@ -17,6 +17,9 @@ import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 import org.eclipse.egit.github.core.RepositoryId;
 
+import duplicatesearcher.StrippedIssue;
+import duplicatesearcher.analysis.Duplicate;
+
 /**
  * Create a set on which our experiments can be conducted.
  */
@@ -27,7 +30,8 @@ public class ExperimentSetGenerator
 	private final Map<Issue, List<Comment>> allIssues;
 	private final Map<Integer, Issue> idIssueMap;
 	private final RepositoryId repo;
-	private Set<Issue> closedIssues, openIssues, nonDuplicates, duplicates, generatedCorpus;
+	private Set<Issue> closedNonDuplicates, nonDuplicates, duplicates, generatedCorpus;
+	private Set<Duplicate> duplicatesInGeneratedCorpus;
 
 	public ExperimentSetGenerator(final RepositoryId repo, final Map<Issue, List<Comment>> issuesWithcomments)
 	{
@@ -52,6 +56,8 @@ public class ExperimentSetGenerator
 		duplicates = findKnownDuplicates();
 		nonDuplicates = findNonDuplicates();
 		assert duplicates.size() + nonDuplicates.size() == allIssues.size() : "Size doesn't add upp";
+		
+		closedNonDuplicates = filterOpenIssues(nonDuplicates);
 
 		generatedCorpus = new HashSet<Issue>((int) (size * 1.1));
 		final int duplicateAmount = (int) (size * duplicateRatio);
@@ -61,9 +67,41 @@ public class ExperimentSetGenerator
 
 		generatedCorpus.addAll(getRandomElements(duplicates, duplicateAmount/2));
 		generatedCorpus.addAll(getMasterIssues(generatedCorpus));
-		generatedCorpus.addAll(getRandomElements(nonDuplicates, size - generatedCorpus.size()));
+		duplicatesInGeneratedCorpus = createDuplicateSet(generatedCorpus);
+		generatedCorpus.addAll(getRandomElements(closedNonDuplicates, size - generatedCorpus.size()));
 	}
-	
+
+	private Set<Issue> filterOpenIssues(Set<Issue> issues)
+	{
+		final Set<Issue> closedIssues = new HashSet<Issue>(issues);
+		final Iterator<Issue> iter = closedIssues.iterator();
+		while(iter.hasNext())
+		{
+			final Issue issue = iter.next();
+			final boolean open = issue.getState().equals("open");
+			if(open)
+				iter.remove();
+		}
+		
+		return closedIssues;
+	}
+
+	private Set<Duplicate> createDuplicateSet(Set<Issue> dupes)
+	{
+		duplicatesInGeneratedCorpus = new HashSet<Duplicate>();
+		for(final Issue issue : generatedCorpus)
+		{
+			final Issue master = getMasterForIssue(issue);
+			if(master == null)
+				continue;
+			if(master.getNumber() == issue.getNumber())
+				continue;
+			final Duplicate dupe = new Duplicate(new StrippedIssue(issue), new StrippedIssue(master), 1.0);
+			duplicatesInGeneratedCorpus.add(dupe);
+		}
+		return duplicatesInGeneratedCorpus;
+	}
+
 	public void generateRandomIntervalSet(final int size, final float minDuplicateRatio, final float maxDuplicateRatio)
 	{
 		float ratio = 0;
@@ -80,10 +118,21 @@ public class ExperimentSetGenerator
 			List<Comment> commentsForIssue = allIssues.get(issue);
 			final int master = findMaster(commentsForIssue);
 			if(master != -1)
-				masterIssues.add(idIssueMap.get(master));
+			{
+				final Issue masterIssue = idIssueMap.get(master);
+				if(masterIssue == null)
+					continue;
+				masterIssues.add(masterIssue);
+			}
 		}
 		
 		return masterIssues;
+	}
+	
+	private Issue getMasterForIssue(Issue issue)
+	{
+		final int masterId = findMaster(allIssues.get(issue));
+		return idIssueMap.get(masterId);
 	}
 
 	private int findMaster(List<Comment> commentsForIssue)
@@ -113,6 +162,8 @@ public class ExperimentSetGenerator
 			throw new IllegalArgumentException("Given set is empty.");
 		List<Issue> listFromSet = new ArrayList<Issue>(set);
 		Collections.shuffle(listFromSet);
+		if(amount > listFromSet.size())
+			amount = listFromSet.size();
 		return listFromSet.subList(0, amount);
 	}
 
@@ -132,10 +183,34 @@ public class ExperimentSetGenerator
 			final Entry<Issue, List<Comment>> entry = iter.next();
 			final Issue issue = entry.getKey();
 			final List<Comment> issueComments = entry.getValue();
-			if (duplicateParser.isTaggedAsDuplicate(issueComments) || isLabeledAsDuplicates(issue))
+			if(duplicateParser.isTaggedAsDuplicate(issueComments))
 				duplicates.add(issue);
 		}
 		return duplicates;
+	}
+	
+	public Set<Duplicate> getDuplicates()
+	{
+		Set<Duplicate> dupes = new HashSet<Duplicate>(duplicates.size());
+		for(Issue issue : duplicates)
+		{
+			final Issue master = getMasterForIssue(issue);
+			if(master == null)
+				continue;
+			if(master.getNumber() == issue.getNumber())
+				continue;
+			StrippedIssue masterStripped = new StrippedIssue(master, allIssues.get(master));
+			StrippedIssue duplicateStripped = new StrippedIssue(issue, allIssues.get(issue));
+			final Duplicate duplicate = new Duplicate(duplicateStripped, masterStripped, 1);
+			dupes.add(duplicate);
+		}
+		
+		return dupes;
+	}
+
+	public Set<Duplicate> getCorpusDuplicates()
+	{
+		return duplicatesInGeneratedCorpus;
 	}
 
 	private boolean isLabeledAsDuplicates(Issue issue)
@@ -149,9 +224,12 @@ public class ExperimentSetGenerator
 		return false;
 	}
 
-	public Set<Issue> getGeneratedCorpus()
+	public Map<Issue, List<Comment>> getGeneratedCorpus()
 	{
-		return generatedCorpus;
+		Map<Issue, List<Comment>> corpus = new HashMap<Issue, List<Comment>>();
+		for(Issue issue : generatedCorpus)
+			corpus.put(issue, allIssues.get(issue));
+		return corpus;
 	}
 	
 	public void printCorpusData()

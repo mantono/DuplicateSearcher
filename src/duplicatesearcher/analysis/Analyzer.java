@@ -80,6 +80,14 @@ public class Analyzer
 			if(issue.getNumber() <= issueInCollection.getNumber())
 				continue;
 			
+			progress.increment();
+			progress.print();
+			
+			final int diffOnId = Math.abs(issue.getNumber() - issueInCollection.getNumber());
+			
+			if(issue.getUserId() == issueInCollection.getUserId() && diffOnId != 1)
+				continue;
+			
 			double similarity = 0;
 			
 			for(IssueComponent comp : IssueComponent.values())
@@ -87,9 +95,6 @@ public class Analyzer
 			
 			if(similarity >= threshold)
 				createDuplicate(issue, issueInCollection, similarity, duplicates);
-			
-			progress.increment();
-			progress.print();
 		}
 
 		return duplicates;
@@ -142,26 +147,14 @@ public class Analyzer
 
 	private void createDuplicate(StrippedIssue issue1, StrippedIssue issue2, double similarity, Set<Duplicate> duplicates)
 	{
-		StrippedIssue master, duplicate;
-		if(issue1.getNumber() < issue2.getNumber())
-		{
-			master = issue1;
-			duplicate = issue2;
-		}
-		else
-		{
-			master = issue2;
-			duplicate = issue1;
-		}
-		
 		try
 		{
-			duplicates.add(new Duplicate(duplicate, master, similarity));
+			duplicates.add(new Duplicate(issue1, issue2, similarity));
 		}
 		catch(IllegalArgumentException exception)
 		{
 			System.err.println("\n" + exception.getMessage());
-			System.err.println("\t" + duplicate.getNumber() + " --> " + master.getNumber());
+			System.err.println("\t" + issue1.getNumber() + " --> " + issue2.getNumber());
 			System.err.println("\tSimilarity: " + similarity);
 		}
 	}

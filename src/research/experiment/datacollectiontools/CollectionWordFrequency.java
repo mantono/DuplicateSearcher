@@ -17,6 +17,7 @@ import research.experiment.datacollectiontools.ObjectSerializer;
 
 import duplicatesearcher.Progress;
 import duplicatesearcher.StrippedIssue;
+import duplicatesearcher.analysis.IssueComponent;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 
 public class CollectionWordFrequency
@@ -94,8 +95,7 @@ public class CollectionWordFrequency
 		{
 			final Entry<Issue, List<Comment>> entry = iter.next();
 			final StrippedIssue issue = new StrippedIssue(entry.getKey(), entry.getValue());
-			issue.createFrequencyCounterForAll();
-			TermFrequencyCounter tfcIssue = issue.getAll();
+			TermFrequencyCounter tfcIssue = issue.getComponent(IssueComponent.ALL);
 			counter.add(tfcIssue);
 			parsingProgress.increment();
 			parsingProgress.print();
