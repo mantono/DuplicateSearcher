@@ -105,7 +105,7 @@ public class DuplicateSearcher
 		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
 		
 		final LocalDateTime startAnalysis = endProcessing;
-		searcher.analyzeIssues(0.6, new Weight(500,250,100,25,50));
+		searcher.analyzeIssues(0.7, new Weight(2, 1.5, 0.5, 0.5, 0.25));
 		final LocalDateTime endAnalysis = LocalDateTime.now();
 		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
 		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
@@ -131,6 +131,7 @@ public class DuplicateSearcher
 		System.out.println("True positives: " + eval.getTruePositives().size());
 		System.out.println("False negatives: " + eval.getFalseNegatives().size());
 		System.out.println("False positives: " + eval.getFalsePositives().size());
+		System.out.println(eval.getFalsePositives());
 	}
 
 }
