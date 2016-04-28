@@ -28,18 +28,22 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException;
 
 import research.experiment.datacollectiontools.ApiClient;
 
 public class FileDownloader
 {
+	private final static String BASE = "https://api.github.com/"; 
 	private final RepositoryId repo;
+	private final String repoPath;
 	private final GitHubClient client = new ApiClient();
 	private final Map<String, LocalDateTime> commitTimestamp;
 
 	public FileDownloader(RepositoryId repo)
 	{
 		this.repo = repo;
+		this.repoPath = repo.getOwner() + "/" + repo.getName();
 		this.commitTimestamp = new HashMap<String, LocalDateTime>();
 		
 	}
@@ -47,7 +51,7 @@ public class FileDownloader
 	public String getFilePath(final String fileName) throws IOException
 	{
 		URL url = new URL(
-				"https://api.github.com/search/code?q=ISSUE_TEMPLATE+in:path+repo:"+repo.getOwner()+"/"+repo.getName());
+				BASE + "search/code?q=ISSUE_TEMPLATE+in:path+repo:"+repoPath);
 		String path = null;
 
 		try(BufferedReader reader = new BufferedReader(
@@ -75,7 +79,7 @@ public class FileDownloader
 
 	public String[] getShaHashes(String filePath) throws UnsupportedEncodingException, IOException
 	{
-		URL url = new URL("https://api.github.com/repos/"+repo.getOwner()+"/"+repo.getName()+"/commits?path=" + filePath);
+		URL url = new URL(BASE + "repos/"+repoPath+"/commits?path=" + filePath);
 		
 		
 		try(BufferedReader reader = new BufferedReader(
@@ -116,7 +120,7 @@ public class FileDownloader
 		
 		for(int i = 0; i < commits.length; i++)
 		{
-			URL url = new URL("https://api.github.com/repos/"+repo.getOwner()+"/"+repo.getName()+"/contents/" + filePath + "?ref=" + commits[i]);
+			URL url = new URL(BASE + "repos/"+repoPath+"/contents/" + filePath + "?ref=" + commits[i]);
 			
 			try(BufferedReader reader = new BufferedReader(
 					new InputStreamReader(url.openStream(), "UTF-8")))
@@ -138,7 +142,7 @@ public class FileDownloader
 		int i = 0;
 		for(URL url : urls)
 		{
-			final File file = new File("issue_template/" + repo.getOwner() + "/" + repo.getName() +  "/" + LocalDateTime.now());
+			final File file = new File("issue_template/" + repoPath +  "/" + LocalDateTime.now());
 			file.mkdirs();
 			final Path fileName = file.toPath();
 			try(InputStream in = url.openStream())
