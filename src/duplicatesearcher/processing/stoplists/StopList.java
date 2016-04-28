@@ -24,6 +24,10 @@ public class StopList implements TokenProcessor
 		readFileContent(stopListFile);
 	}
 
+	public StopList()
+	{
+	}
+
 	private void readFileContent(File stopListFile) throws IOException
 	{
 		final Path path = Paths.get(stopListFile.toURI());

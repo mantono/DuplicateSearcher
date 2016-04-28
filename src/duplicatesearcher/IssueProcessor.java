@@ -2,13 +2,11 @@ package duplicatesearcher;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,24 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
-import org.eclipse.egit.github.core.SearchRepository;
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.client.GitHubRequest;
-import org.eclipse.egit.github.core.client.GitHubResponse;
-
 import duplicatesearcher.analysis.IssueComponent;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.Stemmer;
 import duplicatesearcher.processing.SynonymFinder;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
-import duplicatesearcher.retrieval.FileDownloader;
-import research.experiment.datacollectiontools.ApiClient;
+import duplicatesearcher.processing.stoplists.TemplateLoader;
 
 /**
  * IssueProcessor controls and interacts with all other major components used
@@ -128,12 +118,35 @@ public class IssueProcessor
 
 	private StrippedIssue processIssue(StrippedIssue strippedIssue)
 	{
+		stopIssueTemplate = getStopListForDate(strippedIssue.getDateCreated());
 		for(IssueComponent component : IssueComponent.values())
 			processFrequencyCounter(strippedIssue.getComponent(component));
 		if(hasFlag(ProcessingFlags.FILTER_BAD))
-			strippedIssue.checkQuality();
-		
+			strippedIssue.checkQuality();			
+
 		return strippedIssue;
+	}
+
+	private StopList getStopListForDate(Date dateCreated)
+	{
+		if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC))
+		{
+			if(stopIssueTemplate != null)
+				return stopIssueTemplate;
+			else
+				return issueTemplates.get(issueTemplates.lastKey()); 
+		}
+		else if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
+		{
+			final long seconds = dateCreated.getTime()/1000;
+			final int nanoSeconds = (int) (dateCreated.getTime() % 1000) * 1000000;
+			LocalDateTime date = LocalDateTime.ofEpochSecond(seconds, nanoSeconds, ZoneOffset.UTC);
+			SortedMap<LocalDateTime, StopList> subMap = issueTemplates.headMap(date);
+			if(subMap.isEmpty())
+				return new StopList();
+			return subMap.get(subMap.lastKey());
+		}
+		return null;
 	}
 
 	private void processFrequencyCounter(TermFrequencyCounter counter)
@@ -176,14 +189,13 @@ public class IssueProcessor
 
 	private Token applyProcess(Token token, ProcessingFlags flag)
 	{
-		switch (flag)
+		switch(flag)
 		{
-			//case PARSE_COMMENTS: issue.removeComments(); break;
 			case SPELL_CORRECTION: return spell.process(token);
 			case STOP_LIST_COMMON: return stopListCommon.process(token);
 			case STOP_LIST_GITHUB: return stopListGitHub.process(token);
-			case STOP_LIST_TEMPLATE_DYNAMIC: System.out.println("Not implemented"); break;
-			case STOP_LIST_TEMPLATE_STATIC: System.out.println("Not implemented"); break;
+			case STOP_LIST_TEMPLATE_STATIC: return stopIssueTemplate.process(token);
+			case STOP_LIST_TEMPLATE_DYNAMIC: return stopIssueTemplate.process(token);
 			case SYNONYMS: return synonyms.process(token);
 			case STEMMING: return stemmer.process(token);
 		}

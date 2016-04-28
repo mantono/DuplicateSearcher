@@ -18,7 +18,7 @@ public class FileDownloaderTest
 	public void testFilePath() throws IOException
 	{
 		final RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
-		FileDownloader downloader = new FileDownloader(repo);
+		FileDownloader downloader = new FileDownloader(repo, "issue_templates");
 		final String path = downloader.getFilePath("ISSUE_TEMPLATE");
 		assertEquals("/ISSUE_TEMPLATE", path);
 	}
@@ -27,7 +27,7 @@ public class FileDownloaderTest
 	public void testGetShaHashes() throws IOException
 	{
 		final RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
-		FileDownloader downloader = new FileDownloader(repo);
+		FileDownloader downloader = new FileDownloader(repo, "issue_templates");
 		final int commits = downloader.getShaHashes("/ISSUE_TEMPLATE").length;
 	}
 	
@@ -36,7 +36,7 @@ public class FileDownloaderTest
 	{
 		final String[] commits  = new String[]{"93317b3eb184ae5f98198fb3617e5c7fd23a3f00", "ea43d177b2d451b93237291b81df80d9b405e977"};
 		final RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
-		FileDownloader downloader = new FileDownloader(repo);
+		FileDownloader downloader = new FileDownloader(repo, "issue_templates");
 		final URL[] urls = downloader.getRawUrls(commits, "/ISSUE_TEMPLATE");
 	}
 	
@@ -44,7 +44,7 @@ public class FileDownloaderTest
 	public void testDownloadFiles() throws UnsupportedEncodingException, IOException
 	{
 		final RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
-		FileDownloader downloader = new FileDownloader(repo);
+		FileDownloader downloader = new FileDownloader(repo, "issue_templates");
 		final String[] commits = downloader.getShaHashes("/ISSUE_TEMPLATE");
 		final URL[] urls = downloader.getRawUrls(commits, "/ISSUE_TEMPLATE");
 		final int downloadedFiles = downloader.downloadFiles(urls, commits);

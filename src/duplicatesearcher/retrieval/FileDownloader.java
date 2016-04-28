@@ -35,24 +35,22 @@ import research.experiment.datacollectiontools.ApiClient;
 
 public class FileDownloader
 {
-	private final static String BASE = "https://api.github.com/"; 
-	private final RepositoryId repo;
+	private final static String BASE = "https://api.github.com/";
+	private final String filePath;
 	private final String repoPath;
-	private final GitHubClient client = new ApiClient();
 	private final Map<String, LocalDateTime> commitTimestamp;
 
-	public FileDownloader(RepositoryId repo)
+	public FileDownloader(RepositoryId repo, String path)
 	{
-		this.repo = repo;
+		this.filePath = path;
 		this.repoPath = repo.getOwner() + "/" + repo.getName();
 		this.commitTimestamp = new HashMap<String, LocalDateTime>();
-		
+
 	}
 
 	public String getFilePath(final String fileName) throws IOException
 	{
-		URL url = new URL(
-				BASE + "search/code?q=ISSUE_TEMPLATE+in:path+repo:"+repoPath);
+		URL url = new URL(BASE + "search/code?q=" + fileName + "+in:path+repo:" + repoPath);
 		String path = null;
 
 		try(BufferedReader reader = new BufferedReader(
@@ -80,9 +78,8 @@ public class FileDownloader
 
 	public String[] getShaHashes(String filePath) throws UnsupportedEncodingException, IOException
 	{
-		URL url = new URL(BASE + "repos/"+repoPath+"/commits?path=" + filePath);
-		
-		
+		URL url = new URL(BASE + "repos/" + repoPath + "/commits?path=" + filePath);
+
 		try(BufferedReader reader = new BufferedReader(
 				new InputStreamReader(url.openStream(), "UTF-8")))
 		{
@@ -91,7 +88,7 @@ public class FileDownloader
 			JsonElement e = jp.parse(line);
 			JsonArray ja = e.getAsJsonArray();
 			final String[] commits = new String[ja.size()];
-			
+
 			int i = 0;
 			for(JsonElement element : ja)
 			{
@@ -144,15 +141,25 @@ public class FileDownloader
 		for(; i < urls.length; i++)
 		{
 			final LocalDateTime fileTime = commitTimestamp.get(commits[i]);
-			final File file = new File("issue_template/" + repoPath +  "/" + fileTime.toEpochSecond(ZoneOffset.UTC));
+			final File file = new File(
+					filePath + "/" + repoPath + "/" + fileTime.toEpochSecond(ZoneOffset.UTC));
 			file.mkdirs();
 			final Path fileName = file.toPath();
 			try(InputStream in = urls[i].openStream())
 			{
-			    Files.copy(in, fileName, StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(in, fileName, StandardCopyOption.REPLACE_EXISTING);
 			}
 		}
 		return i;
+	}
+	
+	public int downloadAllVersionsOf(final String fileName) throws IOException
+	{
+		final String filePath = getFilePath(fileName);
+		final String[] shaHashes = getShaHashes(filePath);
+		final URL[] urls = getRawUrls(shaHashes, filePath);
+		final int retrieved = downloadFiles(urls, shaHashes);
+		return retrieved;
 	}
 
 }
