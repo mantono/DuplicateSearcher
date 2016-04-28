@@ -35,69 +35,47 @@ public class IssueProcessor
 	private final EnumSet<ProcessingFlags> flags;
 
 	private final RepositoryId repo;
-	private final StopList stopListCommon;
-	private final StopList stopListGitHub;
+	private final StopList stopListCommon, stopListGitHub;
+	private StopList stopIssueTemplate;
 	private final Stemmer stemmer = new Stemmer();
 	private final SpellCorrector spell;
 	private final SynonymFinder synonyms;
 	private final Map<Token, Token> processedTokens = new HashMap<Token, Token>(120_000);
-	private final SortedMap<LocalDateTime, StopList> issueTemplate;
+	private final SortedMap<LocalDateTime, StopList> issueTemplates;
 
-	public IssueProcessor(RepositoryId repo, EnumSet<ProcessingFlags> flags) throws IOException, InterruptedException,
-			ClassNotFoundException, URISyntaxException
+	public IssueProcessor(RepositoryId repo, EnumSet<ProcessingFlags> flags)
+			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException
 	{
 		this.flags = flags;
 		this.repo = repo;
+		
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
 
-		this.spell = new SpellCorrector(new File("dictionary/noun.txt"));
-		spell.addDictionary(new File("dictionary/sense.txt"));
-		spell.addDictionary(new File("dictionary/verb.txt"));
-		spell.addDictionary(new File("dictionary/adj.txt"));
-		spell.addDictionary(new File("dictionary/adv.txt"));
-		spell.addDictionary(new File("stoplists/github/github.txt"));
-		spell.addDictionary(new File("stoplists/long/ReqSimile.txt"));
-		this.synonyms = new SynonymFinder();
-		if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC) || hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
-			this.issueTemplate = loadIssueTemplateStopList();
+		if(hasFlag(ProcessingFlags.SPELL_CORRECTION))
+		{
+			this.spell = new SpellCorrector(new File("dictionary/noun.txt"));
+			spell.addDictionary(new File("dictionary/sense.txt"));
+			spell.addDictionary(new File("dictionary/verb.txt"));
+			spell.addDictionary(new File("dictionary/adj.txt"));
+			spell.addDictionary(new File("dictionary/adv.txt"));
+			spell.addDictionary(new File("stoplists/github/github.txt"));
+			spell.addDictionary(new File("stoplists/long/ReqSimile.txt"));
+		}
 		else
-			this.issueTemplate = null;
+			this.spell = null;
+		
+		this.synonyms = new SynonymFinder();
+		
+		TemplateLoader loader = new TemplateLoader(repo);
+		if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC) || hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
+			this.issueTemplates = loader.retrieveStopList();
+		else
+			this.issueTemplates = null;
 	}
 
-	private SortedMap<LocalDateTime, StopList> loadIssueTemplateStopList() throws URISyntaxException
-	{
-		final String repoPath = repo.getOwner() + File.pathSeparator + repo.getName();
-		final Path templatePath = Paths.get(new URI("issue_templates" + File.pathSeparator + repoPath));
-		if(Files.exists(templatePath))
-			return loadFiles(templatePath);
-		FileDownloader downloader = new FileDownloader(repo);
-		//return downloader.retrieve("ISSUE_TEMPLATE");
-		return new TreeMap<LocalDateTime, StopList>();
-	}
-
-	private SortedMap<LocalDateTime, StopList> downloadTemplates() throws IOException
-	{
-		GitHubClient client = new ApiClient();
-		SearchRepository search = new SearchRepository(repo.getOwner(), repo.getName());
-		GitHubRequest request = new GitHubRequest();
-		String requestUri = "https://api.github.com/search/code\\?q=ISSUE_TEMPLATE+in:path+repo:mantono/DuplicateSearcher";
-		request.setUri(requestUri);
-		GitHubResponse response = client.get(request);
-		System.out.print(response.toString());
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private SortedMap<LocalDateTime, StopList> loadFiles(Path templatePath)
-	{
-		final File issueTemplateFile = new File("issue_templates/" + repo.getOwner() + "_" + repo.getName() +  ".md");
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public IssueProcessor(final RepositoryId repo, final ProcessingFlags... flags) throws IOException, InterruptedException,
-			ClassNotFoundException, URISyntaxException
+	public IssueProcessor(final RepositoryId repo, final ProcessingFlags... flags)
+			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException
 	{
 		this(repo, EnumSet.copyOf(Arrays.asList(flags)));
 	}
