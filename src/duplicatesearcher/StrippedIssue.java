@@ -175,6 +175,6 @@ public class StrippedIssue implements Serializable
 	{
 		final int titleSize = componentCounters.get(IssueComponent.TITLE).size();
 		final int bodySize = componentCounters.get(IssueComponent.BODY).size();
-		flaggedBad = titleSize + bodySize < 6;
+		flaggedBad = titleSize + bodySize < 8;
 	}
 }

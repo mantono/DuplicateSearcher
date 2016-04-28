@@ -98,7 +98,12 @@ public class IssueProcessor
 	{
 		stopIssueTemplate = getStopListForDate(strippedIssue.getDateCreated());
 		for(IssueComponent component : IssueComponent.values())
-			processFrequencyCounter(strippedIssue.getComponent(component));
+		{
+			TermFrequencyCounter componentCounter =strippedIssue.getComponent(component);
+			processFrequencyCounter(componentCounter);
+			componentCounter.add(new Token("token123456789"));
+		}
+		
 		if(hasFlag(ProcessingFlags.FILTER_BAD))
 			strippedIssue.checkQuality();			
 
