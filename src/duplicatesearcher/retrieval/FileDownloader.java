@@ -17,6 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -31,10 +35,13 @@ public class FileDownloader
 {
 	private final RepositoryId repo;
 	private final GitHubClient client = new ApiClient();
+	private final Map<String, LocalDateTime> commitTimestamp;
 
 	public FileDownloader(RepositoryId repo)
 	{
 		this.repo = repo;
+		this.commitTimestamp = new HashMap<String, LocalDateTime>();
+		
 	}
 
 	public String getFilePath(final String fileName) throws IOException
@@ -84,10 +91,23 @@ public class FileDownloader
 			for(JsonElement element : ja)
 			{
 				JsonObject jobj = element.getAsJsonObject();
-				commits[i++] = jobj.get("sha").toString().replaceAll("\"", "");
+				final String commitHash = jobj.get("sha").toString().replaceAll("\"", "");
+				commits[i++] = commitHash;
+				LocalDateTime timestamp = getTimeForCommit(jobj);
+				commitTimestamp.put(commitHash, timestamp);
 			}
 			return commits;
 		}
+	}
+
+	private LocalDateTime getTimeForCommit(JsonObject jobj)
+	{
+		JsonObject commitData = jobj.getAsJsonObject("commit");
+		JsonObject authorData = commitData.getAsJsonObject("author");
+		JsonElement dateElement = authorData.get("date");
+		final String date = dateElement.getAsString();
+		final ZonedDateTime formattedDate = ZonedDateTime.parse(date, DateTimeFormatter.ISO_ZONED_DATE_TIME);
+		return formattedDate.toLocalDateTime();
 	}
 
 	public URL[] getRawUrls(String[] commits, String filePath) throws UnsupportedEncodingException, IOException
