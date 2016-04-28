@@ -104,10 +104,16 @@ public class ExperimentSetGenerator
 
 	public void generateRandomIntervalSet(final int size, final float minDuplicateRatio, final float maxDuplicateRatio)
 	{
-		float ratio = 0;
-		while(ratio < minDuplicateRatio)
-			ratio = random.nextFloat()*maxDuplicateRatio;
-		generateSet(size, ratio);
+		final float spanRandom = maxDuplicateRatio - minDuplicateRatio;
+		if(spanRandom < 0)
+			throw new IllegalAnnotationException("Min is more than max");
+		if(spanRandom == 0)
+			generateSet(size, minDuplicateRatio);
+		else
+		{
+			float ratio = random.nextFloat()*spanRandom + minDuplicateRatio;
+			generateSet(size, ratio);
+		}
 	}
 
 	private Collection<? extends Issue> getMasterIssues(Set<Issue> duplicateSet)
