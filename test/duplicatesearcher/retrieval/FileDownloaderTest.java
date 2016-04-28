@@ -47,7 +47,7 @@ public class FileDownloaderTest
 		FileDownloader downloader = new FileDownloader(repo);
 		final String[] commits = downloader.getShaHashes("/ISSUE_TEMPLATE");
 		final URL[] urls = downloader.getRawUrls(commits, "/ISSUE_TEMPLATE");
-		final int downloadedFiles = downloader.downloadFiles(urls);
+		final int downloadedFiles = downloader.downloadFiles(urls, commits);
 	}
 		
 	

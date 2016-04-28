@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -137,18 +138,18 @@ public class FileDownloader
 		return filesToDownload;
 	}
 
-	public int downloadFiles(URL[] urls) throws IOException
+	public int downloadFiles(URL[] urls, String[] commits) throws IOException
 	{
 		int i = 0;
-		for(URL url : urls)
+		for(; i < urls.length; i++)
 		{
-			final File file = new File("issue_template/" + repoPath +  "/" + LocalDateTime.now());
+			final LocalDateTime fileTime = commitTimestamp.get(commits[i]);
+			final File file = new File("issue_template/" + repoPath +  "/" + fileTime.toEpochSecond(ZoneOffset.UTC));
 			file.mkdirs();
 			final Path fileName = file.toPath();
-			try(InputStream in = url.openStream())
+			try(InputStream in = urls[i].openStream())
 			{
 			    Files.copy(in, fileName, StandardCopyOption.REPLACE_EXISTING);
-			    i++;
 			}
 		}
 		return i;
