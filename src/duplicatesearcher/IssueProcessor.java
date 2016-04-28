@@ -2,23 +2,28 @@ package duplicatesearcher;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.SortedMap;
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
-
+import org.eclipse.egit.github.core.RepositoryId;
 import duplicatesearcher.analysis.IssueComponent;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.Stemmer;
 import duplicatesearcher.processing.SynonymFinder;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
+import duplicatesearcher.processing.stoplists.TemplateLoader;
 
 /**
  * IssueProcessor controls and interacts with all other major components used
@@ -29,34 +34,52 @@ public class IssueProcessor
 {
 	private final EnumSet<ProcessingFlags> flags;
 
-	private final StopList stopListCommon;
-	private final StopList stopListGitHub;
+	private final RepositoryId repo;
+	private final StopList stopListCommon, stopListGitHub;
+	private StopList stopIssueTemplate;
 	private final Stemmer stemmer = new Stemmer();
 	private final SpellCorrector spell;
 	private final SynonymFinder synonyms;
 	private final Map<Token, Token> processedTokens = new HashMap<Token, Token>(120_000);
+	private final SortedMap<LocalDateTime, StopList> issueTemplates;
 
-	public IssueProcessor(EnumSet<ProcessingFlags> flags) throws IOException, InterruptedException, ClassNotFoundException
+	public IssueProcessor(RepositoryId repo, EnumSet<ProcessingFlags> flags)
+			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException
 	{
 		this.flags = flags;
+		this.repo = repo;
+		
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
 
-		this.spell = new SpellCorrector(new File("dictionary/noun.txt"));
-		spell.addDictionary(new File("dictionary/sense.txt"));
-		spell.addDictionary(new File("dictionary/verb.txt"));
-		spell.addDictionary(new File("dictionary/adj.txt"));
-		spell.addDictionary(new File("dictionary/adv.txt"));
-		spell.addDictionary(new File("stoplists/github/github.txt"));
-		spell.addDictionary(new File("stoplists/long/ReqSimile.txt"));
+		if(hasFlag(ProcessingFlags.SPELL_CORRECTION))
+		{
+			this.spell = new SpellCorrector(new File("dictionary/noun.txt"));
+			spell.addDictionary(new File("dictionary/sense.txt"));
+			spell.addDictionary(new File("dictionary/verb.txt"));
+			spell.addDictionary(new File("dictionary/adj.txt"));
+			spell.addDictionary(new File("dictionary/adv.txt"));
+			spell.addDictionary(new File("stoplists/github/github.txt"));
+			spell.addDictionary(new File("stoplists/long/ReqSimile.txt"));
+		}
+		else
+			this.spell = null;
+		
 		this.synonyms = new SynonymFinder();
+		
+		TemplateLoader loader = new TemplateLoader(repo);
+		if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC) || hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
+			this.issueTemplates = loader.retrieveStopList();
+		else
+			this.issueTemplates = null;
 	}
 
-	public IssueProcessor(final ProcessingFlags... flags) throws IOException, InterruptedException, ClassNotFoundException
+	public IssueProcessor(final RepositoryId repo, final ProcessingFlags... flags)
+			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException
 	{
-		this(EnumSet.copyOf(Arrays.asList(flags)));
+		this(repo, EnumSet.copyOf(Arrays.asList(flags)));
 	}
-	
+
 	public boolean hasFlag(ProcessingFlags flag)
 	{
 		return flags.contains(flag);
@@ -65,20 +88,43 @@ public class IssueProcessor
 	public StrippedIssue process(final Issue issue, final List<Comment> comments)
 	{
 		final String pullRequestError = "Pull requests should no longer exist in any data set. Remove this data set and download a new one.";
-		assert issue.getPullRequest().getHtmlUrl() == null: pullRequestError;
-		StrippedIssue strippedIssue = new StrippedIssue(issue, comments); 
+		assert issue.getPullRequest().getHtmlUrl() == null : pullRequestError;
+		StrippedIssue strippedIssue = new StrippedIssue(issue, comments);
 		strippedIssue = processIssue(strippedIssue);
 		return strippedIssue;
 	}
 
 	private StrippedIssue processIssue(StrippedIssue strippedIssue)
 	{
+		stopIssueTemplate = getStopListForDate(strippedIssue.getDateCreated());
 		for(IssueComponent component : IssueComponent.values())
 			processFrequencyCounter(strippedIssue.getComponent(component));
 		if(hasFlag(ProcessingFlags.FILTER_BAD))
-			strippedIssue.checkQuality();
-		
+			strippedIssue.checkQuality();			
+
 		return strippedIssue;
+	}
+
+	private StopList getStopListForDate(Date dateCreated)
+	{
+		if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC))
+		{
+			if(stopIssueTemplate != null)
+				return stopIssueTemplate;
+			else
+				return issueTemplates.get(issueTemplates.lastKey()); 
+		}
+		else if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
+		{
+			final long seconds = dateCreated.getTime()/1000;
+			final int nanoSeconds = (int) (dateCreated.getTime() % 1000) * 1000000;
+			LocalDateTime date = LocalDateTime.ofEpochSecond(seconds, nanoSeconds, ZoneOffset.UTC);
+			SortedMap<LocalDateTime, StopList> subMap = issueTemplates.headMap(date);
+			if(subMap.isEmpty())
+				return new StopList();
+			return subMap.get(subMap.lastKey());
+		}
+		return null;
 	}
 
 	private void processFrequencyCounter(TermFrequencyCounter counter)
@@ -119,17 +165,15 @@ public class IssueProcessor
 		return token;
 	}
 
-
 	private Token applyProcess(Token token, ProcessingFlags flag)
 	{
 		switch(flag)
 		{
-			//case PARSE_COMMENTS: issue.removeComments(); break;
 			case SPELL_CORRECTION: return spell.process(token);
 			case STOP_LIST_COMMON: return stopListCommon.process(token);
 			case STOP_LIST_GITHUB: return stopListGitHub.process(token);
-			case STOP_LIST_TEMPLATE_DYNAMIC: System.out.println("Not implemented"); break;
-			case STOP_LIST_TEMPLATE_STATIC: System.out.println("Not implemented"); break;
+			case STOP_LIST_TEMPLATE_STATIC: return stopIssueTemplate.process(token);
+			case STOP_LIST_TEMPLATE_DYNAMIC: return stopIssueTemplate.process(token);
 			case SYNONYMS: return synonyms.process(token);
 			case STEMMING: return stemmer.process(token);
 		}

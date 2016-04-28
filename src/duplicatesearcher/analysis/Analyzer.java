@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.hamcrest.core.Is;
+
 import duplicatesearcher.Progress;
 import duplicatesearcher.StrippedIssue;
 import duplicatesearcher.Token;
