@@ -17,6 +17,10 @@ import org.eclipse.egit.github.core.RepositoryId;
 import duplicatesearcher.analysis.Analyzer;
 import duplicatesearcher.analysis.Duplicate;
 import duplicatesearcher.analysis.Weight;
+import duplicatesearcher.flags.BooleanFlag;
+import duplicatesearcher.flags.Flag;
+import duplicatesearcher.flags.ProcessingFlag;
+import duplicatesearcher.flags.SettingsLoader;
 import research.experiment.ExperimentEvaluator;
 import research.experiment.datacollectiontools.DatasetFileManager;
 import research.experiment.datacollectiontools.ExperimentSetGenerator;
@@ -83,6 +87,8 @@ public class DuplicateSearcher
 		DatasetFileManager data = new DatasetFileManager(repo);
 		data.load();
 		ExperimentSetGenerator exGen = new ExperimentSetGenerator(repo, data.getDataset());
+		
+		final SettingsLoader<Enum<ProcessingFlag>, Flag<Boolean>> sLoader1 = new SettingsLoader<>(ProcessingFlag.class);
 		
 		final IssueProcessor processor = new IssueProcessor(repo,
 				ProcessingFlags.PARSE_COMMENTS,

@@ -106,7 +106,7 @@ public class ExperimentSetGenerator
 	{
 		final float spanRandom = maxDuplicateRatio - minDuplicateRatio;
 		if(spanRandom < 0)
-			throw new IllegalAnnotationException("Min is more than max");
+			throw new IllegalArgumentException("Min is more than max");
 		if(spanRandom == 0)
 			generateSet(size, minDuplicateRatio);
 		else

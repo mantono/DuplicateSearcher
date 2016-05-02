@@ -3,6 +3,8 @@ package duplicatesearcher.analysis;
 import java.util.EnumMap;
 import java.util.Map;
 
+import duplicatesearcher.flags.IssueComponent;
+
 public class Weight
 {
 	private final Map<IssueComponent, Double> values = new EnumMap<IssueComponent, Double>(IssueComponent.class);
