@@ -2,21 +2,13 @@ package duplicatesearcher.flags;
 
 import java.util.EnumMap;
 
-public class DoubleFlagLoader
+public class IssueComponentFlagLoader
 {
-	private final EnumMap<IssueComponent, Double> settings;
-
-	public SettingsLoader()
-	{
-		this.settings = loadDefaultSettings();
-	}
+	private EnumMap<IssueComponent, Double> settings = new EnumMap<IssueComponent, Double>(IssueComponent.class);
 
 	private EnumMap<IssueComponent, Double> loadDefaultSettings()
 	{
 		final EnumMap<IssueComponent, Double> defaultSettings = new EnumMap<IssueComponent, Double>(IssueComponent.class);
-		
-		
-		
 		for(IssueComponent op : values())
 			defaultSettings.put(op, op.defaultValue());
 		return defaultSettings;
@@ -24,44 +16,36 @@ public class DoubleFlagLoader
 
 	private IssueComponent getOption(String string)
 	{
-		for(IssueComponent option : IssueComponent.values())
+		for(IssueComponent option : values())
 			if(option.matches(string))
 				return option;
 		return null;
 	}
 
-//	private E[] values()
-//	{
-//		return enumClass.getEnumConstants();
-//	}
+	private IssueComponent[] values()
+	{
+		return IssueComponent.values();
+	}
 
 	public void applyAgrumentVector(String[] args)
 	{
 		for(int i = 0; i < args.length; i++)
 		{
-			E option = getOption(args[i]);
-			if(option == null)
+			IssueComponent option = getOption(args[i]);
+			if(args[i].equals("--help") || args[i].equals("-h"))
+			{
+				for(IssueComponent op : values())
+					System.out.println(op.helpDescription());
+				System.exit(0);
+			}
+			else if(option == null)
 			{
 				continue;
-//				System.err.println("Argument " + args[i]
-//						+ " is not a valid flag. See --help for options.");
-//				System.exit(1);
-			}
-			else if(option.equals(getOption("--help")))
-			{
-				for(E op : values())
-					System.out.println(op);
-				System.exit(0);
 			}
 			try
 			{
-				if(!option.takesArgument())
-					settings.put(option, option.getMaximumValue());
-				else
-				{
-					settings.put(option, option.parse(args[i + 1]));
-					i++;
-				}
+				settings.put(option, Double.parseDouble(args[i + 1]));
+				i++;
 			}
 			catch(ArrayIndexOutOfBoundsException exception)
 			{
@@ -72,11 +56,11 @@ public class DoubleFlagLoader
 		validateSettings(settings);
 	}
 
-	private void validateSettings(final EnumMap<E, T> settings)
+	private void validateSettings(final EnumMap<IssueComponent, Double> settings)
 	{
-		for(E setting : settings.keySet())
+		for(IssueComponent setting : settings.keySet())
 		{
-			final T value = settings.get(setting);
+			final Double value = settings.get(setting);
 			if(!setting.inRange(value))
 			{
 				System.err.println("Argument " + value + " is not valid for flag "
@@ -87,7 +71,7 @@ public class DoubleFlagLoader
 		}
 	}
 
-	public EnumMap<E, T> getSettings()
+	public EnumMap<IssueComponent, Double> getSettings()
 	{
 		return settings;
 	}

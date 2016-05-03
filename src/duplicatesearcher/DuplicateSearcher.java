@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +21,10 @@ import duplicatesearcher.analysis.Duplicate;
 import duplicatesearcher.analysis.Weight;
 import duplicatesearcher.flags.BooleanFlag;
 import duplicatesearcher.flags.Flag;
+import duplicatesearcher.flags.IssueComponent;
+import duplicatesearcher.flags.IssueComponentFlagLoader;
 import duplicatesearcher.flags.ProcessingFlag;
+import duplicatesearcher.flags.ProcessingFlagLoader;
 import duplicatesearcher.flags.SettingsLoader;
 import research.experiment.ExperimentEvaluator;
 import research.experiment.datacollectiontools.DatasetFileManager;
@@ -88,18 +93,15 @@ public class DuplicateSearcher
 		data.load();
 		ExperimentSetGenerator exGen = new ExperimentSetGenerator(repo, data.getDataset());
 		
-		final SettingsLoader<Enum<ProcessingFlag>, Flag<Boolean>> sLoader1 = new SettingsLoader<>(ProcessingFlag.class);
+		ProcessingFlagLoader pfl = new ProcessingFlagLoader();
+		pfl.applyAgrumentVector(args);
+		EnumSet<ProcessingFlag> flags = pfl.getSettings();
 		
-		final IssueProcessor processor = new IssueProcessor(repo,
-				ProcessingFlags.PARSE_COMMENTS,
-				ProcessingFlags.SPELL_CORRECTION,
-				ProcessingFlags.STOP_LIST_COMMON,
-				ProcessingFlags.STOP_LIST_GITHUB,
-				ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC,
-				ProcessingFlags.SYNONYMS,
-				ProcessingFlags.STEMMING,
-				ProcessingFlags.FILTER_BAD
-				);
+		IssueComponentFlagLoader icfl = new IssueComponentFlagLoader();
+		icfl.applyAgrumentVector(args);
+		EnumMap<IssueComponent, Double> weighting = icfl.getSettings();
+		
+		final IssueProcessor processor = new IssueProcessor(repo, flags);
 		exGen.generateRandomIntervalSet(500, 0.3f, 0.6f);
 		DuplicateSearcher searcher = new DuplicateSearcher(exGen.getGeneratedCorpus(), processor);
 		
@@ -111,7 +113,7 @@ public class DuplicateSearcher
 		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
 		
 		final LocalDateTime startAnalysis = endProcessing;
-		searcher.analyzeIssues(0.7, new Weight(2, 1.5, 0.5, 0.5, 0.25));
+		searcher.analyzeIssues(0.5, new Weight(weighting));
 		final LocalDateTime endAnalysis = LocalDateTime.now();
 		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
 		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
