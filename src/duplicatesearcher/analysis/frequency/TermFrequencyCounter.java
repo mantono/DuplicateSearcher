@@ -29,7 +29,7 @@ public class TermFrequencyCounter implements FrequencyCounter
 	{
 		return frequency.keySet();
 	}
-
+	
 	public int size()
 	{
 		return frequency.size();
@@ -142,5 +142,14 @@ public class TermFrequencyCounter implements FrequencyCounter
 		for(Label label : labelCollection)
 			add(new Token(label.toString().toLowerCase().replaceAll("\\s", "")));
 			
+	}
+	
+	@Override
+	public String toString(){
+		StringBuilder stringBuilder = new StringBuilder();
+    	for(Map.Entry<Token, Integer> entry : frequency.entrySet())
+    		stringBuilder.append(entry.getKey()+"("+entry.getValue()+")");
+    	
+    	return stringBuilder.toString();
 	}
 }
