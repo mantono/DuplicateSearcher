@@ -13,6 +13,7 @@ import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.FrequencyCounter;
 import duplicatesearcher.analysis.frequency.InverseDocumentFrequencyCounter;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.flags.IssueComponent;
 
 public class Analyzer
 {

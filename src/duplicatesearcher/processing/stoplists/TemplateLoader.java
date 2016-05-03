@@ -40,7 +40,9 @@ public class TemplateLoader
 		if(Files.exists(templatePath))
 			return loadFiles(templatePath);
 		FileDownloader downloader = new FileDownloader(repo, DIR);
-		downloader.downloadAllVersionsOf("ISSUE_TEMPLATE");
+		final int downloaded = downloader.downloadAllVersionsOf("ISSUE_TEMPLATE");
+		if(downloaded == 0)
+			System.out.println("No ISSUE_TEMPLATE found for " + repo);
 		return loadFiles(templatePath);
 	}
 	

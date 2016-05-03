@@ -17,8 +17,10 @@ import java.util.SortedMap;
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
-import duplicatesearcher.analysis.IssueComponent;
+
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.flags.IssueComponent;
+import duplicatesearcher.flags.ProcessingFlag;
 import duplicatesearcher.processing.Stemmer;
 import duplicatesearcher.processing.SynonymFinder;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
@@ -32,7 +34,7 @@ import duplicatesearcher.processing.stoplists.TemplateLoader;
  */
 public class IssueProcessor
 {
-	private final EnumSet<ProcessingFlags> flags;
+	private final EnumSet<ProcessingFlag> flags;
 
 	private final RepositoryId repo;
 	private final StopList stopListCommon, stopListGitHub;
@@ -43,7 +45,7 @@ public class IssueProcessor
 	private final Map<Token, Token> processedTokens = new HashMap<Token, Token>(120_000);
 	private final SortedMap<LocalDateTime, StopList> issueTemplates;
 
-	public IssueProcessor(RepositoryId repo, EnumSet<ProcessingFlags> flags)
+	public IssueProcessor(RepositoryId repo, EnumSet<ProcessingFlag> flags)
 			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException
 	{
 		this.flags = flags;
@@ -52,7 +54,7 @@ public class IssueProcessor
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
 
-		if(hasFlag(ProcessingFlags.SPELL_CORRECTION))
+		if(hasFlag(ProcessingFlag.SPELL_CORRECTION))
 		{
 			this.spell = new SpellCorrector(new File("dictionary/noun.txt"));
 			spell.addDictionary(new File("dictionary/sense.txt"));
@@ -68,19 +70,19 @@ public class IssueProcessor
 		this.synonyms = new SynonymFinder();
 		
 		TemplateLoader loader = new TemplateLoader(repo);
-		if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC) || hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
+		if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE_STATIC) || hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE_DYNAMIC))
 			this.issueTemplates = loader.retrieveStopList();
 		else
 			this.issueTemplates = null;
 	}
 
-	public IssueProcessor(final RepositoryId repo, final ProcessingFlags... flags)
+	public IssueProcessor(final RepositoryId repo, final ProcessingFlag... flags)
 			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException
 	{
 		this(repo, EnumSet.copyOf(Arrays.asList(flags)));
 	}
 
-	public boolean hasFlag(ProcessingFlags flag)
+	public boolean hasFlag(ProcessingFlag flag)
 	{
 		return flags.contains(flag);
 	}
@@ -104,7 +106,7 @@ public class IssueProcessor
 			componentCounter.add(new Token("token123456789"));
 		}
 		
-		if(hasFlag(ProcessingFlags.FILTER_BAD))
+		if(hasFlag(ProcessingFlag.FILTER_BAD))
 			strippedIssue.checkQuality();			
 
 		return strippedIssue;
@@ -112,14 +114,14 @@ public class IssueProcessor
 
 	private StopList getStopListForDate(Date dateCreated)
 	{
-		if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_STATIC))
+		if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE_STATIC))
 		{
 			if(stopIssueTemplate != null)
 				return stopIssueTemplate;
 			else
 				return issueTemplates.get(issueTemplates.lastKey()); 
 		}
-		else if(hasFlag(ProcessingFlags.STOP_LIST_TEMPLATE_DYNAMIC))
+		else if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE_DYNAMIC))
 		{
 			final long seconds = dateCreated.getTime()/1000;
 			final int nanoSeconds = (int) (dateCreated.getTime() % 1000) * 1000000;
@@ -160,7 +162,7 @@ public class IssueProcessor
 
 	public Token process(Token token)
 	{
-		for(ProcessingFlags flag : flags)
+		for(ProcessingFlag flag : flags)
 		{
 			token = applyProcess(token, flag);
 			if(token == null)
@@ -170,7 +172,7 @@ public class IssueProcessor
 		return token;
 	}
 
-	private Token applyProcess(Token token, ProcessingFlags flag)
+	private Token applyProcess(Token token, ProcessingFlag flag)
 	{
 		switch(flag)
 		{

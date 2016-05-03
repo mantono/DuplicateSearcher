@@ -14,9 +14,8 @@ import org.eclipse.egit.github.core.RepositoryId;
 import org.junit.Test;
 
 import duplicatesearcher.IssueProcessor;
-import duplicatesearcher.ProcessingFlags;
 import duplicatesearcher.StrippedIssue;
-
+import duplicatesearcher.flags.ProcessingFlag;
 import research.experiment.datacollectiontools.DatasetFileManager;
 
 public class AnalyzerTest
@@ -34,7 +33,7 @@ public class AnalyzerTest
 		HashSet<StrippedIssue> issues = new HashSet<StrippedIssue>(dataMap.size());
 		Iterator<Entry<Issue, List<Comment>>> iter = dataMap.entrySet().iterator();
 
-		final IssueProcessor processor = new IssueProcessor(ProcessingFlags.PARSE_COMMENTS, ProcessingFlags.STOP_LIST_COMMON);
+		final IssueProcessor processor = new IssueProcessor(ProcessingFlag.PARSE_COMMENTS, ProcessingFlag.STOP_LIST_COMMON);
 		
 		while(iter.hasNext())
 		{

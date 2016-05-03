@@ -17,8 +17,8 @@ import research.experiment.datacollectiontools.ObjectSerializer;
 
 import duplicatesearcher.Progress;
 import duplicatesearcher.StrippedIssue;
-import duplicatesearcher.analysis.IssueComponent;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.flags.IssueComponent;
 
 public class CollectionWordFrequency
 {

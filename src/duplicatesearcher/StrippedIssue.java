@@ -13,8 +13,8 @@ import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 
-import duplicatesearcher.analysis.IssueComponent;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.flags.IssueComponent;
 import duplicatesearcher.processing.CodeExtractor;
 
 /**
