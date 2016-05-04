@@ -150,7 +150,7 @@ public class TermFrequencyCounter implements FrequencyCounter
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
     	for(Map.Entry<Token, Integer> entry : frequency.entrySet())
-    		stringBuilder.append(entry.getKey()+"("+entry.getValue()+")");
+    		stringBuilder.append(entry.getKey()+" ("+entry.getValue()+"), ");
     	
     	return stringBuilder.toString();
 	}
