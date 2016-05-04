@@ -72,6 +72,9 @@ public class Analyzer
 	{
 		final Set<Duplicate> duplicates = new HashSet<Duplicate>();
 		
+		double highestSimilarity = threshold;
+		Duplicate bestMatch = null;
+		
 		final Map<IssueComponent, Map<Token, Double>> queryNormalized = createQueryMap(issue);
 
 		for(StrippedIssue issueInCollection : issues)
@@ -92,8 +95,12 @@ public class Analyzer
 			for(IssueComponent comp : IssueComponent.values())
 				similarity += calculateSimilarity(weights.getWeight(comp), issueInCollection.getComponent(comp), queryNormalized.get(comp));
 			
-			if(similarity >= threshold)
-				createDuplicate(issue, issueInCollection, similarity, duplicates);
+			if(similarity >= highestSimilarity)
+			{
+				duplicates.remove(bestMatch);
+				bestMatch = createDuplicate(issue, issueInCollection, similarity, duplicates);
+				highestSimilarity = similarity;
+			}
 		}
 
 		return duplicates;
@@ -144,11 +151,13 @@ public class Analyzer
 		return similarity;
 	}
 
-	private void createDuplicate(StrippedIssue issue1, StrippedIssue issue2, double similarity, Set<Duplicate> duplicates)
+	private Duplicate createDuplicate(StrippedIssue issue1, StrippedIssue issue2, double similarity, Set<Duplicate> duplicates)
 	{
 		try
 		{
-			duplicates.add(new Duplicate(issue1, issue2, similarity));
+			final Duplicate duplicate = new Duplicate(issue1, issue2, similarity); 
+			duplicates.add(duplicate);
+			return duplicate;
 		}
 		catch(IllegalArgumentException exception)
 		{
@@ -156,6 +165,7 @@ public class Analyzer
 			System.err.println("\t" + issue1.getNumber() + " --> " + issue2.getNumber());
 			System.err.println("\tSimilarity: " + similarity);
 		}
+		return null;
 	}
 
 	private Map<Token, Double> weightMap(FrequencyCounter frequency)
