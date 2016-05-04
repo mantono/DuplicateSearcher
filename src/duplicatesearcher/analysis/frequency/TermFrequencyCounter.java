@@ -40,9 +40,11 @@ public class TermFrequencyCounter implements FrequencyCounter
 		frequency.clear();
 	}
 
-	public int remove(final Token three)
+	public int remove(final Token token)
 	{
-		return frequency.remove(three);
+		if(!frequency.containsKey(token))
+			return -1;
+		return frequency.remove(token);
 	}
 	
 	public int remove(final String token)
