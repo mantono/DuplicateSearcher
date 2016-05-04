@@ -16,8 +16,8 @@ public class ExperimentEvaluator {
 		
 		this.truePositives = new HashSet<Duplicate>(oracleDuplicates.size());
 		//true positive = intersect(oracleDupes, foundDupes)
-		this.truePositives.addAll(oracleDuplicates);
-		this.truePositives.retainAll(foundDuplicates);
+		this.truePositives.addAll(foundDuplicates);
+		this.truePositives.retainAll(oracleDuplicates);
 		
 		this.falsePositives = new HashSet<Duplicate>(oracleDuplicates.size());
 		//falsePositive = alla element i foundDupes minus alla element i oracleDupes

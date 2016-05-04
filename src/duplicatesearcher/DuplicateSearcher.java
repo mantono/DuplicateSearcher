@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
@@ -27,6 +28,7 @@ import duplicatesearcher.flags.ProcessingFlag;
 import duplicatesearcher.flags.ProcessingFlagLoader;
 import duplicatesearcher.flags.SettingsLoader;
 import research.experiment.ExperimentEvaluator;
+import research.experiment.Report;
 import research.experiment.datacollectiontools.DatasetFileManager;
 import research.experiment.datacollectiontools.ExperimentSetGenerator;
 
@@ -102,7 +104,8 @@ public class DuplicateSearcher
 		EnumMap<IssueComponent, Double> weighting = icfl.getSettings();
 		
 		final IssueProcessor processor = new IssueProcessor(repo, flags);
-		exGen.generateRandomIntervalSet(500, 0.3f, 0.6f);
+		exGen.generateRandomIntervalSet(1000, 0.3f, 0.6f);
+
 		DuplicateSearcher searcher = new DuplicateSearcher(exGen.getGeneratedCorpus(), processor);
 		
 		final LocalDateTime startProcessing = LocalDateTime.now();
@@ -113,33 +116,18 @@ public class DuplicateSearcher
 		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
 		
 		final LocalDateTime startAnalysis = endProcessing;
-		searcher.analyzeIssues(0.5, new Weight(weighting));
+
+		searcher.analyzeIssues(0.6, new Weight(weighting));
+
 		final LocalDateTime endAnalysis = LocalDateTime.now();
 		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
 		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
-		
-		System.out.println("\n");
-		for(Duplicate d : searcher.getDuplicates())
-			System.out.println(d);
 		final Duration elpasedTime = Duration.between(startProcessing, endAnalysis);
 		
 		System.out.println("Execution time:" + elpasedTime);
-		System.out.println("Found duplicates: " + searcher.getDuplicates().size());
-		
-		ExperimentEvaluator eval = new ExperimentEvaluator(searcher.getDuplicates(), exGen.getCorpusDuplicates());
-		
-		final int actualDuplicates = eval.getFalseNegatives().size() + eval.getTruePositives().size();
-		System.out.println("Corpus total size: " + exGen.getGeneratedCorpus().size());
-		System.out.println("Duplicates in corpus: " + actualDuplicates);
-		
-		System.out.println("Precision: " + eval.calculatePrecision());
-		System.out.println("Recall: " + eval.calculateRecall());
-		System.out.println("F1-score: " + eval.calculateF1Score());
-		
-		System.out.println("True positives: " + eval.getTruePositives().size());
-		System.out.println("False negatives: " + eval.getFalseNegatives().size());
-		System.out.println("False positives: " + eval.getFalsePositives().size());
-		System.out.println(eval.getFalsePositives());
+			
+		Report report = new Report(flags, weighting, repo, elpasedTimeProcessing, elpasedTimeAnalysis, exGen, searcher.getDuplicates());
+		report.buildFile();
 	}
 
 }

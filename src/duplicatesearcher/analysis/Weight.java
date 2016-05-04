@@ -58,4 +58,10 @@ public class Weight
 	{
 		return values.get(component);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return values.toString();
+	}
 }

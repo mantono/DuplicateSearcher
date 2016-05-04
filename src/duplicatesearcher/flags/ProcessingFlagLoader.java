@@ -26,7 +26,10 @@ public class ProcessingFlagLoader
 			}
 			flagList.add(option);
 		}
-		flags = EnumSet.copyOf(flagList);
+		if(flagList.isEmpty())
+			flags = EnumSet.noneOf(ProcessingFlag.class);
+		else
+			flags = EnumSet.copyOf(flagList);
 	}
 	
 	private ProcessingFlag[] values()
