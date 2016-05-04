@@ -3,8 +3,10 @@ package research.experiment;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import org.eclipse.egit.github.core.RepositoryId;
 
 import research.experiment.datacollectiontools.ExperimentSetGenerator;
 import duplicatesearcher.ProcessingFlags;
+import duplicatesearcher.StrippedIssue;
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.Duplicate;
 import duplicatesearcher.analysis.IssueComponent;
@@ -45,125 +48,146 @@ public class Report{
 		this.analysis = analysis;
 		this.exSetGenerator = exSetGenerator;
 		this.foundDuplicates = foundDuplicates;
-		this.exEval = new ExperimentEvaluator(foundDuplicates, exSetGenerator.getCorpusDuplicates());
- 	}
-	
-	public List<String> buildHTML(){
-	    reportList = new ArrayList<String>();
-	    final String header = "<html><head><title>"+repoId+"</title></head><body>";
-	    final String flags = "<p>Flags: "+ flagSet +"</p>";
-	    StringBuilder weighting = new StringBuilder("<p>Weightings: ");
-	    
-	    for(final Entry<IssueComponent, Double> entry : weights.entrySet()){ 
-	    	  weighting.append("\n" + entry.getKey().toString());
-	    	  weighting.append(":" + entry.getValue().toString());
-	    }
-	    weighting.append("</p>");
-	    
-	    final String F1score = "<p>F1-score: "+ exEval.calculateF1Score()+"</p>";
-	    final String precision = "<p>Precision: "+ exEval.calculatePrecision()+"</p>";
-	    final String recall = "<p>F1-score: "+ exEval.calculateRecall()+"</p>";
-	    final String time = "<p>Processingtime: "+ processing.toString() + "Analysistime: " + analysis.toString() + "</p>";
-	    final String truePositiveHeader = ("<h> True Positives: </h>"); 
-	    StringBuilder truePositives = new StringBuilder();
-	    Set<Duplicate> truePositivesSet = exEval.getTruePositives();
-	    
-	    for(Duplicate duplicate : truePositivesSet){
-	    	        truePositives.append("<table><tr><td>" + duplicate.getMaster().getNumber()
-	    	        		+ "</td><td>" + duplicate.getDuplicate().getNumber());
-	        for(IssueComponent ic : IssueComponent.values()){
-	        	TermFrequencyCounter terms = duplicate.getMaster().getComponent(ic);	        		
-	        	truePositives.append(ic +":"+ terms.toString());
-	        }
-	        		 
-	        truePositives.append("</td><td>" + duplicate.getDuplicate().getNumber());
-	        for(IssueComponent ic : IssueComponent.values()){
-	        	TermFrequencyCounter terms = duplicate.getDuplicate().getComponent(ic);	        		
-	        	truePositives.append(ic +":"+ terms.toString());
-	        }
-	        truePositives.append("</td></tr></table>");
-	    }
-	   
-	    final String falsePositiveHeader = ("<h> False Positives: </h>"); 
-	    StringBuilder falsePositives = new StringBuilder();
-	    Set<Duplicate> falsePositivesSet = exEval.getFalsePositives();
-	    
-	    for(Duplicate duplicate : falsePositivesSet){
-	        falsePositives.append("<table><tr><td colspan = \"3\">" + duplicate.getMaster().getNumber()); 
-	        for(IssueComponent ic : IssueComponent.values()){
-	        	TermFrequencyCounter terms = duplicate.getMaster().getComponent(ic);	        		
-	        	falsePositives.append(ic +":"+ terms.toString());
-	        }
-	        		 
-	        falsePositives.append("</td><td>" + duplicate.getDuplicate().getNumber());
-	        for(IssueComponent ic : IssueComponent.values()){
-	        	TermFrequencyCounter terms = duplicate.getDuplicate().getComponent(ic);	        		
-	        	falsePositives.append(ic +":"+ terms.toString());
-	        }
-	        falsePositives.append("</td></tr></table>");
-	    }
-	    
-	    final String falseNegativeHeader = ("<h> False Negatives: </h>"); 
-	    StringBuilder falseNegatives = new StringBuilder();
-	    Set<Duplicate> falseNegativesSet = exEval.getFalseNegatives();
-	    
-	    for(Duplicate duplicate : falseNegativesSet){
-	        falseNegatives.append("<table><tr><td>" + duplicate.getMaster().getNumber()
-	        		+ "</td><td>" + duplicate.getDuplicate().getNumber());
-	      
-	        for(IssueComponent ic : IssueComponent.values()){
-	        	falseNegatives.append("<tr><td>" + ic + "</td>");
-	        	TermFrequencyCounter terms = duplicate.getDuplicate().getComponent(ic);	        		
-	        	falseNegatives.append("<td>"+ terms.toString() + "</td>");
-	        	
-	        	terms = duplicate.getMaster().getComponent(ic);	        		
-	        	falseNegatives.append("<td>"+ terms.toString() + "</td>");
-	        	falseNegatives.append("</tr>");
-	        }
-	        		 
-	        falseNegatives.append("</td><td>" + duplicate.getDuplicate().getNumber());
-	        for(IssueComponent ic : IssueComponent.values()){
-	        	TermFrequencyCounter terms = duplicate.getDuplicate().getComponent(ic);	        		
-	        	falseNegatives.append(ic +":"+ terms.toString());
-	        }
-	        falseNegatives.append("</td></tr></table>");
-	    }
-	    
-	    reportList.add(header);
-	    reportList.add(flags);
-	    reportList.add(weighting.toString());
-	    reportList.add(F1score);
-	    reportList.add(precision);
-	    reportList.add(recall);
-	    reportList.add(time);
-	    reportList.add(truePositiveHeader);
-	    reportList.add(truePositives.toString());
-	    reportList.add(falsePositiveHeader);
-	    reportList.add(falsePositives.toString());
-	    reportList.add(falseNegativeHeader);
-	    reportList.add(falseNegatives.toString());
-	    
-	    
-	    reportList.add("</body></html>");
-	    
-	    return reportList;
+		this.exEval = new ExperimentEvaluator(foundDuplicates,
+				exSetGenerator.getCorpusDuplicates());
 	}
-	
-	public void buildFile(){
-		List<String> reportList = buildHTML(); 
+
+	public List<String> buildHTML()
+	{
+		reportList = new ArrayList<String>();
+		final String header = "<html><head><link rel='stylesheet' type='text/css' href='../../style.css'><title>" + repoId + "</title></head><body>";
 		
-		Path file = Paths.get("experimentreport.html");
-		try {
+		final StringBuilder links = new StringBuilder("<p>");
+		links.append("<a href='#truepositives'>True positives</a><br/>");
+		links.append("<a href='#falsepositives'>False positives</a><br/>");
+		links.append("<a href='#falsenegatives'>False negatives</a><br/>");
+		links.append("</p>");
+		
+		final StringBuilder parameters = new StringBuilder("<fieldset><legend>Parameters</legend>");
+		parameters.append("<p>Processing flags: " + flagSet + "</p>");
+		parameters.append("<p>Weights: " + weights + "</p>");
+		parameters.append("</fieldset>");
+		
+		final StringBuilder result = new StringBuilder("<fieldset><legend>Result</legend>");
+		result.append("<p>True positives: "+exEval.getTruePositives().size()+"</p>");
+		result.append("<p>False positives: "+exEval.getFalsePositives().size()+"</p>");
+		result.append("<p>False negatives: "+exEval.getFalseNegatives().size()+"</p>");
+		result.append("<p>Precision: " + exEval.calculatePrecision() + "</p>");
+		result.append("<p>Recall: " + exEval.calculateRecall() + "</p>");
+		result.append("<p>F1-score: " + exEval.calculateF1Score() + "</p>");
+		result.append("</fieldset>");
+		
+		final StringBuilder performance = new StringBuilder("<fieldset><legend>Performance</legend>");
+		performance.append("<p>Processing time: " + processing.toString() + "<br/>");
+		performance.append("Analysis time: " + analysis.toString() + "</p>");
+		performance.append("</fieldset>");
+		
+		final int corpusSize = exSetGenerator.getGeneratedCorpus().size();
+		final double corpusDuplicatesSize = exSetGenerator.getCorpusDuplicates().size();
+		final double corpusDuplicateRatio = corpusDuplicatesSize/corpusSize;
+		
+		final StringBuilder corpusData = new StringBuilder("<fieldset><legend>Experiment set data</legend>");
+		corpusData.append("<p>Experiment set size: " + corpusSize + " issues</p>");
+		corpusData.append("<p>Duplicates in experiment set: "+corpusDuplicatesSize+"</p>");
+		corpusData.append("<p>Duplicate ratio in experiment: "+corpusDuplicateRatio+"</p>");
+		corpusData.append("</fieldset>");
+
+		final String truePos = createTable(exEval.getTruePositives(), "True Positives");
+		final String falsePos = createTable(exEval.getFalsePositives(), "False Positives");
+		final String falseNeg = createTable(exEval.getFalseNegatives(), "False Negatives");
+
+		reportList.add(header);
+		reportList.add(links.toString());
+		reportList.add(parameters.toString());
+		reportList.add(result.toString());
+		reportList.add(performance.toString());
+		reportList.add(corpusData.toString());
+		reportList.add(truePos);
+		reportList.add(falsePos);
+		reportList.add(falseNeg);
+
+		reportList.add("</body></html>");
+
+		return reportList;
+	}
+
+	private String createTable(Set<Duplicate> dupes, String title)
+	{
+		final String anchor = title.replaceAll("\\s", "").toLowerCase();
+		final StringBuilder table = new StringBuilder("<p><table id='" + anchor + "'>");
+		final String header = ("<th colspan='4'>" + title + "</th>");
+		table.append(header);
+
+		for(Duplicate duplicatePair : dupes)
+		{
+			final StrippedIssue duplicate = duplicatePair.getDuplicate();
+			final StrippedIssue master = duplicatePair.getMaster();
+
+			table.append("<tr><td colspan = \"4\">");
+			table.append("<h4 class=\"similarity\">" + duplicatePair.getSimilarity() + "</h4>");
+			table.append("</td></tr>");
+
+			table.append("<tr><td>Component</td>");
+			table.append(createLink(duplicate.getNumber()));
+			table.append(createLink(master.getNumber()));
+			table.append("<td>Common</td>");
+
+			for(IssueComponent ic : IssueComponent.values())
+			{
+				table.append("<tr>");
+				table.append("<td>" + ic.toString() + "</td>");
+
+				final TermFrequencyCounter termsDupe = duplicate.getComponent(ic);
+				termsDupe.remove("token123456789");
+				table.append("<td>" + termsDupe + "</td>");
+
+				final TermFrequencyCounter termsMaster = master.getComponent(ic);
+				termsMaster.remove("token123456789");
+				table.append("<td>" + termsMaster + "</td>");
+
+				final Set<Token> common = termsDupe.getTokens();
+				common.retainAll(termsMaster.getTokens());
+				table.append("<td>" + common + "</td>");
+
+				table.append("</tr>");
+			}
+
+		}
+
+		table.append("</table></p>");
+
+		return table.toString();
+	}
+
+	private String createLink(int number)
+	{
+		return "<td><a href='http://github.com/" + repoId.getOwner() + "/" + repoId.getName()
+				+ "/issues/" + number + "'>" + number + "</a></td>";
+	}
+
+	public void buildFile()
+	{
+		List<String> reportList = buildHTML();
+
+		Path file = Paths
+				.get("reports/" + repoId.getOwner() + "/" + repoId.getName() + "/" + "report.html");
+		try
+		{
+			if(!Files.exists(file, new LinkOption[0]))
+			{
+				Files.createDirectories(
+						Paths.get("reports/" + repoId.getOwner() + "/" + repoId.getName()),
+						new FileAttribute<?>[0]);
+				Files.createFile(file, new FileAttribute[0]);
+			}
 			Files.write(file, reportList, Charset.forName("UTF-8"));
-		} catch (IOException e) {
+		}
+		catch(IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-	
-	
-	
-	
+
 }

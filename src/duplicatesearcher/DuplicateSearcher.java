@@ -110,34 +110,14 @@ public class DuplicateSearcher
 		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
 		
 		final LocalDateTime startAnalysis = endProcessing;
-		searcher.analyzeIssues(0.3, new Weight(2, 1.5, 0.5, 0.5, 0.25));
+		searcher.analyzeIssues(0.5, new Weight(2, 1.5, 0.5, 0.5, 0.25));
 		final LocalDateTime endAnalysis = LocalDateTime.now();
 		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
 		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
-		
-		System.out.println("\n");
-		for(Duplicate d : searcher.getDuplicates())
-			System.out.println(d);
 		final Duration elpasedTime = Duration.between(startProcessing, endAnalysis);
 		
 		System.out.println("Execution time:" + elpasedTime);
-		System.out.println("Found duplicates: " + searcher.getDuplicates().size());
-		
-		ExperimentEvaluator eval = new ExperimentEvaluator(searcher.getDuplicates(), exGen.getCorpusDuplicates());
-		
-		final int actualDuplicates = eval.getFalseNegatives().size() + eval.getTruePositives().size();
-		System.out.println("Corpus total size: " + exGen.getGeneratedCorpus().size());
-		System.out.println("Duplicates in corpus: " + actualDuplicates);
-		
-		System.out.println("Precision: " + eval.calculatePrecision());
-		System.out.println("Recall: " + eval.calculateRecall());
-		System.out.println("F1-score: " + eval.calculateF1Score());
-		
-		System.out.println("True positives: " + eval.getTruePositives().size());
-		System.out.println("False negatives: " + eval.getFalseNegatives().size());
-		System.out.println("False positives: " + eval.getFalsePositives().size());
-		System.out.println(eval.getFalsePositives());
-	
+			
 		EnumMap<IssueComponent, Double> dummyWeights = new EnumMap<IssueComponent, Double>(IssueComponent.class);
 	
 		EnumSet<ProcessingFlags> dummyFlagSet = EnumSet.of(ProcessingFlags.STOP_LIST_COMMON, ProcessingFlags.STEMMING);
