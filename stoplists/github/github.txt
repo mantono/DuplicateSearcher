@@ -10,3 +10,7 @@ bug
 alpha
 beta
 release
+sorry
+thank
+thanks
+please
