@@ -29,8 +29,7 @@ public class NormalizerTest
 	@Test
 	public void test()
 	{
-		Normalizer normalizer = new Normalizer(weights);
-		Map<Token, Double> normalizedMap = normalizer.normalizeVector();
+		Map<Token, Double> normalizedMap = Normalizer.normalizeVector(weights);
 		double sum = 0;
 		
 		for(Double value : normalizedMap.values())

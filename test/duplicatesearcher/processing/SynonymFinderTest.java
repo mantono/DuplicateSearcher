@@ -13,7 +13,7 @@ import duplicatesearcher.Token;
 public class SynonymFinderTest
 {
 	@Test
-	public void testProcess() throws IOException, InterruptedException
+	public void testProcess() throws IOException, InterruptedException, ClassNotFoundException
 	{
 		SynonymFinder s = new SynonymFinder();
 		final Token synonym = s.process(new Token("dog"));

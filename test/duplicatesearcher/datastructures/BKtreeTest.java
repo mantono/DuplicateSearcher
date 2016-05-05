@@ -8,6 +8,7 @@ import java.util.SortedMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import duplicatesearcher.Token;
 import duplicatesearcher.processing.spellcorrecting.LevenshteinDistance;
 
 public class BKtreeTest
@@ -18,20 +19,20 @@ public class BKtreeTest
 	@Before
 	public void setUp() throws Exception
 	{
-		this.tree = new BKtree("test");
-		tree.insert("a");
-		tree.insert("ab");
-		tree.insert("abc");
-		tree.insert("xyz");
+		this.tree = new BKtree(new Token("test"));
+		tree.insert(new Token("a"));
+		tree.insert(new Token("ab"));
+		tree.insert(new Token("abc"));
+		tree.insert(new Token("xyz"));
 	}
 
 	@Test
 	public void testInsert()
 	{
-		assertFalse(tree.insert("test"));
-		assertTrue(tree.insert("testa"));
-		assertFalse(tree.insert("testa"));
-		assertTrue(tree.insert("tes"));
+		assertFalse(tree.insert(new Token("test")));
+		assertTrue(tree.insert(new Token("testa")));
+		assertFalse(tree.insert(new Token("testa")));
+		assertTrue(tree.insert(new Token("tes")));
 	}
 	
 	@Test
