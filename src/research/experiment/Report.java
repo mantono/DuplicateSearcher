@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,15 +30,14 @@ import duplicatesearcher.flags.IssueComponent;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 
 public class Report{
-	EnumSet<ProcessingFlag> flagSet;
-	EnumMap<IssueComponent, Double> weights;
-	RepositoryId repoId;
-	Duration processing;
-	Duration analysis;
-	ExperimentSetGenerator exSetGenerator;
-	Set<Duplicate> foundDuplicates;
-	ExperimentEvaluator exEval;
-	List<String> reportList;
+	private final EnumSet<ProcessingFlag> flagSet;
+	private final EnumMap<IssueComponent, Double> weights;
+	private final RepositoryId repoId;
+	private final Duration processing;
+	private final Duration analysis;
+	private final ExperimentSetGenerator exSetGenerator;
+	private final ExperimentEvaluator exEval;
+	private List<String> reportList;
 	
 	public Report(EnumSet<ProcessingFlag> flagSet, EnumMap<IssueComponent, Double> weights, RepositoryId repoId,
 			Duration processing, Duration analysis, ExperimentSetGenerator exSetGenerator, Set<Duplicate> foundDuplicates){
@@ -47,9 +47,7 @@ public class Report{
 		this.processing = processing;
 		this.analysis = analysis;
 		this.exSetGenerator = exSetGenerator;
-		this.foundDuplicates = foundDuplicates;
-		this.exEval = new ExperimentEvaluator(foundDuplicates,
-				exSetGenerator.getCorpusDuplicates());
+		this.exEval = new ExperimentEvaluator(foundDuplicates, exSetGenerator.getCorpusDuplicates());
 	}
 
 	public List<String> buildHTML()
@@ -135,9 +133,10 @@ public class Report{
 			for(IssueComponent ic : IssueComponent.values())
 			{
 				table.append("<tr>");
-				table.append("<td>" + ic.toString() + "</td>");
+				table.append("<td class='component'>" + ic.toString() + "</td>");
 
 				final TermFrequencyCounter termsDupe = duplicate.getComponent(ic);
+				
 				termsDupe.remove("token123456789");
 				table.append("<td>" + termsDupe + "</td>");
 
@@ -162,7 +161,7 @@ public class Report{
 	private String createLink(int number)
 	{
 		return "<td><a href='http://github.com/" + repoId.getOwner() + "/" + repoId.getName()
-				+ "/issues/" + number + "'>" + number + "</a></td>";
+				+ "/issues/" + number + "'>#" + number + "</a></td>";
 	}
 
 	public void buildFile()
