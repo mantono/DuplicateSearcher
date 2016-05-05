@@ -145,7 +145,7 @@ public class Report{
 				termsMaster.remove("token123456789");
 				table.append("<td>" + termsMaster + "</td>");
 
-				final Set<Token> common = termsDupe.getTokens();
+				final Set<Token> common = new HashSet<Token>(termsDupe.getTokens());
 				common.retainAll(termsMaster.getTokens());
 				table.append("<td>" + common + "</td>");
 
