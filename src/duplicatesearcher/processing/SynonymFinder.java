@@ -76,7 +76,7 @@ public class SynonymFinder implements TokenProcessor
 
 			for (IWord syn : synset.getWords())
 			{
-				if(!Tokenizer.isToken(syn.getLemma()))
+				if(!Tokenizer.isToken(syn.getLemma().toLowerCase()))
 					continue;
 				synonyms.add(syn.getLemma());
 			}
@@ -87,6 +87,9 @@ public class SynonymFinder implements TokenProcessor
 		
 		final Token synonym = mostCommonWord(synonyms);
 		
+		if(synonym == null)
+			return token;
+		
 		return synonym;
 	}
 
@@ -96,7 +99,7 @@ public class SynonymFinder implements TokenProcessor
 		int occurencesMostCommon = 0;
 		for(String synonym : synonyms)
 		{
-			final Token token = new Token(synonym);
+			final Token token = new Token(synonym.toLowerCase());
 			final int frequency = termFreq.getTokenFrequency(token);
 			if(frequency > occurencesMostCommon)
 			{
