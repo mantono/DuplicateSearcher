@@ -1,0 +1,15 @@
+td
+{
+	max-width: 500px;
+	width: 400px;
+}
+
+table, th, td
+{
+	border: 1px solid #141414;
+}
+
+body
+{
+	background-color: #dedeea;
+}
