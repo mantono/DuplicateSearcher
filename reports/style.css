@@ -1,7 +1,6 @@
 td
 {
 	max-width: 500px;
-	width: 400px;
 }
 
 table, th, td
@@ -12,4 +11,24 @@ table, th, td
 body
 {
 	background-color: #dedeea;
+}
+
+.component
+{
+	width: 120px;
+}
+
+#truepositives
+{
+	border: 2px solid green;
+}
+
+#falsepositives
+{
+	border: 2px dashed red;
+}
+
+#falsenegatives
+{
+	border: 2px solid red;
 }
