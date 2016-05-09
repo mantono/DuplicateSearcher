@@ -41,7 +41,7 @@
 </target>
 
 <target name="test" description="Run JUnit tests" depends="compile,compileTests">
-	<junit showoutput="true" printsummary="yes" haltonfailure="yes">
+	<junit showoutput="true" printsummary="yes" haltonfailure="yes" fork="true">
 		<formatter type="brief" usefile="false"/>
 		<classpath refid="project.class.path" />
 
