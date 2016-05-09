@@ -84,6 +84,19 @@ public class TokenizerTest
 
 		assertEquals(expected, output);
 	}
+	
+	@Test
+	public void testRemoveURLsWithDashInDomain()
+	{
+		final String input = "http://test-this.com/resource";
+		final String expected = "";
+
+		Tokenizer tokenizer = new Tokenizer("");
+		final String output = tokenizer.removeURLs(input);
+
+		assertEquals(expected, output);
+	}
+
 
 	@Test
 	public void testRemoveURLsWithHttpUrl()
