@@ -1,0 +1,9 @@
+<p>
+	<fieldset>
+		<legend>$title - $number</legend>
+		<strong>Author: </strong><em>$author</em><br/>
+		<strong>Date: </strong><em>$date</em><br/>
+		<strong>Labels: </strong><em>$labels</em><br/>
+		<p>$body</p>
+	</fieldset>
+</p>

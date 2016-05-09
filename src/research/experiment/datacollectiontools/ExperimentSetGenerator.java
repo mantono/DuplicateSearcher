@@ -219,13 +219,18 @@ public class ExperimentSetGenerator
 		return duplicatesInGeneratedCorpus;
 	}
 
-	private boolean isLabeledAsDuplicates(Issue issue)
+	public static boolean isLabeledAsDuplicates(Issue issue)
 	{
 		List<Label> labels = issue.getLabels();
 		
 		for(Label label : labels)
-			if(label.getName().toLowerCase().equals("duplicate"))
+		{
+			final String labelName = label.getColor().toLowerCase();
+			if(labelName.equals("duplicate"))
 				return true;
+			if(labelName.equals("dupe"))
+				return true;
+		}
 		
 		return false;
 	}
