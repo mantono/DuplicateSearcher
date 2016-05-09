@@ -56,11 +56,8 @@ public class IssueProcessor
 
 		if(hasFlag(ProcessingFlag.SPELL_CORRECTION))
 		{
-			this.spell = new SpellCorrector(new File("dictionary/noun.txt"));
-			spell.addDictionary(new File("dictionary/sense.txt"));
-			spell.addDictionary(new File("dictionary/verb.txt"));
-			spell.addDictionary(new File("dictionary/adj.txt"));
-			spell.addDictionary(new File("dictionary/adv.txt"));
+			this.spell = new SpellCorrector(new File("dictionary/words.txt"));
+			spell.addDictionary(new File("dictionary/words2.txt"));
 			spell.addDictionary(new File("stoplists/github/github.txt"));
 			spell.addDictionary(new File("stoplists/long/ReqSimile.txt"));
 		}

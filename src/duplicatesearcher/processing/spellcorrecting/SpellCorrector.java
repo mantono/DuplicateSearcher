@@ -88,4 +88,10 @@ public class SpellCorrector implements TokenProcessor {
 		
 		return new Token(textSubject);
 	}
+
+
+	public int size()
+	{
+		return dictionary.size();
+	}
 }

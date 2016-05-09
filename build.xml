@@ -10,6 +10,7 @@
 <property name="dist"  location="dist"/>
 <property name="libs" location="lib"/>
 <property name="doc" location="doc"/>
+<property name="dict" location="dictionary"/>
 
 <path id="project.class.path">
 	<pathelement path="${build}" />
@@ -22,6 +23,7 @@
 	<mkdir dir="${dist}"/>
 	<mkdir dir="${libs}"/>
 	<mkdir dir="${doc}"/>
+	<mkdir dir="${dict}"/>
 </target>
 
 <target name="clean" description="Delete previous jar and class files">
@@ -30,14 +32,19 @@
 	<delete dir="${doc}"/>
 </target>
 
-<target name="libs" description="Download and/or compile dependency libraries">
+<target name="libs" description="Download and/or compile dependency libraries and other assets">
 	<!-- See https://github.com/mantono/DuplicateSearcher/wiki/Frameworks for links to projects and APIs -->
 	<ivy:retrieve />
 	<get dest="${libs}" verbose="true" usetimestamp="true">
 		<url url="http://wordnetcode.princeton.edu/3.0/WordNet-3.0.tar.gz" />
 	</get>
+	<get dest="${dict}" verbose="true" usetimestamp="true">
+		<url url="https://github.com/dwyl/english-words/raw/master/words2.txt" />
+		<url url="https://github.com/dwyl/english-words/raw/master/words.txt.zip" />
+	</get>
 	<gunzip src="${libs}/WordNet-3.0.tar.gz" />
 	<untar src="${libs}/WordNet-3.0.tar" dest="${libs}" />
+	<unzip src="${dict}/words.txt.zip" dest="${dict}" />
 </target>
 
 <target name="test" description="Run JUnit tests" depends="compile,compileTests">
