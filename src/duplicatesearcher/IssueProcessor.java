@@ -70,7 +70,7 @@ public class IssueProcessor
 		this.synonyms = new SynonymFinder();
 		
 		TemplateLoader loader = new TemplateLoader(repo);
-		if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE_STATIC) || hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE_DYNAMIC))
+		if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE))
 			this.issueTemplates = loader.retrieveStopList();
 		else
 			this.issueTemplates = null;
@@ -114,14 +114,7 @@ public class IssueProcessor
 
 	private StopList getStopListForDate(Date dateCreated)
 	{
-		if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE_STATIC))
-		{
-			if(stopIssueTemplate != null)
-				return stopIssueTemplate;
-			else
-				return issueTemplates.get(issueTemplates.lastKey()); 
-		}
-		else if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE_DYNAMIC))
+		if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE))
 		{
 			final long seconds = dateCreated.getTime()/1000;
 			final int nanoSeconds = (int) (dateCreated.getTime() % 1000) * 1000000;
@@ -179,8 +172,7 @@ public class IssueProcessor
 			case SPELL_CORRECTION: return spell.process(token);
 			case STOP_LIST_COMMON: return stopListCommon.process(token);
 			case STOP_LIST_GITHUB: return stopListGitHub.process(token);
-			case STOP_LIST_TEMPLATE_STATIC: return stopIssueTemplate.process(token);
-			case STOP_LIST_TEMPLATE_DYNAMIC: return stopIssueTemplate.process(token);
+			case STOP_LIST_TEMPLATE: return stopIssueTemplate.process(token);
 			case SYNONYMS: return synonyms.process(token);
 			case STEMMING: return stemmer.process(token);
 		}
