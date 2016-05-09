@@ -72,6 +72,18 @@ public class TokenizerTest
 
 		assertEquals(expected, output);
 	}
+	
+	@Test
+	public void testRemoveURLsWithDashUrl()
+	{
+		final String input = "https://commons.apache.org/sandbox/commons-text/jacoco/org.apache.commons.text.similarity/LevenshteinDistance.java.html";
+		final String expected = "";
+
+		Tokenizer tokenizer = new Tokenizer("");
+		final String output = tokenizer.removeURLs(input);
+
+		assertEquals(expected, output);
+	}
 
 	@Test
 	public void testRemoveURLsWithHttpUrl()

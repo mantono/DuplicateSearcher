@@ -13,7 +13,8 @@ public class Tokenizer
 	private final static String S_SUFFIX = "'s";
 	private final static String LL_SUFFIX = "'ll";
 	private final static String APOSTROPHE = "'";
-	private final static String URL = "http[s]?://[\\w+\\.]+\\w{2,}[/\\w]*";
+	private final static String URL_LEGAL_CHARACTERS = "[\\w+\\-\\.]";
+	private final static String URL = "http[s]?://"+URL_LEGAL_CHARACTERS+"+\\w{2,}[/\\w-\\.]*";
 	private final static String DOMAIN = "\\b[\\w+.]*\\w+\\.\\w{2,}[/\\w]*";
 	private final static String NUMBER = "\\b(\\d+[.|,]?)";
 	private final static String USERNAME ="@\\w[\\w-]*\\b(?![-.])";
