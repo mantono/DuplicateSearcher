@@ -30,13 +30,14 @@ public class IssueProcessorTest
 
 		final Token mhz = new Token("mhz");
 		final Token crash = new Token("crash");
+		final Token spelled = new Token("spelled");
 		final Token sorry = new Token("sorry");
 		final Token please = new Token("please");
 		final Token of = new Token("of");
 
-
 		assertEquals(mhz, isp.process(mhz));
 		assertEquals(crash, isp.process(crash));
+		assertEquals(new Token("spell"), isp.process(spelled));
 		assertEquals(null, isp.process(sorry));
 		assertEquals(null, isp.process(please));
 		assertEquals(null, isp.process(of));
