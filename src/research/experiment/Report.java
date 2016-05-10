@@ -167,9 +167,16 @@ public class Report{
 	public void buildFile()
 	{
 		List<String> reportList = buildHTML();
+		String reportName = "";
+		for(ProcessingFlag flag : flagSet)
+		{
+			reportName += flag.getShortFlag();
+		}
+		LocalDateTime time = LocalDateTime.now();
+		reportName += " " + time.toEpochSecond(ZoneOffset.UTC);
 
 		Path file = Paths
-				.get("reports/" + repoId.getOwner() + "/" + repoId.getName() + "/" + "report.html");
+				.get("reports/" + repoId.getOwner() + "/" + repoId.getName() + "/" +reportName+".html");
 		try
 		{
 			if(!Files.exists(file, new LinkOption[0]))
