@@ -50,9 +50,11 @@ public class IssueProcessor
 	{
 		this.flags = flags;
 		this.repo = repo;
-		
+
 		this.stopListCommon = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		this.stopListGitHub = new StopList(new File("stoplists/github/github.txt"));
+		TemplateLoader loader = new TemplateLoader(repo);
+		this.issueTemplates = loader.retrieveStopList();
 
 		if(hasFlag(ProcessingFlag.SPELL_CORRECTION))
 		{
@@ -63,14 +65,8 @@ public class IssueProcessor
 		}
 		else
 			this.spell = null;
-		
+
 		this.synonyms = new SynonymFinder();
-		
-		TemplateLoader loader = new TemplateLoader(repo);
-		if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE))
-			this.issueTemplates = loader.retrieveStopList();
-		else
-			this.issueTemplates = null;
 	}
 
 	public IssueProcessor(final RepositoryId repo, final ProcessingFlag... flags)
@@ -98,30 +94,26 @@ public class IssueProcessor
 		stopIssueTemplate = getStopListForDate(strippedIssue.getDateCreated());
 		for(IssueComponent component : IssueComponent.values())
 		{
-			TermFrequencyCounter componentCounter =strippedIssue.getComponent(component);
+			TermFrequencyCounter componentCounter = strippedIssue.getComponent(component);
 			processFrequencyCounter(componentCounter);
 			componentCounter.add(new Token("token123456789"));
 		}
-		
+
 		if(hasFlag(ProcessingFlag.FILTER_BAD))
-			strippedIssue.checkQuality();			
+			strippedIssue.checkQuality();
 
 		return strippedIssue;
 	}
 
 	private StopList getStopListForDate(Date dateCreated)
 	{
-		if(hasFlag(ProcessingFlag.STOP_LIST_TEMPLATE))
-		{
-			final long seconds = dateCreated.getTime()/1000;
-			final int nanoSeconds = (int) (dateCreated.getTime() % 1000) * 1000000;
-			LocalDateTime date = LocalDateTime.ofEpochSecond(seconds, nanoSeconds, ZoneOffset.UTC);
-			SortedMap<LocalDateTime, StopList> subMap = issueTemplates.headMap(date);
-			if(subMap.isEmpty())
-				return new StopList();
-			return subMap.get(subMap.lastKey());
-		}
-		return null;
+		final long seconds = dateCreated.getTime() / 1000;
+		final int nanoSeconds = (int) (dateCreated.getTime() % 1000) * 1000000;
+		LocalDateTime date = LocalDateTime.ofEpochSecond(seconds, nanoSeconds, ZoneOffset.UTC);
+		SortedMap<LocalDateTime, StopList> subMap = issueTemplates.headMap(date);
+		if(subMap.isEmpty())
+			return new StopList();
+		return subMap.get(subMap.lastKey());
 	}
 
 	private void processFrequencyCounter(TermFrequencyCounter counter)
@@ -164,15 +156,21 @@ public class IssueProcessor
 
 	private Token applyProcess(Token token, ProcessingFlag flag)
 	{
-		switch(flag)
+		switch (flag)
 		{
 			case SPELL_CORRECTION: return spell.process(token);
-			case STOP_LIST_COMMON: return stopListCommon.process(token);
-			case STOP_LIST_GITHUB: return stopListGitHub.process(token);
-			case STOP_LIST_TEMPLATE: return stopIssueTemplate.process(token);
+			case STOP_LIST:	return stopList(token);
 			case SYNONYMS: return synonyms.process(token);
 			case STEMMING: return stemmer.process(token);
 		}
+		return token;
+	}
+
+	private Token stopList(Token token)
+	{
+		token = stopListCommon.process(token);
+		token = stopListGitHub.process(token);
+		token = stopIssueTemplate.process(token);
 		return token;
 	}
 
