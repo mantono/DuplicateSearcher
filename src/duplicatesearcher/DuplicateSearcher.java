@@ -104,7 +104,7 @@ public class DuplicateSearcher
 		EnumMap<IssueComponent, Double> weighting = icfl.getSettings();
 		
 		final IssueProcessor processor = new IssueProcessor(repo, flags);
-		exGen.generateRandomIntervalSet(1000, 0.3f, 0.6f);
+		exGen.generateRandomIntervalSet(1_000, 0.2f, 0.5f);
 
 		DuplicateSearcher searcher = new DuplicateSearcher(exGen.getGeneratedCorpus(), processor);
 		
@@ -117,7 +117,7 @@ public class DuplicateSearcher
 		
 		final LocalDateTime startAnalysis = endProcessing;
 
-		searcher.analyzeIssues(0.6, new Weight(weighting));
+		searcher.analyzeIssues(0.50, new Weight(weighting));
 
 		final LocalDateTime endAnalysis = LocalDateTime.now();
 		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
