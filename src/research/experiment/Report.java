@@ -177,7 +177,7 @@ public class Report{
 			reportName += flag.getShortFlag();
 		}
 		LocalDateTime time = LocalDateTime.now();
-		reportName += " " + time.toEpochSecond(ZoneOffset.UTC);
+		reportName += "_" + threshold + "_" + time.toEpochSecond(ZoneOffset.UTC);
 
 		Path file = Paths
 				.get("reports/" + repoId.getOwner() + "/" + repoId.getName() + "/" +reportName+".html");
