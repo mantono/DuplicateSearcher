@@ -117,7 +117,8 @@ public class DuplicateSearcher
 		
 		final LocalDateTime startAnalysis = endProcessing;
 
-		searcher.analyzeIssues(0.50, new Weight(weighting));
+		final double threshold = 0.2;
+		searcher.analyzeIssues(threshold, new Weight(weighting));
 
 		final LocalDateTime endAnalysis = LocalDateTime.now();
 		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
@@ -126,8 +127,7 @@ public class DuplicateSearcher
 		
 		System.out.println("Execution time:" + elpasedTime);
 			
-		Report report = new Report(flags, weighting, repo, elpasedTimeProcessing, elpasedTimeAnalysis, exGen, searcher.getDuplicates());
+		Report report = new Report(flags, weighting, threshold, repo, elpasedTimeProcessing, elpasedTimeAnalysis, exGen, searcher.getDuplicates());
 		report.buildFile();
 	}
-
 }

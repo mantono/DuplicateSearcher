@@ -33,6 +33,7 @@ import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 public class Report{
 	private final EnumSet<ProcessingFlag> flagSet;
 	private final EnumMap<IssueComponent, Double> weights;
+	private final double threshold;
 	private final RepositoryId repoId;
 	private final Duration processing;
 	private final Duration analysis;
@@ -40,10 +41,11 @@ public class Report{
 	private final ExperimentEvaluator exEval;
 	private List<String> reportList;
 	
-	public Report(EnumSet<ProcessingFlag> flagSet, EnumMap<IssueComponent, Double> weights, RepositoryId repoId,
+	public Report(EnumSet<ProcessingFlag> flagSet, EnumMap<IssueComponent, Double> weights, double threshold, RepositoryId repoId,
 			Duration processing, Duration analysis, ExperimentSetGenerator exSetGenerator, Set<Duplicate> foundDuplicates){
 		this.flagSet = flagSet;
 		this.weights = weights;
+		this.threshold = threshold;
 		this.repoId = repoId;
 		this.processing = processing;
 		this.analysis = analysis;
@@ -65,6 +67,7 @@ public class Report{
 		final StringBuilder parameters = new StringBuilder("<fieldset><legend>Parameters</legend>");
 		parameters.append("<p>Processing flags: " + flagSet + "</p>");
 		parameters.append("<p>Weights: " + weights + "</p>");
+		parameters.append("<p>Threshold: " + threshold + "</p>");
 		parameters.append("</fieldset>");
 		
 		final StringBuilder result = new StringBuilder("<fieldset><legend>Result</legend>");

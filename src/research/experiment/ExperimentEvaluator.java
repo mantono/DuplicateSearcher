@@ -29,7 +29,7 @@ public class ExperimentEvaluator {
 		this.falseNegatives.addAll(oracleDuplicates);
 		this.falseNegatives.removeAll(foundDuplicates);
 	}
-	
+
 	public double calculatePrecision()
 	{
 		double truePositiveSize = truePositives.size();
