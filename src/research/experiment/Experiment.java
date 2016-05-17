@@ -89,7 +89,7 @@ public class Experiment implements Runnable
 			allArgs[1] = repo.getName();
 			for(int i = 0; i < args.length; i++)
 				allArgs[i + 2] = args[i];
-			DuplicateSearcher.main(allArgs);
+			DuplicateSearcher.mainWithCorpus(exGen, allArgs);
 		}
 		catch(ClassNotFoundException | IOException | InterruptedException | URISyntaxException e)
 		{
