@@ -126,6 +126,7 @@ public class DuplicateSearcher
 		report.buildFile();
 	}
 
+	@Deprecated
 	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
 	{
 
