@@ -86,6 +86,45 @@ public class DuplicateSearcher
 	{
 		return duplicates;
 	}
+	
+	public static void mainWithCorpus(ExperimentSetGenerator exGen, String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
+	{
+		final RepositoryId repo = new RepositoryId(args[0], args[1]);
+		
+		ProcessingFlagLoader pfl = new ProcessingFlagLoader();
+		pfl.applyAgrumentVector(args);
+		EnumSet<ProcessingFlag> flags = pfl.getSettings();
+		
+		IssueComponentFlagLoader icfl = new IssueComponentFlagLoader();
+		icfl.applyAgrumentVector(args);
+		EnumMap<IssueComponent, Double> weighting = icfl.getSettings();
+		
+		final IssueProcessor processor = new IssueProcessor(repo, flags);
+
+		DuplicateSearcher searcher = new DuplicateSearcher(exGen.getGeneratedCorpus(), processor);
+		
+		final LocalDateTime startProcessing = LocalDateTime.now();
+		searcher.processIssues();
+
+		final LocalDateTime endProcessing = LocalDateTime.now();
+		final Duration elpasedTimeProcessing = Duration.between(startProcessing, endProcessing);
+		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
+		
+		final LocalDateTime startAnalysis = endProcessing;
+
+		final double threshold = 0.5;
+		searcher.analyzeIssues(threshold, new Weight(weighting));
+
+		final LocalDateTime endAnalysis = LocalDateTime.now();
+		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
+		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
+		final Duration elpasedTime = Duration.between(startProcessing, endAnalysis);
+		
+		System.out.println("Execution time:" + elpasedTime);
+			
+		Report report = new Report(flags, weighting, threshold, repo, elpasedTimeProcessing, elpasedTimeAnalysis, exGen, searcher.getDuplicates());
+		report.buildFile();
+	}
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
 	{
