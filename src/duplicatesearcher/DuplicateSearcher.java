@@ -28,6 +28,7 @@ import duplicatesearcher.flags.ProcessingFlag;
 import duplicatesearcher.flags.ProcessingFlagLoader;
 import duplicatesearcher.flags.SettingsLoader;
 import research.experiment.ExperimentEvaluator;
+import research.experiment.FinalReport;
 import research.experiment.Report;
 import research.experiment.datacollectiontools.DatasetFileManager;
 import research.experiment.datacollectiontools.ExperimentSetGenerator;
@@ -85,6 +86,45 @@ public class DuplicateSearcher
 	public Set<Duplicate> getDuplicates()
 	{
 		return duplicates;
+	}
+	
+	public static void mainWithGeneratedCorpus(Map<Issue, List<Comment>> corpus, String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
+	{
+final RepositoryId repo = new RepositoryId(args[0], args[1]);
+		
+		ProcessingFlagLoader pfl = new ProcessingFlagLoader();
+		pfl.applyAgrumentVector(args);
+		EnumSet<ProcessingFlag> flags = pfl.getSettings();
+		
+		IssueComponentFlagLoader icfl = new IssueComponentFlagLoader();
+		icfl.applyAgrumentVector(args);
+		EnumMap<IssueComponent, Double> weighting = icfl.getSettings();
+		
+		final IssueProcessor processor = new IssueProcessor(repo, flags);
+
+		DuplicateSearcher searcher = new DuplicateSearcher(corpus, processor);
+		
+		final LocalDateTime startProcessing = LocalDateTime.now();
+		searcher.processIssues();
+
+		final LocalDateTime endProcessing = LocalDateTime.now();
+		final Duration elpasedTimeProcessing = Duration.between(startProcessing, endProcessing);
+		System.out.println("\nProcessing time: " + elpasedTimeProcessing);
+		
+		final LocalDateTime startAnalysis = endProcessing;
+
+		final double threshold = 0.5;
+		searcher.analyzeIssues(threshold, new Weight(weighting));
+
+		final LocalDateTime endAnalysis = LocalDateTime.now();
+		final Duration elpasedTimeAnalysis = Duration.between(startAnalysis, endAnalysis);
+		System.out.println("\nAnalysis time: " + elpasedTimeAnalysis);
+		final Duration elpasedTime = Duration.between(startProcessing, endAnalysis);
+		
+		System.out.println("Execution time:" + elpasedTime);
+			
+		FinalReport report = new FinalReport(flags, weighting, threshold, repo, elpasedTimeProcessing, elpasedTimeAnalysis, searcher.getDuplicates());
+		report.buildFile();
 	}
 	
 	public static void mainWithCorpus(ExperimentSetGenerator exGen, String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
