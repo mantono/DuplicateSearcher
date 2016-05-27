@@ -49,7 +49,7 @@ public class Experiment implements Runnable
 					extendedArgs = new String[args.length + flags.size()];
 					int n = 0;
 					for(ProcessingFlag flag : flags)
-						extendedArgs[n++] = flag.getLongFlag();
+						extendedArgs[n++] = "--" + flag.getLongFlag();
 					for(; n < extendedArgs.length; n++)
 						extendedArgs[n] = args[n - flags.size()];
 				}

@@ -20,8 +20,7 @@ public class IssueProcessorTest
 		final RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
 		final EnumSet<ProcessingFlag> flags = EnumSet.of(
 				ProcessingFlag.SPELL_CORRECTION,
-				ProcessingFlag.STOP_LIST_COMMON,
-				ProcessingFlag.STOP_LIST_GITHUB,
+				ProcessingFlag.STOP_LIST,
 				ProcessingFlag.SYNONYMS,
 				ProcessingFlag.STEMMING,
 				ProcessingFlag.FILTER_BAD);

@@ -26,7 +26,7 @@ public class SettingsLoader<E extends Enum<E> & Flag<T>, T extends Flag<T> & Com
 
 	private E getOption(String string)
 	{
-		for(E option : values())
+		for(E option : values()) 
 			if(option.matches(string))
 				return option;
 		return null;
