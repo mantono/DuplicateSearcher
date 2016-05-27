@@ -37,7 +37,10 @@ public class HtmlIssues
 			html = html.replaceAll("\\$date", i.getCreatedAt().toString());
 			List<Label> labels = removeDupeLabels(i.getLabels());
 			html = html.replaceAll("\\$labels", labels.toString());
-			html = html.replaceAll("\\$body", i.getBody());
+			if(i.getBody() != null)
+				html = html.replaceAll("\\$body", i.getBody());
+			else
+				html = html.replaceAll("\\$body", "");
 			data.add(html);
 		}
 		data.add("</body></html>");
