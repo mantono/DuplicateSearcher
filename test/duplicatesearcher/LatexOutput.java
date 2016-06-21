@@ -17,6 +17,7 @@ import org.junit.Test;
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
+import duplicatesearcher.processing.stoplists.StopList;
 
 public class LatexOutput
 {
@@ -37,7 +38,7 @@ public class LatexOutput
 		TermFrequencyCounter tfc = new TermFrequencyCounter();
 		tfc.addAll(issueData);
 
-		outputData(tfc);
+		outputData(tfc, 4);
 
 		final SpellCorrector largeDict = new SpellCorrector(new File("./dictionary/words.txt"));
 		largeDict.addDictionary(new File("./dictionary/words2.txt"));
@@ -56,6 +57,26 @@ public class LatexOutput
 			tf2.add(token);
 		}
 
+		outputData(tf2, 4);
+		
+		StopList list1 = new StopList(new File("stoplists/long/ReqSimile.txt"));
+		StopList list2 = new StopList(new File("stoplists/github/github.txt"));
+		
+		TermFrequencyCounter tf3 = new TermFrequencyCounter();
+		tf3.add(tf2);
+		
+		for(Token token : tf3.getTokens())
+		{
+			final Token original = new Token(token);
+			token = list1.process(token);
+			token = list2.process(token);
+			
+			if(token == null)
+				tf2.remove(original);
+			else
+				tf2.change(original, token);
+		}
+		
 		outputData(tf2, 4);
 
 	}
