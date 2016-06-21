@@ -28,8 +28,8 @@ public class LatexOutput
 		
 		outputData(tfc);
 		
-		final SpellCorrector largeDict = new SpellCorrector(new File("/a/oberon-home1/h13/anos3557/workspace/DuplicateSearcher/dictionary/words.txt"));
-		largeDict.addDictionary(new File("/a/oberon-home1/h13/anos3557/workspace/DuplicateSearcher/dictionary/words2.txt"));
+		final SpellCorrector largeDict = new SpellCorrector(new File("./dictionary/words.txt"));
+		largeDict.addDictionary(new File("./dictionary/words2.txt"));
 		
 		TermFrequencyCounter tf2 = new TermFrequencyCounter();
 		
