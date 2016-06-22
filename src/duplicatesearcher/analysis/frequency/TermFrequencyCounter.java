@@ -56,10 +56,18 @@ public class TermFrequencyCounter implements FrequencyCounter
 
 	public boolean change(final Token currentKey, final Token newKey)
 	{
+		if(currentKey.equals(newKey))
+			return false;
+		
 		if(!frequency.containsKey(currentKey))
 			return false;
+		
+		int addition = 0;
+		
+		if(frequency.containsKey(newKey))
+			addition = frequency.get(newKey);
 
-		final int value = frequency.get(currentKey);
+		final int value = frequency.get(currentKey) + addition;
 		frequency.remove(currentKey);
 		frequency.put(newKey, value);
 		return true;

@@ -122,5 +122,24 @@ public class TermFrequencyCounterTest
 	{
 		assertEquals(0, tfc.increment(new Token("")));
 	}
+	
+	@Test
+	public void testChangeAndCorrectSum()
+	{
+		final Token from = new Token("from");
+		final Token to = new Token("to");
+		
+		TermFrequencyCounter tf = new TermFrequencyCounter();
+		tf.add(from);
+		tf.add(from);
+		tf.add(to);
+		tf.add(to);
+		
+		assertEquals(2, tf.getTokenFrequency(from));
+		assertEquals(2, tf.getTokenFrequency(to));
+		
+		tf.change(from, to);
+		assertEquals(4, tf.getTokenFrequency(to));
+	}
 
 }
