@@ -17,13 +17,14 @@ import org.junit.Test;
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.Stemmer;
+import duplicatesearcher.processing.SynonymFinder;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
 
 public class LatexOutput
 {
 	@Test
-	public void blaha() throws IOException
+	public void blaha() throws IOException, ClassNotFoundException, InterruptedException
 	{
 		final String[] input = new String[]{"steps", "to", "reproduce", "start", "download", "upload", "a", "file",
 				"with", "a", "size", "mb", "ive", "same", "issue", "with", "mb", "mb", "wait", "forever", "because",
@@ -39,7 +40,7 @@ public class LatexOutput
 		TermFrequencyCounter tfc = new TermFrequencyCounter();
 		tfc.addAll(issueData);
 
-		outputData(tfc, 4);
+		outputData("Tokenized", tfc, 4);
 
 		final SpellCorrector largeDict = new SpellCorrector(new File("./dictionary/words.txt"));
 		largeDict.addDictionary(new File("./dictionary/words2.txt"));
@@ -58,7 +59,7 @@ public class LatexOutput
 			tf2.add(token);
 		}
 
-		outputData(tf2, 4);
+		outputData("Spell check", tf2, 4);
 		
 		StopList list1 = new StopList(new File("stoplists/long/ReqSimile.txt"));
 		StopList list2 = new StopList(new File("stoplists/github/github.txt"));
@@ -78,33 +79,51 @@ public class LatexOutput
 				tf2.change(original, token);
 		}
 		
-		outputData(tf2, 4);
+		outputData("Stop words list", tf2, 4);
+		
+		TermFrequencyCounter synonyms = new TermFrequencyCounter();
+		synonyms.add(tf2);
+		
+		SynonymFinder s = new SynonymFinder();
+		
+		for(Token token : tf2.getTokens())
+		{
+			final Token processed = s.process(token);
+			if(!token.equals(processed))
+				synonyms.change(token, processed);
+		}
+		
+		outputData("Synonyms", synonyms, 4);		
 		
 		TermFrequencyCounter stemmed = new TermFrequencyCounter();
-		stemmed.add(tf2);
+		stemmed.add(synonyms);
 		
 		Stemmer stemmer = new Stemmer();
 		
-		for(Token token : tf2.getTokens())
+		for(Token token : synonyms.getTokens())
 		{
 			stemmer.setCurrentToken(token);
 			stemmer.stem();
 			final Token stemmedToken = stemmer.getCurrentToken();
 			if(!token.equals(stemmedToken))
+			{
+				if(stemmed.getTokenFrequency(stemmedToken) > 0)
+					
 				stemmed.change(token, stemmedToken);
+			}
 		}
 		
-		outputData(stemmed, 4);
+		outputData("Stemming", stemmed, 4);
 
 	}
 
-	private void outputData(TermFrequencyCounter tfc, final int width)
+	private void outputData(final String component, TermFrequencyCounter tfc, final int width)
 	{
 		SortedMap<Token, Integer> tokens = new TreeMap<Token, Integer>();
 		for(Token tk : tfc.getTokens())
 			tokens.put(tk, tfc.getTokenFrequency(tk));
 
-		System.out.println("\n-------------\n");
+		System.out.println("\n-------"+component+"-------\n");
 
 		List<Token> tokenIndex = new ArrayList<Token>(tokens.keySet());
 		
