@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import duplicatesearcher.Token;
 import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
+import duplicatesearcher.processing.Stemmer;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 import duplicatesearcher.processing.stoplists.StopList;
 
@@ -78,6 +79,22 @@ public class LatexOutput
 		}
 		
 		outputData(tf2, 4);
+		
+		TermFrequencyCounter stemmed = new TermFrequencyCounter();
+		stemmed.add(tf2);
+		
+		Stemmer stemmer = new Stemmer();
+		
+		for(Token token : tf2.getTokens())
+		{
+			stemmer.setCurrentToken(token);
+			stemmer.stem();
+			final Token stemmedToken = stemmer.getCurrentToken();
+			if(!token.equals(stemmedToken))
+				stemmed.change(token, stemmedToken);
+		}
+		
+		outputData(stemmed, 4);
 
 	}
 
@@ -91,7 +108,7 @@ public class LatexOutput
 
 		List<Token> tokenIndex = new ArrayList<Token>(tokens.keySet());
 		
-		final int height = (tokenIndex.size()+1)/width;
+		final int height = (tokenIndex.size()/width)+1;
 		
 		final int[] indexes = new int[width];
 		
