@@ -75,6 +75,43 @@ public class TermFrequency<T> implements VectorUnit<T>
 			return tokenFrequency;
 		}
 	}
+	
+	public boolean change(final T currentKey, final T newKey)
+	{
+		if(currentKey.equals(newKey))
+			return false;
+		
+		if(!frequency.containsKey(currentKey))
+			return false;
+		
+		int addition = 0;
+		
+		if(frequency.containsKey(newKey))
+			addition = frequency.get(newKey);
+
+		final int value = frequency.get(currentKey) + addition;
+		frequency.remove(currentKey);
+		frequency.put(newKey, value);
+		
+		return true;
+	}
+	
+	public int size()
+	{
+		return frequency.size();
+	}
+
+	public void clear()
+	{
+		frequency.clear();
+	}
+
+	public int remove(final T obj)
+	{
+		if(!frequency.containsKey(obj))
+			return 0;
+		return frequency.remove(obj);
+	}
 
 	@Override
 	public Map<T, Integer> vectors()
