@@ -2,6 +2,7 @@ package duplicatesearcher.retrieval;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -14,8 +15,8 @@ public abstract class GitHubTask
 	private final static int TICK_RATE = 720;
 	private final GitHubClient client;
 	private int sleepTime = 720;
-	private LocalDateTime lastThrottleUpdate = LocalDateTime.now();
-	private LocalDateTime rateResetTime;
+	private Instant lastThrottleUpdate = Instant.now();
+	private Instant rateResetTime;
 	private int consumedRequests = -1;
 	private float consumedRequestsSinceLastThrottle = 50;
 	private final DecimalFormat format = new DecimalFormat("#.####");
@@ -23,7 +24,7 @@ public abstract class GitHubTask
 	public GitHubTask(final GitHubClient client)
 	{
 		this.client = client;
-		this.rateResetTime = LocalDateTime.now();
+		this.rateResetTime = Instant.now();
 	}
 
 	public GitHubClient getClient()
@@ -54,7 +55,7 @@ public abstract class GitHubTask
 			System.exit(2);
 		}
 		final long thirtySeconds = 30 * 1000;
-		while(rateResetTime.isAfter(LocalDateTime.now()))
+		while(rateResetTime.isAfter(Instant.now()))
 			sleep(thirtySeconds);
 	}
 
@@ -65,7 +66,7 @@ public abstract class GitHubTask
 		final GitHubResponse response = client.get(updateRateLimit);
 		final String resetTime = response.getHeader("X-RateLimit-Reset");
 		final long resetTimeParsed = Long.parseLong(resetTime);
-		rateResetTime = LocalDateTime.ofEpochSecond(resetTimeParsed, 0, ZoneOffset.ofHours(1));
+		rateResetTime = Instant.ofEpochSecond(resetTimeParsed);
 	}
 	
 	private void sleep(final long sleepTime)
@@ -113,7 +114,7 @@ public abstract class GitHubTask
 		if(consumedRequests == -1)
 			timeBetweenEachRequest = 720;
 
-		lastThrottleUpdate = LocalDateTime.now();
+		lastThrottleUpdate = Instant.now();
 		consumedRequests = getConsumedRequests();
 
 		final double delta = TICK_RATE / timeBetweenEachRequest;

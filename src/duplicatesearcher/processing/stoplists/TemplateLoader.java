@@ -2,25 +2,18 @@ package duplicatesearcher.processing.stoplists;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.egit.github.core.RepositoryId;
-import org.eclipse.egit.github.core.SearchRepository;
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.client.GitHubRequest;
-import org.eclipse.egit.github.core.client.GitHubResponse;
-
 import duplicatesearcher.retrieval.FileDownloader;
-import research.experiment.datacollectiontools.ApiClient;
 
 public class TemplateLoader
 {
@@ -35,7 +28,7 @@ public class TemplateLoader
 		this.templatePath = new File(DIR + File.separator + repoPath).toPath();
 	}
 	
-	public SortedMap<LocalDateTime, StopList> retrieveStopList() throws IOException
+	public SortedMap<LocalDateTime, StopList> retrieveStopList() throws IOException, InterruptedException, ExecutionException, TimeoutException
 	{
 		if(Files.exists(templatePath))
 			return loadFiles(templatePath);

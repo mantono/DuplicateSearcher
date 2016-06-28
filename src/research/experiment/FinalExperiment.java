@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
@@ -15,7 +18,7 @@ import research.experiment.datacollectiontools.DatasetFileManager;
 
 public class FinalExperiment
 {
-	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
+	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException, ExecutionException, TimeoutException
 	{
 		final RepositoryId repo = new RepositoryId("WhisperSystems", "Signal-Android");
 		DatasetFileManager data = new DatasetFileManager(repo);

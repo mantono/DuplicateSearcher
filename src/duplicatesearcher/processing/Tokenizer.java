@@ -87,12 +87,12 @@ public class Tokenizer
 	
 	public String removeNumbers(String input)
 	{
-		return input.replaceAll(NUMBER, "");
+		return input.replaceAll(NUMBER, " ");
 	}
 	
 	public String removeUsernames(String input)
 	{
-		return input.replaceAll(USERNAME, "");
+		return input.replaceAll(USERNAME, " ");
 	}
 	
 	public static boolean isToken(final CharSequence input)

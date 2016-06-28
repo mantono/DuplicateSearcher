@@ -76,7 +76,15 @@ public class Report{
 		result.append("<p>False negatives: "+exEval.getFalseNegatives().size()+"</p>");
 		result.append("<p>Precision: " + exEval.calculatePrecision() + "</p>");
 		result.append("<p>Recall: " + exEval.calculateRecall() + "</p>");
+		try{
 		result.append("<p>F1-score: " + exEval.calculateF1Score() + "</p>");
+		}
+		catch(IllegalStateException e){
+			e.printStackTrace();
+			System.err.println(repoId.getName() + " (" + flagSet + ")");
+			System.err.println("Precision: " + exEval.calculatePrecision());
+			System.err.println("Recall: " + exEval.calculateRecall());
+		}
 		result.append("</fieldset>");
 		
 		final StringBuilder performance = new StringBuilder("<fieldset><legend>Performance</legend>");

@@ -15,13 +15,20 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.egit.github.core.RepositoryId;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mantono.ghapic.Client;
+import com.mantono.ghapic.Response;
 
 public class FileDownloader
 {
@@ -29,6 +36,7 @@ public class FileDownloader
 	private final String filePath;
 	private final String repoPath;
 	private final Map<String, LocalDateTime> commitTimestamp;
+	private final Client client;
 
 	public FileDownloader(RepositoryId repo, String path)
 	{
@@ -38,15 +46,19 @@ public class FileDownloader
 
 	}
 
-	public String getFilePath(final String fileName) throws IOException
+	public String getFilePath(final String fileName) throws IOException, InterruptedException, ExecutionException, TimeoutException
 	{
-		URL url = new URL(BASE + "search/code?q=" + fileName + "+in:path+repo:" + repoPath);
+		Future<Response> request = client.submitRequest("/search/code?q=" + fileName + "+in:path+repo:" + repoPath);
+		Response response = request.get(10, TimeUnit.SECONDS);
+		List<String> body = response.getBody();
+		
+		//URL url = new URL(BASE + "search/code?q=" + fileName + "+in:path+repo:" + repoPath);
 		String path = null;
 
-		try(BufferedReader reader = new BufferedReader(
-				new InputStreamReader(url.openStream(), "UTF-8")))
-		{
-			for(String line; (line = reader.readLine()) != null;)
+//		try(BufferedReader reader = new BufferedReader(
+//				new InputStreamReader(url.openStream(), "UTF-8")))
+//		{
+			for(String line : body)
 			{
 				String[] splitted = line.split("\\{");
 				for(String s : splitted)
@@ -62,7 +74,7 @@ public class FileDownloader
 					}
 				}
 			}
-		}
+		//}
 		return path;
 	}
 
@@ -143,7 +155,7 @@ public class FileDownloader
 		return i;
 	}
 	
-	public int downloadAllVersionsOf(final String fileName) throws IOException
+	public int downloadAllVersionsOf(final String fileName) throws IOException, InterruptedException, ExecutionException, TimeoutException
 	{
 		final String filePath = getFilePath(fileName);
 		final String[] shaHashes = getShaHashes(filePath);

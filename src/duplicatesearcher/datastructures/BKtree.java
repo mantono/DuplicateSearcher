@@ -13,15 +13,15 @@ import duplicatesearcher.processing.spellcorrecting.LevenshteinDistance;
 public class BKtree
 {
 	private final static LevenshteinDistance LEVENSHTEIN = new LevenshteinDistance();
-	private final Token word;
+	private final CharSequence word;
 	private final Map<Integer, BKtree> children = new TreeMap<Integer, BKtree>();
 
-	public BKtree(final Token word)
+	public BKtree(final CharSequence word)
 	{
 		this.word = word;
 	}
 
-	public boolean insert(final Token word)
+	public boolean insert(final CharSequence word)
 	{
 		final int distance = LEVENSHTEIN.apply(this.word, word);
 		

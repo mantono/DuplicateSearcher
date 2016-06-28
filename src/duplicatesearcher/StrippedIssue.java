@@ -118,7 +118,7 @@ public class StrippedIssue implements Serializable
 
 	/**
 	 * Check if this issue contains enough textual data to actually be analyzed
-	 * and compared to other issues (after stop lists and are applied)
+	 * and compared to other issues (after stop lists are applied)
 	 * 
 	 * @return true if it is considered viable for analysis, else false.
 	 */
