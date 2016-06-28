@@ -6,11 +6,18 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import duplicatesearcher.Token;
+import duplicatesearcher.analysis.frequency.TermFrequencyCounter;
 import duplicatesearcher.processing.spellcorrecting.SpellCorrector;
 
 public class SpellCorrectorTest
