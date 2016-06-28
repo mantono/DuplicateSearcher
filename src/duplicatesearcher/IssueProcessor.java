@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.RepositoryId;
@@ -46,7 +49,7 @@ public class IssueProcessor
 	private final SortedMap<LocalDateTime, StopList> issueTemplates;
 
 	public IssueProcessor(RepositoryId repo, EnumSet<ProcessingFlag> flags)
-			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException
+			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException, ExecutionException, TimeoutException
 	{
 		this.flags = flags;
 		this.repo = repo;
@@ -70,7 +73,7 @@ public class IssueProcessor
 	}
 
 	public IssueProcessor(final RepositoryId repo, final ProcessingFlag... flags)
-			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException
+			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException, ExecutionException, TimeoutException
 	{
 		this(repo, EnumSet.copyOf(Arrays.asList(flags)));
 	}

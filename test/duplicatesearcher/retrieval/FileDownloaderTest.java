@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.egit.github.core.RepositoryId;
 import org.junit.Ignore;
@@ -15,7 +17,7 @@ public class FileDownloaderTest
 
 	@Ignore
 	@Test
-	public void testFilePath() throws IOException
+	public void testFilePath() throws IOException, InterruptedException, ExecutionException, TimeoutException
 	{
 		final RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
 		FileDownloader downloader = new FileDownloader(repo, "issue_templates");

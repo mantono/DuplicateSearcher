@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.egit.github.core.RepositoryId;
 import org.junit.Test;
@@ -15,7 +17,7 @@ public class IssueProcessorTest
 {
 
 	@Test
-	public void testSomeTokens() throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
+	public void testSomeTokens() throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException, ExecutionException, TimeoutException
 	{
 		final RepositoryId repo = new RepositoryId("mantono", "DuplicateSearcher");
 		final EnumSet<ProcessingFlag> flags = EnumSet.of(

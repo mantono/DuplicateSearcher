@@ -72,7 +72,7 @@ public class Experiment implements Runnable
 			DatasetFileManager data = new DatasetFileManager(project.getRepo());
 			data.load();
 			ExperimentSetGenerator exGen = new ExperimentSetGenerator(project.getRepo(), data.getDataset());
-			exGen.generateSet(4000, 0.4f);
+			exGen.generateSet(500, 0.4f);
 			datasets.put(project, exGen);
 		}
 		
@@ -82,18 +82,33 @@ public class Experiment implements Runnable
 	@Override
 	public void run()
 	{
-		try
+		boolean completed = false;
+		while(!completed)
 		{
-			String[] allArgs = new String[args.length + 2];
-			allArgs[0] = repo.getOwner();
-			allArgs[1] = repo.getName();
-			for(int i = 0; i < args.length; i++)
-				allArgs[i + 2] = args[i];
-			DuplicateSearcher.mainWithCorpus(exGen, allArgs);
-		}
-		catch(ClassNotFoundException | IOException | InterruptedException | URISyntaxException e)
-		{
-			e.printStackTrace();
+			String[] allArgs = null;
+			try
+			{
+				allArgs = new String[args.length + 2];
+				allArgs[0] = repo.getOwner();
+				allArgs[1] = repo.getName();
+				for(int i = 0; i < args.length; i++)
+					allArgs[i + 2] = args[i];
+				DuplicateSearcher.mainWithCorpus(exGen, allArgs);
+				completed = true;
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				System.err.println("Experiment failed: "+ allArgs +"\nStarting over.");
+				try
+				{
+					Thread.sleep(600_000);
+				}
+				catch(InterruptedException e1)
+				{
+					e1.printStackTrace();
+				}
+			}
 		}
 	}
 

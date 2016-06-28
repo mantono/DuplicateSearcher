@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Issue;
@@ -84,7 +86,7 @@ public class DuplicateSearcher
 		return duplicates;
 	}
 
-	public static void mainWithGeneratedCorpus(Map<Issue, List<Comment>> corpus, String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
+	public static void mainWithGeneratedCorpus(Map<Issue, List<Comment>> corpus, String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException, ExecutionException, TimeoutException
 	{
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
 
@@ -123,7 +125,7 @@ public class DuplicateSearcher
 		report.buildFile();
 	}
 
-	public static void mainWithCorpus(ExperimentSetGenerator exGen, String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
+	public static void mainWithCorpus(ExperimentSetGenerator exGen, String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException, ExecutionException, TimeoutException
 	{
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
 
@@ -163,7 +165,7 @@ public class DuplicateSearcher
 	}
 
 	@Deprecated
-	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException
+	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException, URISyntaxException, ExecutionException, TimeoutException
 	{
 
 		final RepositoryId repo = new RepositoryId(args[0], args[1]);
