@@ -107,9 +107,8 @@ public class LatexOutput
 			final Token stemmedToken = stemmer.getCurrentToken();
 			if(!token.equals(stemmedToken))
 			{
-				if(stemmed.getTokenFrequency(stemmedToken) > 0)
-					
-				stemmed.change(token, stemmedToken);
+				if(stemmed.getTokenFrequency(token) > 0)
+					stemmed.change(token, stemmedToken);
 			}
 		}
 		
