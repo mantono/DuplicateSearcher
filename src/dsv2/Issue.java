@@ -160,28 +160,12 @@ public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 
 		final Issue other = (Issue) object;
 
-		if(this.issueId != other.issueId)
-			return false;
-
-		if(this.creatorId != other.creatorId)
-			return false;
-
-		return this.tokens.equals(other.tokens);
+		return this.issueId == other.issueId;
 	}
 
 	@Override
 	public int hashCode()
 	{
-		final byte prime = 13;
-		int hash = 1;
-
-		hash += issueId;
-		hash *= prime;
-		hash += creatorId;
-		hash *= prime;
-		hash += tokens.hashCode();
-		hash *= prime;
-
-		return hash;
+		return issueId;
 	}
 }
