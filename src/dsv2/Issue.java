@@ -139,11 +139,22 @@ public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 	{
 		return tokens.count();
 	}
+	
+	public TermFrequency<Token> getTokens()
+	{
+		return tokens;
+	}
 
 	@Override
 	public Map<Token, Integer> vectors()
 	{
 		return tokens.vectors();
+	}
+	
+	@Override
+	public String toString()
+	{
+		return issueId + ": " + title;
 	}
 
 	@Override
