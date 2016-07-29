@@ -50,6 +50,9 @@ public class DuplicateSearcher
 			issues = processIssues(issues);
 			graph.addAll(issues);
 			page++;
+			System.out.println(graph.size() + " of " + issuesOnGithub);
+			if(issues.isEmpty())
+				break;
 		}
 
 		Issue issue;
