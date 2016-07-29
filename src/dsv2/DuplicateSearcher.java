@@ -37,14 +37,16 @@ public class DuplicateSearcher
 		SimilarityGraph graph = graphData.load();
 
 		final Client client = new Client();
-		Future<Response> response = client.submitRequest("repos/"+ repoOwner + "/" + repoName +"/issues?q=sort=created&direction=desc&state=all");
-		
+		Future<Response> response = client.submitRequest("repos/" + repoOwner + "/" + repoName
+				+ "/issues?q=sort=created&direction=desc&state=all");
+
 		final int issuesOnGithub = getIssueCount(response);
-		int page = 1+(graph.size()/100);
-		
+		int page = 1 + (graph.size() / 100);
+
 		while(graph.size() < issuesOnGithub)
 		{
-			Resource issueRequest = new Resource(Verb.GET, "repos/"+ repoOwner + "/" + repoName +"/issues?q=sort=created&direction=asc&state=all&page="+page+"&per_page=100");
+			Resource issueRequest = new Resource(Verb.GET, "repos/" + repoOwner + "/" + repoName
+					+ "/issues?q=sort=created&direction=asc&state=all&page=" + page + "&per_page=100");
 			Future<Response> issueFuture = client.submitRequest(issueRequest);
 			Set<Issue> issues = parseIssues(issueFuture);
 			issues = processIssues(issues);
