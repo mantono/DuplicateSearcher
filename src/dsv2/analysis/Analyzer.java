@@ -1,5 +1,6 @@
 package dsv2.analysis;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,8 +8,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class Analyzer<T>
+public class Analyzer<T> implements Serializable
 {
+	private final static long serialVersionUID = 0L;
 	private final InverseDocumentFrequency<T> idfc;
 	
 	public Analyzer()
@@ -41,7 +43,7 @@ public class Analyzer<T>
 		return similarity;
 	}
 
-	private Map<T, Double> weightAndNormalize(VectorUnit<T> e)
+	public Map<T, Double> weightAndNormalize(VectorUnit<T> e)
 	{
 		final TermFrequency<T> tf = new TermFrequency<T>(e.vectors());
 		Map<T, Double> weights = tf.getWeights();

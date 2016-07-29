@@ -35,15 +35,10 @@
 <target name="libs" description="Download and/or compile dependency libraries and other assets">
 	<!-- See https://github.com/mantono/DuplicateSearcher/wiki/Frameworks for links to projects and APIs -->
 	<ivy:retrieve />
-	<get dest="${libs}" verbose="true" usetimestamp="true">
-		<url url="http://wordnetcode.princeton.edu/3.0/WordNet-3.0.tar.gz" />
-	</get>
 	<get dest="${dict}" verbose="true" usetimestamp="true">
 		<url url="https://github.com/dwyl/english-words/raw/master/words2.txt" />
 		<url url="https://github.com/dwyl/english-words/raw/master/words.txt.zip" />
 	</get>
-	<gunzip src="${libs}/WordNet-3.0.tar.gz" />
-	<untar src="${libs}/WordNet-3.0.tar" dest="${libs}" />
 	<unzip src="${dict}/words.txt.zip" dest="${dict}" />
 </target>
 

@@ -1,5 +1,6 @@
 package dsv2.analysis;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,14 +9,15 @@ import java.util.Set;
 import duplicatesearcher.Token;
 
 /**
- * The {@link InverseDocumentFrequency} measures in how many documents an
- * object occurs. Unlike the {@link TermFrequency}, this class does not
- * take any consideration to how many times an object occurs within each specific
+ * The {@link InverseDocumentFrequency} measures in how many documents an object
+ * occurs. Unlike the {@link TermFrequency}, this class does not take any
+ * consideration to how many times an object occurs within each specific
  * document, only in how many documents.
  *
  */
-public class InverseDocumentFrequency<T>
+public class InverseDocumentFrequency<T> implements VectorUnit<T>, Serializable
 {
+	private final static long serialVersionUID = 0L;
 	private final Map<T, Integer> frequency = new HashMap<T, Integer>();
 	private final Map<Integer, Set<T>> addedObjects = new HashMap<Integer, Set<T>>(100);
 
@@ -26,23 +28,26 @@ public class InverseDocumentFrequency<T>
 
 		return frequency.get(obj);
 	}
-	
+
 	public double getWeight(final T obj)
 	{
 		final double inverseFrequency = addedObjects.size() / (double) getFrequency(obj);
 		return 1 + Math.log10(inverseFrequency);
 	}
-	
+
 	public Set<T> getElements()
 	{
 		return frequency.keySet();
 	}
-	
+
 	/**
 	 * Add a {@link T} to the counter.
-	 * @param id is the identifying number of the document from which the object belongs to.
+	 * 
+	 * @param id is the identifying number of the document from which the object
+	 * belongs to.
 	 * @param obj is the item that should be added to the counter.
-	 * @return true the item had not previously been added for the particular document id, else false.
+	 * @return true the item had not previously been added for the particular
+	 * document id, else false.
 	 */
 	public boolean add(final int id, final T obj)
 	{
@@ -58,13 +63,14 @@ public class InverseDocumentFrequency<T>
 			savedItems = new HashSet<T>(4);
 			addedObjects.put(id, savedItems);
 		}
-		
+
 		savedItems.add(obj);
 		return increment(obj);
 	}
-	
+
 	/**
 	 * Add a {@link Set} of {@link T} objects to the counter.
+	 * 
 	 * @param id of the document the objects belongs to.
 	 * @param input objects that should be added.
 	 * @return the number of objects that was added to the counter.
@@ -72,18 +78,17 @@ public class InverseDocumentFrequency<T>
 	public int add(final int id, final Set<T> input)
 	{
 		Set<T> copyOfInput = new HashSet<T>(input);
-		return addTokens(id, copyOfInput);
+		return addObjects(id, copyOfInput);
 	}
 
-	private int addTokens(final int id, final Set<T> objects)
+	private int addObjects(final int id, final Set<T> objects)
 	{
 		Set<T> savedItems;
 		int added = 0;
 
 		if(addedObjects.containsKey(id))
 		{
-			savedItems = addedObjects.get(id);
-			objects.removeAll(savedItems);
+			return 0;
 		}
 		else
 		{
@@ -116,6 +121,42 @@ public class InverseDocumentFrequency<T>
 			final int itemFrequency = frequency.get(obj) + 1;
 			frequency.put(obj, itemFrequency);
 		}
+		return true;
+	}
+
+	private boolean reduce(T obj)
+	{
+		if(obj == null)
+			return false;
+
+		if(!frequency.containsKey(obj))
+			return false;
+
+		final int itemFrequency = frequency.get(obj) - 1;
+		if(itemFrequency == 0)
+			frequency.remove(obj);
+		else
+			frequency.put(obj, itemFrequency);
+
+		return true;
+	}
+
+	@Override
+	public Map<T, Integer> vectors()
+	{
+		return frequency;
+	}
+
+	public boolean remove(int id, Map<T, Integer> vectors)
+	{
+		if(!addedObjects.containsKey(id))
+			return false;
+		
+		addedObjects.remove(id);
+		
+		for(T obj : vectors.keySet())
+			reduce(obj);
+		
 		return true;
 	}
 }

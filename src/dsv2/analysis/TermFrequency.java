@@ -1,12 +1,23 @@
 package dsv2.analysis;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
-public class TermFrequency<T> implements VectorUnit<T>
+import javax.print.attribute.Size2DSyntax;
+
+public class TermFrequency<T> implements VectorUnit<T>, Serializable
 {
+	private final static long serialVersionUID = 1L;
 	private final Map<T, Integer> frequency;
+	
+	public TermFrequency()
+	{
+		this.frequency = new HashMap<T, Integer>();
+	}
 	
 	public TermFrequency(final TermFrequency<T> tf)
 	{
@@ -59,6 +70,18 @@ public class TermFrequency<T> implements VectorUnit<T>
 		return increment(obj) > 0;
 	}
 	
+	public void addAll(Collection<T> elements)
+	{
+		for(T e : elements)
+			add(e);
+	}
+	
+	public void addAll(T[] elements)
+	{
+		for(T e : elements)
+			add(e);
+	}
+	
 	protected int increment(T element)
 	{
 		if(element == null)
@@ -96,9 +119,27 @@ public class TermFrequency<T> implements VectorUnit<T>
 		return true;
 	}
 	
+	/**
+	 * 
+	 * @return the number of unique tokens.
+	 */
 	public int size()
 	{
 		return frequency.size();
+	}
+	
+	/**
+	 * Counting the total amount of present tokens. Multiple occurrences of the same token is counted, as opposed to {@link #size()}.
+	 * @return the total amount of tokens.
+	 */
+	public int count()
+	{
+		int count = 0;
+		Iterator<Entry<T, Integer>> iter = frequency.entrySet().iterator();
+		while(iter.hasNext())
+			count += iter.next().getValue();
+		
+		return count;
 	}
 
 	public void clear()

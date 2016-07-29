@@ -1,14 +1,15 @@
 package duplicatesearcher.analysis;
 
+import dsv2.Issue;
 import duplicatesearcher.StrippedIssue;
 
 public class Duplicate implements Comparable<Duplicate>
 {
-	private final StrippedIssue duplicate;
-	private final StrippedIssue master;
+	private final Issue duplicate;
+	private final Issue master;
 	private final double cosineSimilarity;
 
-	public Duplicate(final StrippedIssue duplicate, final StrippedIssue master,
+	public Duplicate(final Issue duplicate, final Issue master,
 			final double similarity)
 	{
 		if (similarity > 1.00000001)
@@ -31,12 +32,12 @@ public class Duplicate implements Comparable<Duplicate>
 		this.cosineSimilarity = similarity;
 	}
 
-	public StrippedIssue getDuplicate()
+	public Issue getDuplicate()
 	{
 		return duplicate;
 	}
 
-	public StrippedIssue getMaster()
+	public Issue getMaster()
 	{
 		return master;
 	}

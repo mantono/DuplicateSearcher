@@ -233,4 +233,13 @@ public class TokenizerTest
 		result = tokenizer.removeUsernames(notUsernames);
 		assertEquals("my.email@adress.com @-notValidUsername @notvalid- ", result);
 	}
+	
+	@Test
+	public void testIssue2075()
+	{
+		final String input = "Steps to reproduce    Create a new message with image link in it via @like bot (not photo message!)    Post the reaction voting in any group    Ask some people to vote    Thumbnail will be randomly hidden for users in the group Post in group: https://i.imgur.com/NDMdNc7.png After me and several others voted some people reported thumbnail disappearance: https://i.imgur.com/3U8a7F8.png Expected behaviour Thumbnail stays visible Actual behaviour Thumbnail disappears, restarting Telegram shows it back This appears to happen on mobile (Android) too.";
+		Tokenizer tokenizer = new Tokenizer(input);
+		for(String str : tokenizer.tokenize(input))
+			System.out.print(str + ", ");
+	}
 }

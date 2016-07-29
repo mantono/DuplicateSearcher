@@ -168,4 +168,25 @@ public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 	{
 		return issueId;
 	}
+
+	/**
+	 * Checks whether the current version of this issue has changed compared to a more recent version of this issue.
+	 * @param other the other version of this issue to compare with.
+	 * @return true if the other version of this issue is different from the current version.
+	 */
+	public boolean hasChanged(final Issue other)
+	{
+		if(this.issueId != other.issueId)
+			throw new IllegalArgumentException("Comparing two different issues (" + this.issueId + " and "
+					+ other.issueId + ") but this method is only intended for different versions of the same issue.");
+
+		final int comp = this.lastModified.compareTo(other.lastModified);
+		
+		if(comp == 0)
+			return false;
+		else if(comp > 0)
+			throw new IllegalArgumentException("Argument other is and older version of this issue instead of a more recent one.");
+
+		return !this.tokens.equals(other.tokens);
+	}
 }

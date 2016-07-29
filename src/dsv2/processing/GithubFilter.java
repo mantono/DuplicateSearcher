@@ -18,6 +18,7 @@ public enum GithubFilter implements RegexFilter
 		this.regex = filter;
 	}
 
+	@Override
 	public String regex()
 	{
 		return regex;
