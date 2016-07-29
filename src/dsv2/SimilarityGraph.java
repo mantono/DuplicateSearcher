@@ -37,7 +37,7 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 	{
 		this.idfc = new InverseDocumentFrequency<Token>();
 		this.tokenNodes = new ConcurrentHashMap<Token, Issue>();
-		this.analyzer = new Analyzer<Token>();
+		this.analyzer = new Analyzer<Token>(idfc);
 		this.issues = new HashMap<Integer, Issue>();
 	}
 
