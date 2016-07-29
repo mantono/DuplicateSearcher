@@ -3,7 +3,6 @@ package dsv2;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +25,7 @@ import graphProject.concurrent.ConcurrentGraph;
 public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializable
 {
 	private final static long serialVersionUID = 0L;
-	private final static float CONNECT_THRESHOLD = 0.25f;
+	private final static float CONNECT_THRESHOLD = 0.1f;
 	private final Map<Token, Issue> tokenNodes;
 	private final Map<Integer, Issue> issues;
 	private final InverseDocumentFrequency<Token> idfc;
@@ -133,6 +132,8 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 			}
 			visitedNodes.add(currentNode);
 		}
+		
+		System.out.println("Searched through " + (visitedNodes.size() - 1) + " issues.");
 
 		return duplicates;
 	}
