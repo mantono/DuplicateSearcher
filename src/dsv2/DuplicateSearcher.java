@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutionException;
@@ -18,25 +19,22 @@ import com.mantono.ghapic.Response;
 import com.mantono.ghapic.Verb;
 
 import duplicatesearcher.analysis.Duplicate;
-import graphProject.Graph;
 
 public class DuplicateSearcher
 {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, ExecutionException
 	{
-		
 		final String repoOwner = args[0];
 		final String repoName = args[1];
 		final Repository repo = new Repository(repoOwner, repoName);
 
 		final Runtime runtime = Runtime.getRuntime();
-		
 		final GraphStorage graphData = new GraphStorage(repo);
 		final Thread threadGraph = new Thread(graphData);
 		runtime.addShutdownHook(threadGraph);
-		SimilarityGraph graph = graphData.load();		
-		
+		SimilarityGraph graph = graphData.load();
+
 		final Client client = new Client();
 		Future<Response> response = client.submitRequest("repos/"+ repoOwner + "/" + repoName +"/issues?q=sort=created&direction=desc&state=all");
 		
@@ -51,14 +49,54 @@ public class DuplicateSearcher
 			graph.addAll(issues);
 			page++;
 		}
-		
-		final Issue anyIssue = graph.getIssue(5);
-		
-		SortedSet<Duplicate> duplicates = graph.findDuplicates(anyIssue, 0.4, 0.35);
-		
-		System.out.println("Done");
-		System.out.println(duplicates);
+
+		Issue issue;
+		do
+		{
+			issue = readIssueIdFromInput(graph);
+			if(issue == null)
+				break;
+			final long before = System.currentTimeMillis();
+			SortedSet<Duplicate> duplicates = graph.findDuplicates(issue, 0.3, 0.2);
+			final long after = System.currentTimeMillis();
+
+			final long elapsedTime = after - before;
+
+			System.out.println("Done (" + elapsedTime + " ms)");
+			System.out.println(duplicates);
+		}
+		while(issue != null);
+
+		System.out.println("Exit.");
 		System.exit(0);
+	}
+
+	private static Issue readIssueIdFromInput(SimilarityGraph graph)
+	{
+		Issue issue = null;
+		while(issue == null)
+		{
+			String input = "";
+			try
+			{
+				Scanner scanner = new Scanner(System.in);
+				System.out.print("Issue number: ");
+				if(scanner.hasNextLine())
+					input = scanner.nextLine();
+				if(input.length() == 0)
+					return null;
+				final int issueId = Integer.parseInt(input);
+				if(issueId == 0)
+					return null;
+				issue = graph.getIssue(issueId);
+			}
+			catch(NumberFormatException e)
+			{
+				System.err.println(input + " is not an integer.");
+			}
+		}
+
+		return issue;
 	}
 
 	private static Set<Issue> parseIssues(Future<Response> future) throws InterruptedException, ExecutionException
