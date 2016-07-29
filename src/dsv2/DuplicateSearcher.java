@@ -18,6 +18,7 @@ import com.mantono.ghapic.Resource;
 import com.mantono.ghapic.Response;
 import com.mantono.ghapic.Verb;
 
+import dsv2.processing.Stemmer;
 import duplicatesearcher.analysis.Duplicate;
 
 public class DuplicateSearcher
@@ -46,6 +47,7 @@ public class DuplicateSearcher
 			Resource issueRequest = new Resource(Verb.GET, "repos/"+ repoOwner + "/" + repoName +"/issues?q=sort=created&direction=asc&state=all&page="+page+"&per_page=100");
 			Future<Response> issueFuture = client.submitRequest(issueRequest);
 			Set<Issue> issues = parseIssues(issueFuture);
+			issues = processIssues(issues);
 			graph.addAll(issues);
 			page++;
 		}
@@ -97,6 +99,13 @@ public class DuplicateSearcher
 		}
 
 		return issue;
+	}
+
+	private static Set<Issue> processIssues(Set<Issue> issues)
+	{
+		Stemmer stemmer = new Stemmer();
+		stemmer.process(issues);
+		return issues;
 	}
 
 	private static Set<Issue> parseIssues(Future<Response> future) throws InterruptedException, ExecutionException
