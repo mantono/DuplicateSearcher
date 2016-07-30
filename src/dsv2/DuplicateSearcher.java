@@ -121,19 +121,25 @@ public class DuplicateSearcher
 		final JsonNode node = response.getBody();
 		Set<Issue> issues = new HashSet<Issue>(100);
 		for(int i = 0; i < 100; i++)
-		{
+		{			
 			if(!node.has(i))
 				break;
+			
+			final ZoneId utc = ZoneId.of("UTC");
+			final DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT.withZone(utc);			
 			final JsonNode jsonIssue = node.get(i);
 			final int number = jsonIssue.get("number").asInt();
 			final int user = jsonIssue.get("user").get("id").asInt();
 			final String createdValue = jsonIssue.get("created_at").asText();
 			final String modifiedValue = jsonIssue.get("updated_at").asText();
-			final LocalDateTime created = LocalDateTime.parse(createdValue, DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC")));
-			final LocalDateTime modified = LocalDateTime.parse(modifiedValue, DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC")));
+			final LocalDateTime created = LocalDateTime.parse(createdValue, formatter);
+			final LocalDateTime modified = LocalDateTime.parse(modifiedValue, formatter);
 			final String title = jsonIssue.get("title").asText();
 			final String body = jsonIssue.get("body_text").asText();
-			final Issue issue = new Issue(number, user, created, modified, title, body);
+			final String state = jsonIssue.get("state").asText();
+			final boolean open = state.equals("open");
+			
+			final Issue issue = new Issue(number, user, created, modified, title, body, open);
 			issues.add(issue);
 		}
 

@@ -16,15 +16,16 @@ import duplicatesearcher.Token;
 
 public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	private final LocalDateTime created;
 	private LocalDateTime lastModified;
 	private final int issueId, creatorId;
 	private String title, body;
+	private boolean open;
 	private final TermFrequency<Token> tokens;
 	private final ReentrantLock writeLock;
 
-	public Issue(final int issue, final int creator, final LocalDateTime created, final LocalDateTime lastModified, final String title, final String body)
+	public Issue(final int issue, final int creator, final LocalDateTime created, final LocalDateTime lastModified, final String title, final String body, final boolean open)
 	{
 		this.issueId = issue;
 		this.creatorId = creator;
@@ -55,6 +56,21 @@ public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 	public int getCreatorId()
 	{
 		return creatorId;
+	}
+	
+	public boolean isOpen()
+	{
+		return open;
+	}
+	
+	public void close()
+	{
+		this.open = false;
+	}
+	
+	public void open()
+	{
+		this.open = true;
 	}
 
 	private void generateTermFrequency()
