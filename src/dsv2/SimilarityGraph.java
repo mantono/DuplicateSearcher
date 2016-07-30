@@ -95,7 +95,8 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 			if(issueWithToken != null)
 			{
 				final double similarity = analyzer.cosineSimilarity(issue, issueWithToken);
-				if(similarity > CONNECT_THRESHOLD)
+				final double sizeCompensation = 0.1 / Math.log1p(size());
+				if(similarity > CONNECT_THRESHOLD + sizeCompensation)
 				{
 					final double weight = 1 / similarity;
 					if(connect(issue, issueWithToken, weight))
