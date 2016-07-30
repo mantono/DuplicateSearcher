@@ -19,7 +19,7 @@ public class Duplicate implements Comparable<Duplicate>
 		if (duplicate.getNumber() == master.getNumber())
 			throw new IllegalArgumentException("Go home, you're drunk...");
 
-		if (duplicate.getNumber() < master.getNumber())
+		if (duplicate.getNumber() > master.getNumber())
 		{
 			this.duplicate = duplicate;
 			this.master = master;
