@@ -101,7 +101,7 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 		}
 	}
 
-	public SortedSet<Duplicate> findDuplicates(final Issue issue, final double threshold, final double walkingThreshold)
+	public SortedSet<Duplicate> findDuplicates(final Issue issue, final double threshold)
 	{
 		SortedSet<Duplicate> duplicates = new TreeSet<Duplicate>();
 		Queue<Issue> nodesToVisit = new ArrayDeque<Issue>();
@@ -125,7 +125,7 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 					duplicates.add(duplicate);
 				}
 
-				if(similarity >= walkingThreshold)
+				if(similarity >= CONNECT_THRESHOLD)
 				{
 					nodesToVisit.add(destination);
 				}

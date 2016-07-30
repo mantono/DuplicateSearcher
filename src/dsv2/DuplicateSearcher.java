@@ -64,7 +64,7 @@ public class DuplicateSearcher
 			if(issue == null)
 				break;
 			final long before = System.currentTimeMillis();
-			SortedSet<Duplicate> duplicates = graph.findDuplicates(issue, 0.3, 0.2);
+			SortedSet<Duplicate> duplicates = graph.findDuplicates(issue, 0.25);
 			final long after = System.currentTimeMillis();
 
 			final long elapsedTime = after - before;
