@@ -31,8 +31,13 @@ public class InverseDocumentFrequency<T> implements VectorUnit<T>, Serializable
 
 	public double getWeight(final T obj)
 	{
-		final double inverseFrequency = addedObjects.size() / (double) getFrequency(obj);
+		final double inverseFrequency = getInverseFrequency(obj);
 		return 1 + Math.log(inverseFrequency);
+	}
+	
+	public double getInverseFrequency(final T obj)
+	{
+		return addedObjects.size() / (double) getFrequency(obj);
 	}
 
 	public Set<T> getElements()
