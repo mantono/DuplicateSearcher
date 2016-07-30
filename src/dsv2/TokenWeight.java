@@ -33,4 +33,10 @@ public class TokenWeight implements Comparable<TokenWeight>
 	{
 		return weight;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return token + " (" + weight + ")";
+	}
 }
