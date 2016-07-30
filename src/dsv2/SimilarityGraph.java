@@ -87,8 +87,8 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 			tokens.add(weight);
 		}
 
-		int connectedNodes = 0;
-		while(connectedNodes < 5 && !tokens.isEmpty())
+		double remainingWeight = 10;
+		while(remainingWeight > 0 && !tokens.isEmpty())
 		{
 			final Token token = tokens.poll().getToken();
 			final Issue issueWithToken = tokenNodes.get(token);
@@ -99,7 +99,7 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 				{
 					final double weight = 1 / similarity;
 					if(connect(issue, issueWithToken, weight))
-						connectedNodes++;
+						remainingWeight -= weight;
 				}
 			}
 			else
