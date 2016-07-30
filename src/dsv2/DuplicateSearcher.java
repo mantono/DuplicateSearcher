@@ -70,7 +70,15 @@ public class DuplicateSearcher
 			final long elapsedTime = after - before;
 
 			System.out.println("Done (" + elapsedTime + " ms)");
-			System.out.println(duplicates);
+			System.out.println("\t" + issue.getTitle());
+			for(Duplicate dupe : duplicates)
+			{
+				System.out.print("\t" + dupe);
+				if(dupe.getMaster().getNumber() == issue.getNumber())
+					System.out.println("\t" + dupe.getDuplicate().getTitle());
+				else
+					System.out.println("\t" + dupe.getMaster().getTitle());
+			}
 		}
 		while(issue != null);
 
