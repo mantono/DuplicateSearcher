@@ -62,6 +62,14 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 		return false;
 	}
 	
+	@Override
+	public boolean addAll(Collection<? extends Issue> collection)
+	{
+		for(Issue issue : collection)
+			add(issue);
+		return true;
+	}
+	
 	public Issue getIssue(final int id)
 	{
 		return issues.get(id);
