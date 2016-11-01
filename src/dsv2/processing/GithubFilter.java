@@ -6,8 +6,8 @@ public enum GithubFilter implements RegexFilter
 	DOMAIN("\\b(?<!\\.)[\\w\\.]*\\w+\\.\\w{2,}[/\\w]*"),
 	URL(protocol()+urlCharacters()+"+\\w{2,}[/\\w-\\.]*"),
 	NUMBER("\\b(\\d+[.|,]?)\\b"),
-	USERNAME("@\\w[\\w-]*\\b(?![-.])"),
-	CODE("(`[^`]+`)|([\\ ]{4,}.+)");
+	USERNAME("@\\w[\\w-]*\\b(?![-.])");
+	//CODE("(`[^`]+`)|([\\ ]{4,}.+)");
 	
 	private final static String URL_LEGAL_CHARACTERS = "[\\w+\\-\\.]";
 	private final static String PROTOCOL = "http[s]?://";
