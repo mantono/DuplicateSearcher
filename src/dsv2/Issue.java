@@ -214,6 +214,9 @@ public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 		else if(comp > 0)
 			throw new IllegalArgumentException("Argument other is and older version of this issue instead of a more recent one.");
 
-		return !this.tokens.equals(other.tokens);
+		if(!this.title.equals(other.title))
+			return true;
+		
+		return !this.body.equals(other.body);
 	}
 }
