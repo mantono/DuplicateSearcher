@@ -16,16 +16,17 @@ import duplicatesearcher.Token;
 
 public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 {
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
 	private final LocalDateTime created;
 	private LocalDateTime lastModified;
 	private final int issueId, creatorId;
 	private String title, body;
+	private final boolean pullRequest;
 	private boolean open;
 	private final TermFrequency<Token> tokens;
 	private final ReentrantLock writeLock;
 
-	public Issue(final int issue, final int creator, final LocalDateTime created, final LocalDateTime lastModified, final String title, final String body, final boolean open)
+	public Issue(final int issue, final int creator, final LocalDateTime created, final LocalDateTime lastModified, final String title, final String body, final boolean open, final boolean pullRequest)
 	{
 		this.issueId = issue;
 		this.creatorId = creator;
@@ -34,6 +35,7 @@ public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 		this.title = title;
 		this.body = body;
 		this.open = open;
+		this.pullRequest = pullRequest;
 		this.tokens = new TermFrequency<Token>();
 		generateTermFrequency();
 		this.writeLock = new ReentrantLock();
@@ -72,6 +74,11 @@ public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 	public void open()
 	{
 		this.open = true;
+	}
+	
+	public boolean isPullRequest()
+	{
+		return pullRequest;
 	}
 
 	private void generateTermFrequency()
