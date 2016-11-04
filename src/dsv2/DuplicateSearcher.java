@@ -146,8 +146,11 @@ public class DuplicateSearcher
 			final String body = jsonIssue.get("body_text").asText();
 			final String state = jsonIssue.get("state").asText();
 			final boolean open = state.equals("open");
+			final JsonNode pullRequestNode = jsonIssue.get("pull_request");
+			final boolean pullRequest = pullRequestNode != null;
 			
-			final Issue issue = new Issue(number, user, created, modified, title, body, open);
+			
+			final Issue issue = new Issue(number, user, created, modified, title, body, open, pullRequest);
 			issues.add(issue);
 		}
 

@@ -24,10 +24,11 @@ import graphProject.concurrent.ConcurrentGraph;
 
 public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializable
 {
-	private final static long serialVersionUID = 0L;
+	private final static long serialVersionUID = 2L;
 	private final static float CONNECT_THRESHOLD = 0.1f;
 	private final Map<Token, Issue> tokenNodes;
 	private final Map<Integer, Issue> issues;
+	private final Set<Integer> pullRequets;
 	private final InverseDocumentFrequency<Token> idfc;
 	private final Analyzer<Token> analyzer;
 	private int latestIssue = -1;
@@ -38,11 +39,15 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 		this.tokenNodes = new ConcurrentHashMap<Token, Issue>();
 		this.analyzer = new Analyzer<Token>(idfc);
 		this.issues = new HashMap<Integer, Issue>();
+		this.pullRequets = new HashSet<Integer>();
 	}
 
 	@Override
 	public boolean add(final Issue issue)
 	{
+		if(issue.isPullRequest())
+			return pullRequets.add(issue.getNumber());
+		
 		if(contains(issue))
 		{
 			remove(issue);
@@ -95,7 +100,7 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 			if(issueWithToken != null)
 			{
 				final double similarity = analyzer.cosineSimilarity(issue, issueWithToken);
-				final double sizeCompensation = 0.1 / Math.log1p(size());
+				final double sizeCompensation = 0.1 / Math.log1p(super.size());
 				if(similarity > CONNECT_THRESHOLD + sizeCompensation)
 				{
 					final double weight = 1 / similarity;
@@ -155,5 +160,11 @@ public class SimilarityGraph extends ConcurrentGraph<Issue> implements Serializa
 	public int latestIssue()
 	{
 		return latestIssue;
+	}
+	
+	@Override
+	public int size()
+	{
+		return super.size() + pullRequets.size();
 	}
 }
