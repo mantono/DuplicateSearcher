@@ -33,6 +33,7 @@ public class Issue implements Serializable, VectorUnit<Token>, Comparable<Issue>
 		this.lastModified = lastModified;
 		this.title = title;
 		this.body = body;
+		this.open = open;
 		this.tokens = new TermFrequency<Token>();
 		generateTermFrequency();
 		this.writeLock = new ReentrantLock();
