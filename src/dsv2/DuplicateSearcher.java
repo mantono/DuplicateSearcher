@@ -32,8 +32,8 @@ public class DuplicateSearcher
 
 		final Runtime runtime = Runtime.getRuntime();
 		final GraphStorage graphData = new GraphStorage(repo);
-		final Thread threadGraph = new Thread(graphData);
-		runtime.addShutdownHook(threadGraph);
+		final Thread graphThread = new Thread(graphData);
+		runtime.addShutdownHook(graphThread);
 		SimilarityGraph graph = graphData.load();
 
 		final Client client = new Client();
