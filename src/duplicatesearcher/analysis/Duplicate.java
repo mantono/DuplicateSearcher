@@ -82,9 +82,12 @@ public class Duplicate implements Comparable<Duplicate>
 	@Override
 	public int compareTo(Duplicate other)
 	{
-		final int cosineDiffernce = (int) Math.round((other.cosineSimilarity - this.cosineSimilarity) * 10_000_000);
-		if(cosineDiffernce != 0)
-			return cosineDiffernce;
+		final double cosineDiffernce = other.cosineSimilarity - this.cosineSimilarity;
+		if(cosineDiffernce < 0)
+			return -1;
+		if(cosineDiffernce > 0)
+			return 1;
+		
 		return this.master.getNumber() - other.master.getNumber();
 	}
 }
