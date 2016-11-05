@@ -1,5 +1,6 @@
 package dsv2;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,63 +28,82 @@ public class DuplicateSearcher
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, ExecutionException
 	{
-		final String repoOwner = args[0];
-		final String repoName = args[1];
-		final Repository repo = new Repository(repoOwner, repoName);
-		
-		final float threshold = getThreshold(args);
-
-		final Runtime runtime = Runtime.getRuntime();
-		final GraphStorage graphData = new GraphStorage(repo);
-		final Thread graphThread = new Thread(graphData);
-		runtime.addShutdownHook(graphThread);
-		SimilarityGraph graph = graphData.load();
-
-		final Client client = new Client();
-		Future<Response> response = client.submitRequest("repos/" + repoOwner + "/" + repoName
-				+ "/issues?q=sort=created&direction=desc&state=all");
-
-		final int issuesOnGithub = getIssueCount(response);
-		int page = 1 + (graph.size() / 100);
-
-		while(graph.size() < issuesOnGithub)
+		try
 		{
-			Resource issueRequest = new Resource(Verb.GET, "repos/" + repoOwner + "/" + repoName
-					+ "/issues?q=sort=created&direction=asc&state=all&page=" + page + "&per_page=100");
-			Future<Response> issueFuture = client.submitRequest(issueRequest);
-			Set<Issue> issues = parseIssues(issueFuture);
-			issues = processIssues(issues);
-			graph.addAll(issues);
-			page++;
-			System.out.println(graph.size() + " of " + issuesOnGithub);
-			if(issues.isEmpty())
-				break;
-		}
+			final String repoOwner = args[0];
+			final String repoName = args[1];
+			final Repository repo = new Repository(repoOwner, repoName);
 
-		Issue issue;
-		do
-		{
-			issue = readIssueIdFromInput(graph);
-			if(issue == null)
-				break;
-			final long before = System.currentTimeMillis();
-			SortedSet<Duplicate> duplicates = graph.findDuplicates(issue, threshold);
-			final long after = System.currentTimeMillis();
+			final float threshold = getThreshold(args);
 
-			final long elapsedTime = after - before;
+			final Runtime runtime = Runtime.getRuntime();
+			final GraphStorage graphData = new GraphStorage(repo);
+			final Thread graphThread = new Thread(graphData);
+			runtime.addShutdownHook(graphThread);
+			SimilarityGraph graph = graphData.load();
 
-			System.out.println("Done (" + elapsedTime + " ms)");
-			System.out.println("\t" + issue.getTitle());
-			for(Duplicate dupe : duplicates)
+			final Client client = new Client();
+			Future<Response> response = client.submitRequest("repos/" + repoOwner + "/" + repoName
+					+ "/issues?q=sort=created&direction=desc&state=all");
+
+			final int issuesOnGithub = getIssueCount(response);
+
+			int page = 1 + (graph.size() / 100);
+
+			while(graph.size() < issuesOnGithub)
 			{
-				System.out.print("\t" + dupe);
-				if(dupe.getMaster().getNumber() == issue.getNumber())
-					System.out.println("\t" + dupe.getDuplicate().getTitle());
-				else
-					System.out.println("\t" + dupe.getMaster().getTitle());
+				Resource issueRequest = new Resource(Verb.GET, "repos/" + repoOwner + "/" + repoName
+						+ "/issues?q=sort=created&direction=asc&state=all&page=" + page + "&per_page=100");
+				Future<Response> issueFuture = client.submitRequest(issueRequest);
+				Set<Issue> issues = parseIssues(issueFuture);
+				issues = processIssues(issues);
+				graph.addAll(issues);
+				page++;
+				System.out.println(graph.size() + " of " + issuesOnGithub);
+				if(issues.isEmpty())
+					break;
 			}
+
+			Issue issue;
+			do
+			{
+				issue = readIssueIdFromInput(graph);
+				if(issue == null)
+					break;
+				final long before = System.currentTimeMillis();
+				SortedSet<Duplicate> duplicates = graph.findDuplicates(issue, threshold);
+				final long after = System.currentTimeMillis();
+
+				final long elapsedTime = after - before;
+
+				System.out.println("Done (" + elapsedTime + " ms)");
+				System.out.println("\t" + issue.getTitle());
+				for(Duplicate dupe : duplicates)
+				{
+					System.out.print("\t" + dupe);
+					if(dupe.getMaster().getNumber() == issue.getNumber())
+						System.out.println("\t" + dupe.getDuplicate().getTitle());
+					else
+						System.out.println("\t" + dupe.getMaster().getTitle());
+				}
+			}
+			while(issue != null);
 		}
-		while(issue != null);
+		catch(ExecutionException e0)
+		{
+			System.err.println("Unable to retrieve data for " + args[0] + "/" + args[1]);
+			System.exit(1);
+		}
+		catch(NumberFormatException e1)
+		{
+			System.err.println("Not a valid float: " + args[2]);
+			System.exit(2);
+		}
+		catch(ArrayIndexOutOfBoundsException e2)
+		{
+			System.err.println("Expected at least two arguements, got " + args.length);
+			System.exit(3);
+		}
 
 		System.out.println("Exit.");
 		System.exit(0);
@@ -158,8 +178,7 @@ public class DuplicateSearcher
 			final boolean open = state.equals("open");
 			final JsonNode pullRequestNode = jsonIssue.get("pull_request");
 			final boolean pullRequest = pullRequestNode != null;
-			
-			
+
 			final Issue issue = new Issue(number, user, created, modified, title, body, open, pullRequest);
 			issues.add(issue);
 		}
