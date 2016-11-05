@@ -23,12 +23,15 @@ import duplicatesearcher.analysis.Duplicate;
 
 public class DuplicateSearcher
 {
+	private final static float DEFAULT_THRESHOLD = 0.3f;
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, ExecutionException
 	{
 		final String repoOwner = args[0];
 		final String repoName = args[1];
 		final Repository repo = new Repository(repoOwner, repoName);
+		
+		final float threshold = getThreshold(args);
 
 		final Runtime runtime = Runtime.getRuntime();
 		final GraphStorage graphData = new GraphStorage(repo);
@@ -64,7 +67,7 @@ public class DuplicateSearcher
 			if(issue == null)
 				break;
 			final long before = System.currentTimeMillis();
-			SortedSet<Duplicate> duplicates = graph.findDuplicates(issue, 0.25);
+			SortedSet<Duplicate> duplicates = graph.findDuplicates(issue, threshold);
 			final long after = System.currentTimeMillis();
 
 			final long elapsedTime = after - before;
@@ -84,6 +87,13 @@ public class DuplicateSearcher
 
 		System.out.println("Exit.");
 		System.exit(0);
+	}
+
+	private static float getThreshold(String[] args)
+	{
+		if(args.length > 2)
+			return Float.parseFloat(args[2]);
+		return DEFAULT_THRESHOLD;
 	}
 
 	private static Issue readIssueIdFromInput(SimilarityGraph graph)
